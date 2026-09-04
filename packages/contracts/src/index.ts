@@ -1,0 +1,219 @@
+/**
+ * The only definitions of the wire shapes. No module redeclares a shape here.
+ *
+ * Envelopes: spec-doc.md §9. DmOutput: architecture.md §6.4.
+ * TriggerDefinition: MVP.md §4.2. Task M0.3.
+ */
+import { z } from 'zod';
+
+/* -------------------------------------------------------------------------- */
+/* Shared vocabulary                                                          */
+/* -------------------------------------------------------------------------- */
+
+export const Id = z.string().min(1);
+
+/** Where the router sent a message (MVP.md §5 M3.1 table, architecture.md §6.2). */
+export const RecipientType = z.enum([
+  'dm',
+  'player',
+  'party',
+  'table',
+  'dice',
+  'sheet',
+  'ooc',
+  'whisper',
+]);
+export type RecipientType = z.infer<typeof RecipientType>;
+
+export const Channel = z.enum(['in_character', 'ooc']);
+export type Channel = z.infer<typeof Channel>;
+
+/** `private` covers whispers and secret rolls; fanout is computed server-side (M3.4). */
+export const Visibility = z.enum(['public', 'private']);
+export type Visibility = z.infer<typeof Visibility>;
+
+/** MVP subset of architecture.md §6.3 (MVP.md M5.1). Combat states are Phase 3. */
+export const SessionState = z.enum([
+  'WAITING_FOR_PLAYERS',
+  'DM_GENERATING',
+  'WAITING_FOR_ROLL',
+  'PAUSED',
+  'SESSION_ENDED',
+]);
+export type SessionState = z.infer<typeof SessionState>;
+
+/* -------------------------------------------------------------------------- */
+/* 9.1 Client command envelope                                                */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * `sender_id` is deliberately absent: the server derives it from the
+ * authenticated connection and never trusts the payload (spec-doc.md §9.1).
+ */
+const commandBase = {
+  command_id: Id,
+  session_id: Id,
+  expected_state_version: z.int().nonnegative(),
+};
+
+export const ClientCommand = z.discriminatedUnion('type', [
+  z.object({
+    ...commandBase,
+    type: z.literal('SEND_MESSAGE'),
+    payload: z.object({ content: z.string().min(1).max(4000), channel: Channel }),
+  }),
+  z.object({
+    ...commandBase,
+    type: z.literal('ROLL_DICE'),
+    payload: z.object({ expression: z.string().min(1).max(64), character_id: Id.optional() }),
+  }),
+  z.object({
+    ...commandBase,
+    type: z.literal('RESUME'),
+    payload: z.object({ last_sequence: z.int().nonnegative() }),
+  }),
+]);
+export type ClientCommand = z.infer<typeof ClientCommand>;
+
+/* -------------------------------------------------------------------------- */
+/* 9.2 Message record                                                         */
+/* -------------------------------------------------------------------------- */
+
+export const MessageRecord = z.object({
+  message_id: Id,
+  session_id: Id,
+  sender_id: Id,
+  recipient_type: RecipientType,
+  recipient_ids: z.array(Id),
+  visibility: Visibility,
+  channel: Channel,
+  triggers_dm: z.boolean(),
+  /** Which registered trigger fired, so "why did the DM run?" is answerable from the row (M3.3). */
+  trigger_definition_id: Id.nullable().default(null),
+  sequence: z.int().nonnegative(),
+  content: z.string(),
+});
+export type MessageRecord = z.infer<typeof MessageRecord>;
+
+/* -------------------------------------------------------------------------- */
+/* 9.3 Roll result                                                            */
+/* -------------------------------------------------------------------------- */
+
+/** Full modifier provenance is a requirement, not a UI nicety (FR-302). */
+export const RollModifier = z.object({ source: z.string().min(1), value: z.int() });
+export type RollModifier = z.infer<typeof RollModifier>;
+
+export const RollResult = z.object({
+  roll_id: Id,
+  expression: z.string().min(1),
+  dice: z.array(z.int().positive()),
+  modifiers: z.array(RollModifier),
+  total: z.int(),
+  visibility: Visibility,
+  state_version: z.int().nonnegative(),
+});
+export type RollResult = z.infer<typeof RollResult>;
+
+/* -------------------------------------------------------------------------- */
+/* 9.4 Authoritative event envelope                                           */
+/* -------------------------------------------------------------------------- */
+
+export const ActorRef = z.object({
+  type: z.enum(['character', 'player', 'host', 'dm', 'system']),
+  id: Id,
+});
+export type ActorRef = z.infer<typeof ActorRef>;
+
+export const SourceRef = z.object({
+  type: z.enum(['resolution', 'command', 'system']),
+  id: Id,
+});
+export type SourceRef = z.infer<typeof SourceRef>;
+
+/** `type` stays open: event types are domain vocabulary, added per milestone. */
+export const EventEnvelope = z.object({
+  event_id: Id,
+  type: z.string().min(1),
+  campaign_id: Id,
+  session_id: Id,
+  sequence: z.int().nonnegative(),
+  state_version: z.int().nonnegative(),
+  actor: ActorRef,
+  source: SourceRef,
+  payload: z.record(z.string(), z.unknown()),
+  created_at: z.iso.datetime(),
+});
+export type EventEnvelope = z.infer<typeof EventEnvelope>;
+
+/* -------------------------------------------------------------------------- */
+/* DM output (architecture.md §6.4)                                           */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * A *proposal*, never a commit. The orchestrator validates every entry against
+ * permissions and current state before anything touches the database (FR-503,
+ * FR-505). M6.5 tightens `operation` into a closed union once the mutating tool
+ * set exists; until then the validator is the only thing that may accept one.
+ */
+export const ProposedStateChange = z.object({
+  operation: z.string().min(1),
+  target_id: Id,
+  payload: z.record(z.string(), z.unknown()).default({}),
+});
+export type ProposedStateChange = z.infer<typeof ProposedStateChange>;
+
+export const MemoryCandidate = z.object({
+  fact: z.string().min(1),
+  importance: z.number().min(0).max(1),
+});
+export type MemoryCandidate = z.infer<typeof MemoryCandidate>;
+
+export const ToolRequest = z.object({
+  name: z.string().min(1),
+  arguments: z.record(z.string(), z.unknown()),
+});
+export type ToolRequest = z.infer<typeof ToolRequest>;
+
+export const DmOutput = z.object({
+  narration: z.string(),
+  addressed_to: z.array(z.string().min(1)),
+  tool_requests: z.array(ToolRequest).default([]),
+  proposed_state_changes: z.array(ProposedStateChange).default([]),
+  memory_candidates: z.array(MemoryCandidate).default([]),
+  next_state: SessionState,
+});
+export type DmOutput = z.infer<typeof DmOutput>;
+
+/* -------------------------------------------------------------------------- */
+/* Trigger registry (MVP.md §4.2)                                             */
+/* -------------------------------------------------------------------------- */
+
+export const GraphEntryProfile = z.enum([
+  'resolve_action',
+  'npc_dialogue',
+  'rules_answer',
+  'recap',
+]);
+export type GraphEntryProfile = z.infer<typeof GraphEntryProfile>;
+
+export const TriggerKind = z.enum([
+  'mention_tag',
+  'command_tag',
+  'pending_action_completed',
+  'host_control',
+]);
+export type TriggerKind = z.infer<typeof TriggerKind>;
+
+/** Registry rows are data. Adding a trigger is a row, never a branch in the router (D-6). */
+export const TriggerDefinition = z.object({
+  id: Id,
+  kind: TriggerKind,
+  match: z.object({
+    tag: z.string().min(1),
+    argument: z.enum(['none', 'entity', 'text']).optional(),
+  }),
+  entryProfile: GraphEntryProfile,
+  requiredScope: z.enum(['member', 'host']),
+  defaultEnabled: z.boolean(),
+});
+export type TriggerDefinition = z.infer<typeof TriggerDefinition>;
