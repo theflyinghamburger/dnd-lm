@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build workspace packages
+        run: pnpm build
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Format
+        run: pnpm format
+
+      - name: Unit tests
+        run: pnpm test
+
+      # M0.2: the checked-in migrations must be exactly what the Drizzle schema
+      # generates. Anything else means a schema edit shipped without a migration.
+      - name: Migration drift
+        run: |
+          pnpm db:generate
+          if [ -n "$(git status --porcelain -- apps/api/drizzle)" ]; then
+            echo "::error::Drizzle schema drifted from apps/api/drizzle - run 'pnpm db:generate' and commit the migration."
+            git status --porcelain -- apps/api/drizzle
+            exit 1
+          fi
