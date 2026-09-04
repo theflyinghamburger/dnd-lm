@@ -204,17 +204,25 @@ export const TriggerKind = z.enum([
 export type TriggerKind = z.infer<typeof TriggerKind>;
 
 /** Registry rows are data. Adding a trigger is a row, never a branch in the router (D-6). */
-export const TriggerDefinition = z.object({
-  id: Id,
-  kind: TriggerKind,
-  match: z.object({
-    tag: z.string().min(1),
-    argument: z.enum(['none', 'entity', 'text']).optional(),
-  }),
-  entryProfile: GraphEntryProfile,
-  requiredScope: z.enum(['member', 'host']),
-  defaultEnabled: z.boolean(),
-});
+export const TriggerDefinition = z
+  .object({
+    id: Id,
+    kind: TriggerKind,
+    /** Absent for triggers that no message can carry: a resumed roll, a host turn. */
+    match: z
+      .object({
+        tag: z.string().min(1),
+        argument: z.enum(['none', 'entity', 'text']).optional(),
+      })
+      .optional(),
+    entryProfile: GraphEntryProfile,
+    requiredScope: z.enum(['member', 'host']),
+    defaultEnabled: z.boolean(),
+  })
+  .refine((d) => d.match !== undefined || (d.kind !== 'mention_tag' && d.kind !== 'command_tag'), {
+    message: 'a mention_tag or command_tag trigger needs a match',
+    path: ['match'],
+  });
 export type TriggerDefinition = z.infer<typeof TriggerDefinition>;
 
 /* -------------------------------------------------------------------------- */
@@ -316,6 +324,7 @@ export const ErrorCode = z.enum([
   'INVALID_PAYLOAD',
   'RATE_LIMITED',
   'STATE_CONFLICT',
+  'ROUTING_REJECTED',
   'INTERNAL_ERROR',
 ]);
 export type ErrorCode = z.infer<typeof ErrorCode>;
@@ -327,6 +336,8 @@ export const ServerError = z.object({
   command_id: Id.optional(),
   /** Present on STATE_CONFLICT so the client can refetch and retry (M5.4). */
   state_version: z.int().nonnegative().optional(),
+  /** Present on ROUTING_REJECTED: which router rule refused, so the UI can be specific. */
+  reason: z.string().optional(),
 });
 export type ServerError = z.infer<typeof ServerError>;
 
@@ -334,3 +345,35 @@ export const CreateSessionRequest = z.object({
   scene_id: Id.nullish(),
 });
 export type CreateSessionRequest = z.infer<typeof CreateSessionRequest>;
+
+export * from './router';
+
+/** Per-campaign trigger enable/disable (M3.2). Unlisted ids keep their default. */
+export const UpdateTriggersRequest = z.object({
+  triggers: z.record(z.string().min(1), z.boolean()),
+});
+export type UpdateTriggersRequest = z.infer<typeof UpdateTriggersRequest>;
+
+export const CampaignTriggersResponse = z.object({
+  triggers: z.array(
+    z.object({
+      id: Id,
+      enabled: z.boolean(),
+      entryProfile: GraphEntryProfile,
+      tag: z.string().nullable(),
+    }),
+  ),
+});
+export type CampaignTriggersResponse = z.infer<typeof CampaignTriggersResponse>;
+
+/**
+ * The roster the server parses against, handed to the client so the composer's
+ * preview and the server's decision cannot disagree about handles (M3.5).
+ */
+export const RosterResponse = z.object({
+  members: z.array(
+    z.object({ userId: Id, handle: z.string(), displayName: z.string(), role: MembershipRole }),
+  ),
+  npcs: z.array(z.object({ id: Id, name: z.string(), aliases: z.array(z.string()) })),
+});
+export type RosterResponse = z.infer<typeof RosterResponse>;

@@ -72,3 +72,31 @@ li button {
   cursor: pointer;
   color: inherit;
 }
+
+.transcript {
+  list-style: none;
+  padding: 0;
+}
+
+.transcript li {
+  display: block;
+  border-bottom: 1px solid rgb(128 128 128 / 0.2);
+  padding: 0.4rem 0;
+}
+
+/* Delivery state is legible without colour (NFR-403). */
+.transcript li[data-delivery='sending'] {
+  opacity: 0.6;
+}
+
+.transcript li[data-delivery='rejected'] {
+  border-left: 3px solid currentColor;
+  padding-left: 0.5rem;
+}
+
+.suggestions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: 0.25rem 0;
+}

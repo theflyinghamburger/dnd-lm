@@ -5,6 +5,7 @@
  */
 import { sql } from 'drizzle-orm';
 import {
+  boolean,
   index,
   integer,
   jsonb,
@@ -186,4 +187,51 @@ export const commands = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index('commands_session_id_idx').on(t.sessionId)],
+);
+
+/* -------------------------------------------------------------------------- */
+/* M3 — messages                                                              */
+/* -------------------------------------------------------------------------- */
+
+export const recipientType = pgEnum('recipient_type', [
+  'dm',
+  'player',
+  'party',
+  'table',
+  'dice',
+  'sheet',
+  'ooc',
+  'whisper',
+]);
+
+export const messageVisibility = pgEnum('message_visibility', ['public', 'private']);
+export const messageChannel = pgEnum('message_channel', ['in_character', 'ooc']);
+
+/**
+ * Written in the same transaction that allocates `sequence` from
+ * `sessions.next_sequence` (M2.1, M3.3). `triggersDm` and
+ * `triggerDefinitionId` make "why did the DM run?" answerable from the
+ * database alone — and the release gate assertable from it too.
+ */
+export const messages = pgTable(
+  'messages',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    sessionId: uuid('session_id')
+      .notNull()
+      .references(() => sessions.id, { onDelete: 'cascade' }),
+    senderId: uuid('sender_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    recipientType: recipientType('recipient_type').notNull(),
+    recipientIds: uuid('recipient_ids').array().notNull().default([]),
+    channel: messageChannel('channel').notNull().default('in_character'),
+    visibility: messageVisibility('visibility').notNull().default('public'),
+    content: text('content').notNull(),
+    sequence: integer('sequence').notNull(),
+    triggersDm: boolean('triggers_dm').notNull().default(false),
+    triggerDefinitionId: text('trigger_definition_id'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex('messages_session_sequence_key').on(t.sessionId, t.sequence)],
 );

@@ -1,19 +1,26 @@
-import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import {
   type CampaignSummary,
+  type CampaignTriggersResponse,
   CreateCampaignRequest,
   CreateInviteRequest,
   type InviteResponse,
   type PublicUser,
+  type RosterResponse,
+  UpdateTriggersRequest,
 } from '@dnd-lm/contracts';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { ZodValidationPipe } from '../common/zod-validation.pipe';
 import { CampaignMemberGuard, CampaignRoles, type MemberRequest } from './campaign-member.guard';
+import { SessionContextService } from '../router/session-context.service';
 import { CampaignsService } from './campaigns.service';
 
 @Controller('campaigns')
 export class CampaignsController {
-  constructor(private readonly campaigns: CampaignsService) {}
+  constructor(
+    private readonly campaigns: CampaignsService,
+    private readonly context: SessionContextService,
+  ) {}
 
   @Post()
   create(
@@ -46,6 +53,28 @@ export class CampaignsController {
     @Body(new ZodValidationPipe(CreateInviteRequest)) body: CreateInviteRequest,
   ): Promise<InviteResponse> {
     return this.campaigns.createInvite(campaignId, user.id, body);
+  }
+
+  @Get(':campaignId/roster')
+  @UseGuards(CampaignMemberGuard)
+  roster(@Param('campaignId') campaignId: string): Promise<RosterResponse> {
+    return this.context.forCampaign(campaignId).then((c) => c.roster);
+  }
+
+  @Get(':campaignId/triggers')
+  @UseGuards(CampaignMemberGuard)
+  listTriggers(@Param('campaignId') campaignId: string): Promise<CampaignTriggersResponse> {
+    return this.campaigns.listTriggers(campaignId);
+  }
+
+  @Patch(':campaignId/triggers')
+  @UseGuards(CampaignMemberGuard)
+  @CampaignRoles('host', 'admin')
+  updateTriggers(
+    @Param('campaignId') campaignId: string,
+    @Body(new ZodValidationPipe(UpdateTriggersRequest)) body: UpdateTriggersRequest,
+  ): Promise<CampaignTriggersResponse> {
+    return this.campaigns.updateTriggers(campaignId, body);
   }
 }
 
