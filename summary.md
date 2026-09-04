@@ -38,7 +38,7 @@ packages/contracts  Zod schemas AND the pure logic both sides must agree on
 fixtures/pregens    Six level-3 SRD characters
 ```
 
-**Postgres tables:** `users`, `auth_sessions`, `campaigns`, `memberships`, `invites`, `sessions`, `session_events`, `commands`, `messages`, `characters`, `rolls`, `pending_actions`. Five migrations, drift-checked.
+**Postgres tables:** `users`, `auth_sessions`, `campaigns`, `memberships`, `invites`, `sessions`, `session_events`, `commands`, `messages`, `characters`, `rolls`, `pending_actions`, `provider_connections` (M7.1; key material is AES-GCM `bytea`, never plaintext). Six migrations, drift-checked.
 
 ### Running it
 
