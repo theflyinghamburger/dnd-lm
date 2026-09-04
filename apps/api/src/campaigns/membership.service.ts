@@ -20,4 +20,18 @@ export class MembershipService {
       .limit(1);
     return row?.role ?? null;
   }
+
+  /**
+   * The platform-admin definition (M7.4, option (a)): an `admin` membership
+   * in **any** campaign. No user-level flag, no new column — the one-DB MVP
+   * gets the role from the table it already has.
+   */
+  async isPlatformAdmin(userId: string): Promise<boolean> {
+    const [row] = await this.db
+      .select({ admin: memberships.role })
+      .from(memberships)
+      .where(and(eq(memberships.userId, userId), eq(memberships.role, 'admin')))
+      .limit(1);
+    return row !== undefined;
+  }
 }

@@ -6,7 +6,9 @@ import {
   CreateInviteRequest,
   type InviteResponse,
   type PublicUser,
+  type ProviderSettingsResponse,
   type RosterResponse,
+  UpdateProviderRequest,
   UpdateTriggersRequest,
 } from '@dnd-lm/contracts';
 import { CurrentUser } from '../auth/current-user.decorator';
@@ -75,6 +77,21 @@ export class CampaignsController {
     @Body(new ZodValidationPipe(UpdateTriggersRequest)) body: UpdateTriggersRequest,
   ): Promise<CampaignTriggersResponse> {
     return this.campaigns.updateTriggers(campaignId, body);
+  }
+
+  /**
+   * FR-506: which provider connection the campaign's DM runs on (or none).
+   * Host-or-admin on *this* campaign, like `triggers` — a host never sees or
+   * edits a URL or a key, only picks from enabled connections (M7.4).
+   */
+  @Patch(':campaignId/provider')
+  @UseGuards(CampaignMemberGuard)
+  @CampaignRoles('host', 'admin')
+  updateProvider(
+    @Param('campaignId') campaignId: string,
+    @Body(new ZodValidationPipe(UpdateProviderRequest)) body: UpdateProviderRequest,
+  ): Promise<ProviderSettingsResponse> {
+    return this.campaigns.setProvider(campaignId, body.providerConnectionId);
   }
 }
 

@@ -7,11 +7,12 @@ import {
   type CreateInviteRequest,
   type InviteResponse,
   TRIGGER_REGISTRY,
+  type ProviderSettingsResponse,
   type UpdateTriggersRequest,
 } from '@dnd-lm/contracts';
 import { and, eq, isNull, sql } from 'drizzle-orm';
 import { DB, type Db } from '../db/db.module';
-import { campaigns, invites, memberships } from '../db/schema';
+import { campaigns, invites, memberships, providerConnections } from '../db/schema';
 import { SessionContextService } from '../router/session-context.service';
 
 @Injectable()
@@ -162,6 +163,40 @@ export class CampaignsService {
         tag: definition.match?.tag ?? null,
       })),
     };
+  }
+
+  /**
+   * FR-506 / M7.4: point the campaign's DM at a provider connection (or
+   * unset it with `null`). A host only *selects* — the reference must name an
+   * existing, enabled connection, and nothing URL- or key-shaped is visible
+   * to the caller here.
+   */
+  async setProvider(
+    campaignId: string,
+    providerConnectionId: string | null,
+  ): Promise<ProviderSettingsResponse> {
+    if (providerConnectionId !== null) {
+      const [conn] = await this.db
+        .select({ id: providerConnections.id, enabled: providerConnections.enabled })
+        .from(providerConnections)
+        .where(eq(providerConnections.id, providerConnectionId))
+        .limit(1);
+      if (!conn) throw new NotFoundException({ code: 'CONNECTION_NOT_FOUND' });
+      if (!conn.enabled) throw new BadRequestException({ code: 'CONNECTION_NOT_ENABLED' });
+    }
+
+    const [updated] = await this.db
+      .update(campaigns)
+      .set({
+        settings: sql`${campaigns.settings} || jsonb_build_object(
+          'provider_connection_id', ${providerConnectionId}::text
+        )`,
+      })
+      .where(eq(campaigns.id, campaignId))
+      .returning({ id: campaigns.id });
+    if (!updated) throw new NotFoundException({ code: 'CAMPAIGN_NOT_FOUND' });
+
+    return { providerConnectionId };
   }
 
   /**
