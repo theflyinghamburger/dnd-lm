@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { BaseUrlService } from './base-url.service';
 import { ProviderSecrets } from './provider-secrets.service';
 
 /**
@@ -6,7 +7,7 @@ import { ProviderSecrets } from './provider-secrets.service';
  * validation and M7.4 the admin surface — the module is the shelf they share.
  */
 @Module({
-  providers: [ProviderSecrets],
-  exports: [ProviderSecrets],
+  providers: [ProviderSecrets, BaseUrlService],
+  exports: [ProviderSecrets, BaseUrlService],
 })
 export class ProvidersModule {}
