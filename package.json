@@ -15,10 +15,12 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@swc/core": "^1.16.1",
     "eslint": "^10.9.1",
     "prettier": "^3.9.6",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.69.0",
+    "unplugin-swc": "^1.5.11",
     "vitest": "^4.1.11"
   }
 }
