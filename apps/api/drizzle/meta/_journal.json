@@ -36,6 +36,13 @@
       "when": 1788510498086,
       "tag": "0004_sharp_carlie_cooper",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1788511272592,
+      "tag": "0005_stale_logan",
+      "breakpoints": true
     }
   ]
 }

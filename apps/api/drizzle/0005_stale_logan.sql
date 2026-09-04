@@ -1,0 +1,1 @@
+ALTER TABLE "rolls" ADD CONSTRAINT "rolls_pending_action_id_pending_actions_id_fk" FOREIGN KEY ("pending_action_id") REFERENCES "public"."pending_actions"("id") ON DELETE set null ON UPDATE no action;

@@ -293,10 +293,12 @@ export const rolls = pgTable(
       onDelete: 'set null',
     }),
     /**
-     * No foreign key yet: `pending_actions` is created in M5.5, which is also
-     * where a roll starts being able to close one.
+     * Set when this roll closed an open pending action (M5.5). Null for an
+     * ordinary roll, which is most of them.
      */
-    pendingActionId: uuid('pending_action_id'),
+    pendingActionId: uuid('pending_action_id').references(() => pendingActions.id, {
+      onDelete: 'set null',
+    }),
     stateVersion: integer('state_version').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },

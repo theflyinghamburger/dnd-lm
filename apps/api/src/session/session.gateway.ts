@@ -12,23 +12,27 @@ import {
   type CommandAck,
   ErrorCode,
   type EventEnvelope,
+  type HostControlAction,
   type MembershipRole,
   ResumeRequest,
   type ResumeResponse,
   type RoutingDecision,
   type ServerError,
+  type SessionState,
+  type TriggerDefinition,
   formatExpression,
   parseMessage,
 } from '@dnd-lm/contracts';
+import { and, eq, sql } from 'drizzle-orm';
 import type { Server, Socket } from 'socket.io';
 import { AuthService, SESSION_COOKIE } from '../auth/auth.service';
 import { MembershipService } from '../campaigns/membership.service';
 import { CharactersService } from '../characters/characters.service';
-import { messages, rolls } from '../db/schema';
+import { messages, pendingActions, rolls } from '../db/schema';
 import { DiceService } from '../dice/dice.service';
 import { resolveRollRequest } from '../dice/roll-request';
 import { SessionContextService } from '../router/session-context.service';
-import { type EventDraft, SessionService, type Tx } from './session.service';
+import { type EventDraft, type SessionRow, SessionService, type Tx } from './session.service';
 import { TokenBucket } from './token-bucket';
 
 /** Burst of 20, sustained 5/s. Generous for typing, tight enough to stop a loop. */
@@ -189,6 +193,8 @@ export class SessionGateway implements OnGatewayInit, OnGatewayConnection {
 
     try {
       if (command.type === 'SEND_MESSAGE') return await this.sendMessage(socket, command);
+      if (command.type === 'REQUEST_ROLL') return await this.requestRoll(socket, command);
+      if (command.type === 'HOST_CONTROL') return await this.hostControl(socket, command);
       return await this.rollDice(
         socket,
         command.command_id,
@@ -279,6 +285,10 @@ export class SessionGateway implements OnGatewayInit, OnGatewayConnection {
         senderId: userId,
         type: command.type,
         expectedStateVersion: command.expected_state_version,
+        // A message that wakes the DM starts a mutating turn, so it takes the
+        // lock and the version check. Table talk does neither, which is what
+        // keeps chat live while the DM generates (M5.2, M5.4).
+        mode: decision.dmTrigger ? 'mutation' : 'chat',
       },
       () => drafts,
       async (tx, appended) =>
@@ -365,10 +375,59 @@ export class SessionGateway implements OnGatewayInit, OnGatewayConnection {
       source,
     });
 
+    // Set inside the resolution, under the lock, and read again in
+    // `afterAppend` so the roll row and the events agree about what it closed.
+    let closedId: string | null = null;
+    // Resolved before the transaction opens. Inside it the per-session lock is
+    // held, and a cache miss here would hold that lock across a query on a
+    // second pooled connection — which is how a busy table deadlocks.
+    const resumeTrigger = await this.trigger(campaignId, 'pending_action_completed');
+
     const { ack, events } = await this.sessionService.runCommand(
-      { commandId, sessionId, senderId: userId, type: 'ROLL_DICE', expectedStateVersion },
-      () => drafts,
-      async (tx, appended, stateVersion) => {
+      {
+        commandId,
+        sessionId,
+        senderId: userId,
+        type: 'ROLL_DICE',
+        expectedStateVersion,
+        mode: 'mutation',
+      },
+      async (session, tx) => {
+        const closed = await this.closePendingAction(tx, session, character?.id ?? null);
+        if (!closed) return drafts;
+        closedId = closed.id;
+
+        drafts.push({
+          type: 'PENDING_ACTION_COMPLETED',
+          payload: {
+            pending_action_id: closed.id,
+            roll_id: rollId,
+            character_id: character?.id ?? null,
+            graph_thread_id: closed.graphThreadId,
+          },
+          actor,
+          source,
+        });
+
+        // FR-305. The registry says whether a closed action wakes the DM, so a
+        // campaign that disabled the trigger sees no activation — rule 7 again.
+        // M6 attaches the graph resume to this event; there is no graph to
+        // resume yet, so the session simply returns to the players.
+        if (resumeTrigger) {
+          drafts.push({
+            type: 'DM_TRIGGERED',
+            payload: {
+              definition_id: resumeTrigger.id,
+              entry_profile: resumeTrigger.entryProfile,
+              args: { text: '', pending_action_id: closed.id },
+            },
+            actor,
+            source,
+          });
+        }
+        return drafts;
+      },
+      async (tx, appended, stateVersion, session) => {
         if (chat) {
           await insertMessageRow(tx, {
             sessionId,
@@ -388,13 +447,228 @@ export class SessionGateway implements OnGatewayInit, OnGatewayConnection {
           visibility: 'public',
           requesterId: userId,
           authorizedRollerId: userId,
+          pendingActionId: closedId,
           stateVersion,
+        });
+
+        if (closedId && session.status === 'WAITING_FOR_ROLL') {
+          await this.sessionService.setStatus(tx, session, 'WAITING_FOR_PLAYERS');
+        }
+      },
+    );
+
+    this.publish(sessionId, events, null);
+    return ack;
+  }
+
+  /**
+   * M5.5. A roll closes a pending action only when the action is still open
+   * **and** the rolling character is authorized. An unrelated or unauthorized
+   * roll is still a perfectly good roll — it just changes nothing and resumes
+   * nothing, which is the whole point of the acceptance test.
+   *
+   * Runs under the resolution lock, so two rolls racing for one action cannot
+   * both see it open. At most one action is open per session by construction:
+   * opening one parks on `WAITING_FOR_ROLL`, and the transition table refuses
+   * a second `WAITING_FOR_ROLL`.
+   *
+   * ponytail: authorization is by character, not by expression, so an
+   * authorized player rolling `1d4` closes a requested Perception check.
+   * Matching the expression is an M6 concern, once the graph states what it
+   * asked for.
+   */
+  private async closePendingAction(
+    tx: Tx,
+    session: SessionRow,
+    characterId: string | null,
+  ): Promise<typeof pendingActions.$inferSelect | null> {
+    if (!characterId) return null;
+    const [closed] = await tx
+      .update(pendingActions)
+      .set({ status: 'completed', completedAt: new Date() })
+      .where(
+        and(
+          eq(pendingActions.sessionId, session.id),
+          eq(pendingActions.status, 'open'),
+          // Cast explicitly: the column is `uuid[]`, and an uncast text
+          // parameter against it is an operator the planner will not resolve.
+          sql`${characterId}::uuid = ANY(${pendingActions.authorizedCharacterIds})`,
+        ),
+      )
+      .returning();
+    return closed ?? null;
+  }
+
+  /** The campaign's enabled definition for an id, or null if it is switched off. */
+  private async trigger(campaignId: string, id: string): Promise<TriggerDefinition | null> {
+    const { registry } = await this.context.forCampaign(campaignId);
+    return registry.find((definition) => definition.id === id) ?? null;
+  }
+
+  /**
+   * M5.5. The host asks the party for a check: one pending action, and the
+   * session parks on `WAITING_FOR_ROLL` until an authorized character rolls.
+   * This is the seam M6's graph interrupt reuses rather than a second path.
+   */
+  private async requestRoll(
+    socket: SessionSocket,
+    command: Extract<ClientCommand, { type: 'REQUEST_ROLL' }>,
+  ): Promise<CommandAck | ServerError> {
+    const { userId, sessionId, campaignId } = socket.data;
+    const denied = this.requireHost(socket, command.command_id);
+    if (denied) return denied;
+
+    // A forged character id must never reach a pending action's authorized set,
+    // so every id is checked against this campaign's roster before anything is
+    // written — not trusted because the sender happens to be the host.
+    const owned = new Set((await this.characters.listForCampaign(campaignId)).map((c) => c.id));
+    const unknown = command.payload.character_ids.filter((id) => !owned.has(id));
+    if (unknown.length > 0) {
+      return this.fail(socket, {
+        code: 'CHARACTER_NOT_FOUND',
+        message: `Not a character in this campaign: ${unknown.join(', ')}`,
+        command_id: command.command_id,
+      });
+    }
+
+    const actionId = randomUUID();
+    const actor = { type: 'host' as const, id: userId };
+    const source = { type: 'command' as const, id: command.command_id };
+
+    const { ack, events } = await this.sessionService.runCommand(
+      {
+        commandId: command.command_id,
+        sessionId,
+        senderId: userId,
+        type: 'REQUEST_ROLL',
+        expectedStateVersion: command.expected_state_version,
+        mode: 'mutation',
+      },
+      () => [
+        {
+          type: 'ROLL_REQUESTED',
+          payload: {
+            pending_action_id: actionId,
+            prompt: command.payload.prompt,
+            expression: command.payload.expression,
+            authorized_character_ids: command.payload.character_ids,
+          },
+          actor,
+          source,
+        },
+      ],
+      async (tx, _appended, _stateVersion, session) => {
+        // Asserted before the insert, so a request made from a state that
+        // cannot wait for a roll leaves no orphaned action behind.
+        await this.sessionService.setStatus(tx, session, 'WAITING_FOR_ROLL');
+        await tx.insert(pendingActions).values({
+          id: actionId,
+          sessionId,
+          type: 'roll',
+          requesterId: userId,
+          authorizedCharacterIds: command.payload.character_ids,
+          payload: { prompt: command.payload.prompt, expression: command.payload.expression },
         });
       },
     );
 
     this.publish(sessionId, events, null);
     return ack;
+  }
+
+  /**
+   * M5.6. Pause, resume, end, and force a DM turn. All host-only, all mutating,
+   * and all reachable from `PAUSED` — a host who cannot resume from a pause is
+   * trapped, so these run in `host` mode and skip the paused-session refusal.
+   */
+  private async hostControl(
+    socket: SessionSocket,
+    command: Extract<ClientCommand, { type: 'HOST_CONTROL' }>,
+  ): Promise<CommandAck | ServerError> {
+    const { userId, sessionId, campaignId } = socket.data;
+    const denied = this.requireHost(socket, command.command_id);
+    if (denied) return denied;
+
+    const { action } = command.payload;
+    const actor = { type: 'host' as const, id: userId };
+    const source = { type: 'command' as const, id: command.command_id };
+    // Read here rather than inside the resolution: the transaction holds the
+    // per-session lock, and a cache miss there would hold it over a query.
+    const hostTurn =
+      action === 'FORCE_DM_TURN' ? await this.trigger(campaignId, 'host_turn') : null;
+    // Only RESUME, END and PAUSE get the paused-session exemption. Forcing a DM
+    // turn *is* a trigger, and a pause blocks all triggers (M5.6) — so it runs
+    // as an ordinary mutation and is refused like any other.
+    const mode = action === 'FORCE_DM_TURN' ? 'mutation' : 'host';
+
+    const { ack, events } = await this.sessionService.runCommand(
+      {
+        commandId: command.command_id,
+        sessionId,
+        senderId: userId,
+        type: `HOST_${action}`,
+        expectedStateVersion: command.expected_state_version,
+        mode,
+      },
+      (session) => {
+        const to = nextStatus(session, action);
+        // Only a real move is recorded. FORCE_DM_TURN moves nothing, and an
+        // event claiming a transition from a state to itself would be a lie in
+        // a log that is supposed to be truth (invariant 5).
+        const drafts: EventDraft[] =
+          to === session.status
+            ? []
+            : [
+                {
+                  type: 'SESSION_STATE_CHANGED',
+                  payload: { action, from: session.status, to },
+                  actor,
+                  source,
+                },
+              ];
+        // FORCE_DM_TURN has no graph to call yet; the activation event is the
+        // hook M6 consumes, and until then the session stays where it is.
+        if (hostTurn) {
+          drafts.push({
+            type: 'DM_TRIGGERED',
+            payload: {
+              definition_id: hostTurn.id,
+              entry_profile: hostTurn.entryProfile,
+              args: { text: '' },
+            },
+            actor,
+            source,
+          });
+        }
+        return drafts;
+      },
+      async (tx, _appended, _stateVersion, session) => {
+        // FORCE_DM_TURN is the only control that moves nothing. Every other one
+        // goes through the transition table, so pausing a paused session is
+        // refused there rather than quietly succeeding here.
+        if (action === 'FORCE_DM_TURN') return;
+        await this.sessionService.setStatus(
+          tx,
+          session,
+          nextStatus(session, action),
+          action === 'PAUSE' ? session.status : null,
+        );
+      },
+    );
+
+    this.publish(sessionId, events, null);
+    return ack;
+  }
+
+  /** Host-only commands are refused on role, not by a routing rule (FR-801). */
+  private requireHost(socket: SessionSocket, commandId: string): ServerError | null {
+    const { role } = socket.data;
+    if (role === 'host' || role === 'admin') return null;
+    return this.fail(socket, {
+      code: 'NOT_THE_HOST',
+      message: 'Only the host can do that.',
+      command_id: commandId,
+    });
   }
 
   /**
@@ -449,6 +723,24 @@ export class SessionGateway implements OnGatewayInit, OnGatewayConnection {
 }
 
 /**
+ * Where a host control moves the session (M5.6). RESUME returns to whatever the
+ * pause interrupted, so a parked roll is not dropped on the floor. FORCE_DM_TURN
+ * moves nothing — a self-transition is illegal, and the activation is the event.
+ */
+function nextStatus(session: SessionRow, action: HostControlAction): SessionState {
+  switch (action) {
+    case 'PAUSE':
+      return 'PAUSED';
+    case 'RESUME':
+      return session.pausedFrom ?? 'WAITING_FOR_PLAYERS';
+    case 'END':
+      return 'SESSION_ENDED';
+    case 'FORCE_DM_TURN':
+      return session.status;
+  }
+}
+
+/**
  * Maps a thrown HTTP-style exception onto the socket error contract. Codes the
  * contract knows are passed through verbatim; anything else becomes
  * INTERNAL_ERROR rather than leaking an unmodelled string to the client.
@@ -456,11 +748,11 @@ export class SessionGateway implements OnGatewayInit, OnGatewayConnection {
 function toServerError(error: unknown, commandId: string): ServerError {
   const body = (error as { response?: unknown } | null)?.response;
   if (typeof body === 'object' && body !== null && 'code' in body) {
-    const typed = body as { code: string; state_version?: number };
+    const typed = body as { code: string; message?: string; state_version?: number };
     const known = ErrorCode.safeParse(typed.code);
     return {
       code: known.success ? known.data : 'INTERNAL_ERROR',
-      message: typed.code,
+      message: typed.message ?? typed.code,
       command_id: commandId,
       ...(typed.state_version === undefined ? {} : { state_version: typed.state_version }),
     };

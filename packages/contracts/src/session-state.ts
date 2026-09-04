@@ -10,7 +10,11 @@
 import type { SessionState } from './index';
 
 const TRANSITIONS: Record<SessionState, readonly SessionState[]> = {
-  WAITING_FOR_PLAYERS: ['DM_GENERATING', 'PAUSED', 'SESSION_ENDED'],
+  // WAITING_FOR_ROLL is reachable directly because a host may ask the party for
+  // a check at an idle table (M5.5's REQUEST_ROLL), not only as a graph
+  // interrupt out of DM_GENERATING. architecture.md §6.3 lists the states but
+  // no edges, so this table is the only definition of them.
+  WAITING_FOR_PLAYERS: ['DM_GENERATING', 'WAITING_FOR_ROLL', 'PAUSED', 'SESSION_ENDED'],
   // A generating turn ends by finishing, by parking on a roll, or by failing.
   DM_GENERATING: ['WAITING_FOR_PLAYERS', 'WAITING_FOR_ROLL', 'SESSION_ENDED'],
   WAITING_FOR_ROLL: ['DM_GENERATING', 'WAITING_FOR_PLAYERS', 'PAUSED', 'SESSION_ENDED'],

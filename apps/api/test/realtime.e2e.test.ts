@@ -124,7 +124,10 @@ describe.skipIf(!DATABASE_URL)('realtime session gateway', () => {
         payload: { content: 'I inspect the altar.', channel: 'in_character' },
       })) as CommandAck;
 
-      expect(ack).toEqual({ command_id: 'cmd_1', sequence: 1, state_version: 1 });
+      // Table chat is not a mutating resolution, so it allocates a sequence and
+      // leaves `state_version` alone (M5.4). The two counters are different
+      // things: one is log position, the other is state.
+      expect(ack).toEqual({ command_id: 'cmd_1', sequence: 1, state_version: 0 });
 
       const event = await delivered;
       expect(event.type).toBe('MESSAGE_POSTED');
@@ -156,7 +159,7 @@ describe.skipIf(!DATABASE_URL)('realtime session gateway', () => {
       expect(rows).toHaveLength(1);
 
       const [session] = await db.select().from(sessions).where(eq(sessions.id, sessionId));
-      expect(session!.stateVersion).toBe(1);
+      expect(session!.stateVersion).toBe(0);
     });
 
     it('gives two concurrent commands contiguous sequences', async () => {

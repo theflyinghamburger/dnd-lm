@@ -13,6 +13,8 @@ const ALL = SessionState.options;
 describe('the session state machine', () => {
   it.each([
     ['WAITING_FOR_PLAYERS', 'DM_GENERATING'],
+    // A host asking an idle table for a check, rather than a graph interrupt.
+    ['WAITING_FOR_PLAYERS', 'WAITING_FOR_ROLL'],
     ['DM_GENERATING', 'WAITING_FOR_ROLL'],
     ['WAITING_FOR_ROLL', 'DM_GENERATING'],
     ['WAITING_FOR_PLAYERS', 'PAUSED'],
@@ -24,7 +26,6 @@ describe('the session state machine', () => {
   });
 
   it.each([
-    ['WAITING_FOR_PLAYERS', 'WAITING_FOR_ROLL'],
     ['DM_GENERATING', 'PAUSED'],
     ['DM_GENERATING', 'DM_GENERATING'],
     ['SESSION_ENDED', 'WAITING_FOR_PLAYERS'],
