@@ -135,7 +135,9 @@ describe.skipIf(!DATABASE_URL)('deterministic routing over the gateway', () => {
         'We should retreat.',
         '@ferris Do you have the key?',
         '@party We should retreat.',
-        '/roll perception',
+        // A raw expression needs no character. `/roll perception` does, and is
+        // covered in the M4 suite where a sheet exists to read.
+        '/roll 1d20',
         '/sheet equip longsword',
         '/ooc back in five',
         '/whisper @brann cover me',

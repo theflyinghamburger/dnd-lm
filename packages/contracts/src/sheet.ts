@@ -125,8 +125,12 @@ export const CharacterRecord = z.object({
 });
 export type CharacterRecord = z.infer<typeof CharacterRecord>;
 
+/**
+ * The campaign is a route parameter, not a body field: that is the only place
+ * `CampaignMemberGuard` can see it, and a body that could name a different
+ * campaign than the route would be an authorization hole waiting to happen.
+ */
 export const ImportCharacterRequest = z.object({
-  campaignId: z.string().min(1),
   name: z.string().min(1).max(80),
   sheet: CharacterSheet,
 });

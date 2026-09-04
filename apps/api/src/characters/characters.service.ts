@@ -30,11 +30,15 @@ export type CharacterView = {
 export class CharactersService {
   constructor(@Inject(DB) private readonly db: Db) {}
 
-  async import(userId: string, input: ImportCharacterRequest): Promise<CharacterView> {
+  async import(
+    userId: string,
+    campaignId: string,
+    input: ImportCharacterRequest,
+  ): Promise<CharacterView> {
     const [row] = await this.db
       .insert(characters)
       .values({
-        campaignId: input.campaignId,
+        campaignId,
         ownerUserId: userId,
         name: input.name,
         // Already validated against the SRD subset by the pipe. Derived values

@@ -10,17 +10,14 @@ import { type CharacterView, CharactersService } from './characters.service';
 export class CharactersController {
   constructor(private readonly characters: CharactersService) {}
 
-  /**
-   * The route carries the campaign so `CampaignMemberGuard` covers it; the body
-   * must agree, or a member of campaign A could file a character into B.
-   */
+  /** The campaign comes from the route, which is what the guard checked. */
   @Post('import')
   import(
     @Param('campaignId') campaignId: string,
     @CurrentUser() user: PublicUser,
     @Body(new ZodValidationPipe(ImportCharacterRequest)) body: ImportCharacterRequest,
   ): Promise<CharacterView> {
-    return this.characters.import(user.id, { ...body, campaignId });
+    return this.characters.import(user.id, campaignId, body);
   }
 
   @Get()

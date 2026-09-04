@@ -1,4 +1,4 @@
-import { Global, Module } from '@nestjs/common';
+import { Global, Logger, Module } from '@nestjs/common';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import * as schema from './schema';
@@ -19,7 +19,11 @@ export type Db = ReturnType<typeof drizzle<typeof schema>>;
       useFactory: (): Db => {
         const url = process.env.DATABASE_URL;
         if (!url) throw new Error('DATABASE_URL is not set');
-        return drizzle(postgres(url), { schema });
+        // Notices (a TRUNCATE cascade, an implicit index) go to the logger
+        // rather than stdout, where they drown real output in tests.
+        const logger = new Logger('Postgres');
+        const client = postgres(url, { onnotice: (notice) => logger.debug(notice.message) });
+        return drizzle(client, { schema });
       },
     },
   ],
