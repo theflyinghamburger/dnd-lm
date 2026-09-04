@@ -1,9 +1,12 @@
 import type {
   CampaignSummary,
+  CampaignTriggersResponse,
   InviteResponse,
   LoginRequest,
   PublicUser,
   RegisterRequest,
+  RosterResponse,
+  SessionSnapshot,
 } from '@dnd-lm/contracts';
 
 /** Thrown for any non-2xx; `code` is the server's typed error code when it sent one. */
@@ -44,4 +47,10 @@ export const api = {
   createInvite: (campaignId: string) =>
     post<InviteResponse>(`/campaigns/${campaignId}/invites`, {}),
   acceptInvite: (token: string) => post<CampaignSummary>(`/invites/${token}/accept`),
+  roster: (campaignId: string) => call<RosterResponse>(`/campaigns/${campaignId}/roster`),
+  triggers: (campaignId: string) =>
+    call<CampaignTriggersResponse>(`/campaigns/${campaignId}/triggers`),
+  sessions: (campaignId: string) => call<SessionSnapshot[]>(`/campaigns/${campaignId}/sessions`),
+  createSession: (campaignId: string) =>
+    post<SessionSnapshot>(`/campaigns/${campaignId}/sessions`, {}),
 };

@@ -20,6 +20,15 @@ export type EventDraft = {
 
 export type SessionRow = typeof sessions.$inferSelect;
 
+export type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
+
+/**
+ * Runs inside the resolution transaction, after events are appended and their
+ * sequences are known. M3 uses it to write the `messages` row alongside its
+ * event so the two can never disagree (M3.3).
+ */
+export type AfterAppend = (tx: Tx, appended: Array<{ sequence: number }>) => Promise<void>;
+
 /** Postgres unique-violation. A duplicate command_id is expected traffic, not a fault. */
 const isUniqueViolation = (error: unknown): boolean =>
   typeof error === 'object' && error !== null && (error as { code?: string }).code === '23505';
@@ -58,15 +67,35 @@ export class SessionService {
     return this.toSnapshot(session);
   }
 
-  /** M2.4. Contiguous by construction: `sequence` has no gaps to skip over. */
-  async eventsSince(sessionId: string, lastSequence: number): Promise<EventEnvelope[]> {
+  /**
+   * M2.4. Contiguous by construction: `sequence` has no gaps to skip over.
+   *
+   * Privacy is a `WHERE` predicate, not a post-filter (M3.4, FR-207). Replay is
+   * part of the event stream, so a whisper has to be excluded here too — a
+   * reconnecting third player must not receive one to drop client-side.
+   */
+  async eventsSince(
+    sessionId: string,
+    lastSequence: number,
+    viewerId: string,
+  ): Promise<EventEnvelope[]> {
     const session = await this.find(sessionId);
     if (!session) throw new NotFoundException({ code: 'SESSION_NOT_FOUND' });
 
     const rows = await this.db
       .select()
       .from(sessionEvents)
-      .where(and(eq(sessionEvents.sessionId, sessionId), gt(sessionEvents.sequence, lastSequence)))
+      .where(
+        and(
+          eq(sessionEvents.sessionId, sessionId),
+          gt(sessionEvents.sequence, lastSequence),
+          sql`(
+            ${sessionEvents.payload}->>'visibility' IS DISTINCT FROM 'private'
+            OR ${sessionEvents.actor}->>'id' = ${viewerId}
+            OR ${sessionEvents.payload}->'recipient_ids' ? ${viewerId}
+          )`,
+        ),
+      )
       .orderBy(asc(sessionEvents.sequence));
 
     return rows.map((row) => this.toEnvelope(session.campaignId, row));
@@ -89,6 +118,7 @@ export class SessionService {
       expectedStateVersion: number;
     },
     produce: (session: SessionRow) => EventDraft[],
+    afterAppend?: AfterAppend,
   ): Promise<{ ack: CommandAck; events: EventEnvelope[] }> {
     // A replay is answered with the original result and no events: they were
     // already published, and the client refetches missed ones with RESUME.
@@ -139,6 +169,8 @@ export class SessionService {
                 )
                 .returning();
 
+        if (afterAppend) await afterAppend(tx, rows);
+
         const ack: CommandAck = {
           command_id: input.commandId,
           sequence: firstSequence + Math.max(drafts.length - 1, 0),
@@ -167,7 +199,7 @@ export class SessionService {
    * session produce contiguous sequences instead of a race (M2.1).
    */
   private async allocate(
-    tx: Parameters<Parameters<Db['transaction']>[0]>[0],
+    tx: Tx,
     sessionId: string,
     count: number,
   ): Promise<{ firstSequence: number; stateVersion: number }> {

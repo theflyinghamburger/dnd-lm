@@ -9,24 +9,38 @@ import {
 import {
   ClientCommand,
   type CommandAck,
+  type EventEnvelope,
+  type MembershipRole,
   ResumeRequest,
   type ResumeResponse,
+  type RoutingDecision,
   type ServerError,
+  parseMessage,
 } from '@dnd-lm/contracts';
 import type { Server, Socket } from 'socket.io';
 import { AuthService, SESSION_COOKIE } from '../auth/auth.service';
 import { MembershipService } from '../campaigns/membership.service';
-import { SessionService } from './session.service';
+import { messages } from '../db/schema';
+import { SessionContextService } from '../router/session-context.service';
+import { type EventDraft, SessionService } from './session.service';
 import { TokenBucket } from './token-bucket';
 
 /** Burst of 20, sustained 5/s. Generous for typing, tight enough to stop a loop. */
 const BUCKET_CAPACITY = 20;
 const BUCKET_REFILL_PER_SECOND = 5;
 
-type SocketData = { userId: string; sessionId: string; bucket: TokenBucket };
+type SocketData = {
+  userId: string;
+  sessionId: string;
+  campaignId: string;
+  role: MembershipRole;
+  bucket: TokenBucket;
+};
 type SessionSocket = Socket & { data: SocketData };
 
 const room = (sessionId: string): string => `session:${sessionId}`;
+/** Per-user room, so a private event is addressed rather than filtered client-side. */
+const userRoom = (sessionId: string, userId: string): string => `session:${sessionId}:u:${userId}`;
 
 /** No `cookie` dependency for three lines of parsing. */
 function readCookie(header: string | undefined, name: string): string | undefined {
@@ -58,6 +72,7 @@ export class SessionGateway implements OnGatewayInit, OnGatewayConnection {
     private readonly auth: AuthService,
     private readonly memberships: MembershipService,
     private readonly sessionService: SessionService,
+    private readonly context: SessionContextService,
   ) {}
 
   afterInit(server: Server): void {
@@ -85,12 +100,15 @@ export class SessionGateway implements OnGatewayInit, OnGatewayConnection {
     socket.data = {
       userId: user.id,
       sessionId,
+      campaignId: session.campaignId,
+      role,
       bucket: new TokenBucket(BUCKET_CAPACITY, BUCKET_REFILL_PER_SECOND),
     };
   }
 
   handleConnection(socket: SessionSocket): void {
-    void socket.join(room(socket.data.sessionId));
+    const { sessionId, userId } = socket.data;
+    void socket.join([room(sessionId), userRoom(sessionId, userId)]);
   }
 
   @SubscribeMessage('command')
@@ -116,6 +134,8 @@ export class SessionGateway implements OnGatewayInit, OnGatewayConnection {
     }
 
     try {
+      if (command.type === 'SEND_MESSAGE') return await this.sendMessage(socket, command);
+
       const { ack, events } = await this.sessionService.runCommand(
         {
           commandId: command.command_id,
@@ -124,15 +144,132 @@ export class SessionGateway implements OnGatewayInit, OnGatewayConnection {
           type: command.type,
           expectedStateVersion: command.expected_state_version,
         },
-        (session) => draftsFor(command, socket.data.userId, session.id),
+        () => [
+          {
+            type: 'ROLL_REQUESTED',
+            payload: { ...command.payload },
+            actor: { type: 'player', id: socket.data.userId },
+            source: { type: 'command', id: command.command_id },
+          },
+        ],
       );
-
-      // Published only after the transaction commits, so a broadcast failure is
-      // recoverable by replay and never leaks uncommitted state (NFR-205).
-      for (const event of events) this.server.to(room(command.session_id)).emit('event', event);
+      this.publish(socket.data.sessionId, events, null);
       return ack;
     } catch (error) {
       return this.fail(socket, toServerError(error, command.command_id));
+    }
+  }
+
+  /**
+   * The whole point of M3: the routing decision is made by a pure function
+   * before anything is written, and the DM is activated only when that function
+   * says a registered trigger fired (FR-202, FR-206, D-6).
+   */
+  private async sendMessage(
+    socket: SessionSocket,
+    command: Extract<ClientCommand, { type: 'SEND_MESSAGE' }>,
+  ): Promise<CommandAck | ServerError> {
+    const { userId, sessionId, campaignId, role } = socket.data;
+    const { registry, roster } = await this.context.forCampaign(campaignId);
+    const decision = parseMessage(command.payload.content, roster, registry, { role });
+
+    if (decision.kind === 'reject') {
+      return this.fail(socket, {
+        code: 'ROUTING_REJECTED',
+        message: decision.message,
+        reason: decision.code,
+        command_id: command.command_id,
+      });
+    }
+
+    const actor = { type: 'player' as const, id: userId };
+    const source = { type: 'command' as const, id: command.command_id };
+
+    const drafts: EventDraft[] = [
+      {
+        type: 'MESSAGE_POSTED',
+        payload: {
+          recipient_type: decision.recipientType,
+          recipient_ids: decision.recipientIds,
+          visibility: decision.visibility,
+          channel: decision.channel,
+          content: decision.content,
+          triggers_dm: decision.dmTrigger !== undefined,
+          trigger_definition_id: decision.dmTrigger?.definitionId ?? null,
+        },
+        actor,
+        source,
+      },
+    ];
+
+    // The DM's activation is its own event, so "did the DM wake, and why?" is a
+    // question the event log answers on its own. M6's orchestrator consumes it.
+    if (decision.dmTrigger) {
+      drafts.push({
+        type: 'DM_TRIGGERED',
+        payload: {
+          definition_id: decision.dmTrigger.definitionId,
+          entry_profile: decision.dmTrigger.entryProfile,
+          args: decision.dmTrigger.args,
+        },
+        actor,
+        source,
+      });
+    }
+
+    const { ack, events } = await this.sessionService.runCommand(
+      {
+        commandId: command.command_id,
+        sessionId,
+        senderId: userId,
+        type: command.type,
+        expectedStateVersion: command.expected_state_version,
+      },
+      () => drafts,
+      // M3.3: the row lands in the same transaction as its event, so the two
+      // can never disagree about what was said or which trigger fired.
+      async (tx, appended) => {
+        await tx.insert(messages).values({
+          sessionId,
+          senderId: userId,
+          recipientType: decision.recipientType,
+          recipientIds: decision.recipientIds,
+          channel: decision.channel,
+          visibility: decision.visibility,
+          content: decision.content,
+          sequence: appended[0]!.sequence,
+          triggersDm: decision.dmTrigger !== undefined,
+          triggerDefinitionId: decision.dmTrigger?.definitionId ?? null,
+        });
+      },
+    );
+
+    this.publish(sessionId, events, decision);
+    return ack;
+  }
+
+  /**
+   * M3.4. The recipient set is computed server-side from the decision that was
+   * stored. A private message is emitted only to the sender's and target's own
+   * rooms — never broadcast for the client to filter.
+   */
+  private publish(
+    sessionId: string,
+    events: EventEnvelope[],
+    decision: RoutingDecision | null,
+  ): void {
+    const targets =
+      decision?.kind === 'route' && decision.visibility === 'private'
+        ? [...new Set([...decision.recipientIds, ...events.map((e) => e.actor.id)])].map((id) =>
+            userRoom(sessionId, id),
+          )
+        : [room(sessionId)];
+
+    for (const event of events) {
+      // A DM activation is public even when it followed from a private view of
+      // the world; there is no private trigger in the MVP (FR-207).
+      const to = event.type === 'DM_TRIGGERED' ? [room(sessionId)] : targets;
+      this.server.to(to).emit('event', event);
     }
   }
 
@@ -147,10 +284,10 @@ export class SessionGateway implements OnGatewayInit, OnGatewayConnection {
       return this.fail(socket, { code: 'INVALID_PAYLOAD', message: 'Malformed resume request.' });
     }
 
-    const { sessionId } = socket.data;
+    const { sessionId, userId } = socket.data;
     return {
       snapshot: await this.sessionService.snapshot(sessionId),
-      events: await this.sessionService.eventsSince(sessionId, parsed.data.last_sequence),
+      events: await this.sessionService.eventsSince(sessionId, parsed.data.last_sequence, userId),
     };
   }
 
@@ -178,28 +315,4 @@ function toServerError(error: unknown, commandId: string): ServerError {
     message: error instanceof Error ? error.message : 'Unknown failure',
     command_id: commandId,
   };
-}
-
-/**
- * M2 appends the event and stops there. The routing decision, the `messages`
- * row and the DM trigger are M3's, and the dice service is M4's — both replace
- * this body without touching the envelope, ordering or idempotency above.
- */
-function draftsFor(command: ClientCommand, userId: string, sessionId: string) {
-  const source = { type: 'command' as const, id: command.command_id };
-  const actor = { type: 'player' as const, id: userId };
-
-  switch (command.type) {
-    case 'SEND_MESSAGE':
-      return [{ type: 'MESSAGE_POSTED', payload: { ...command.payload }, actor, source }];
-    case 'ROLL_DICE':
-      return [
-        {
-          type: 'ROLL_REQUESTED',
-          payload: { ...command.payload, session_id: sessionId },
-          actor,
-          source,
-        },
-      ];
-  }
 }

@@ -15,6 +15,13 @@
       "when": 1788507758987,
       "tag": "0001_busy_dark_phoenix",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788508792403,
+      "tag": "0002_aspiring_black_tarantula",
+      "breakpoints": true
     }
   ]
 }

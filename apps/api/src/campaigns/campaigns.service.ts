@@ -1,18 +1,25 @@
 import { randomBytes } from 'node:crypto';
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import type {
-  CampaignSummary,
-  CreateCampaignRequest,
-  CreateInviteRequest,
-  InviteResponse,
+import {
+  type CampaignSummary,
+  type CampaignTriggersResponse,
+  type CreateCampaignRequest,
+  type CreateInviteRequest,
+  type InviteResponse,
+  TRIGGER_REGISTRY,
+  type UpdateTriggersRequest,
 } from '@dnd-lm/contracts';
 import { and, eq, isNull, sql } from 'drizzle-orm';
 import { DB, type Db } from '../db/db.module';
 import { campaigns, invites, memberships } from '../db/schema';
+import { SessionContextService } from '../router/session-context.service';
 
 @Injectable()
 export class CampaignsService {
-  constructor(@Inject(DB) private readonly db: Db) {}
+  constructor(
+    @Inject(DB) private readonly db: Db,
+    private readonly context: SessionContextService,
+  ) {}
 
   /**
    * The owner is also a `host` membership row. Ownership is then never a
@@ -94,7 +101,7 @@ export class CampaignsService {
    * same link cannot both consume it.
    */
   async acceptInvite(token: string, userId: string): Promise<CampaignSummary> {
-    return this.db.transaction(async (tx) => {
+    const summary = await this.db.transaction(async (tx) => {
       const [invite] = await tx
         .select()
         .from(invites)
@@ -130,5 +137,61 @@ export class CampaignsService {
         createdAt: campaign.createdAt.toISOString(),
       };
     });
+
+    // The roster the router parses against just changed (M3.2).
+    this.context.invalidate(summary.id);
+    return summary;
+  }
+
+  async listTriggers(campaignId: string): Promise<CampaignTriggersResponse> {
+    const [campaign] = await this.db
+      .select({ settings: campaigns.settings })
+      .from(campaigns)
+      .where(eq(campaigns.id, campaignId))
+      .limit(1);
+    if (!campaign) throw new NotFoundException({ code: 'CAMPAIGN_NOT_FOUND' });
+
+    const overrides =
+      (campaign.settings as { triggers?: Record<string, boolean> } | null)?.triggers ?? {};
+
+    return {
+      triggers: TRIGGER_REGISTRY.map((definition) => ({
+        id: definition.id,
+        enabled: overrides[definition.id] ?? definition.defaultEnabled,
+        entryProfile: definition.entryProfile,
+        tag: definition.match?.tag ?? null,
+      })),
+    };
+  }
+
+  /**
+   * Merges into `campaigns.settings.triggers` and invalidates the cached
+   * registry. Unknown ids are dropped rather than stored, so a typo cannot
+   * quietly persist as a setting that matches nothing.
+   */
+  async updateTriggers(
+    campaignId: string,
+    input: UpdateTriggersRequest,
+  ): Promise<CampaignTriggersResponse> {
+    const known = new Set(TRIGGER_REGISTRY.map((d) => d.id));
+    const unknown = Object.keys(input.triggers).filter((id) => !known.has(id));
+    if (unknown.length > 0) {
+      throw new BadRequestException({ code: 'UNKNOWN_TRIGGER', ids: unknown });
+    }
+
+    const [updated] = await this.db
+      .update(campaigns)
+      .set({
+        settings: sql`${campaigns.settings} || jsonb_build_object(
+          'triggers',
+          coalesce(${campaigns.settings}->'triggers', '{}'::jsonb) || ${JSON.stringify(input.triggers)}::jsonb
+        )`,
+      })
+      .where(eq(campaigns.id, campaignId))
+      .returning({ id: campaigns.id });
+    if (!updated) throw new NotFoundException({ code: 'CAMPAIGN_NOT_FOUND' });
+
+    this.context.invalidate(campaignId);
+    return this.listTriggers(campaignId);
   }
 }

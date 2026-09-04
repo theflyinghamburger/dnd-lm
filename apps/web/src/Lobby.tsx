@@ -3,7 +3,13 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { type FormEvent, useState } from 'react';
 import { ApiError, api } from './api';
 
-export function Lobby({ user }: { user: PublicUser }) {
+export function Lobby({
+  user,
+  onEnter,
+}: {
+  user: PublicUser;
+  onEnter: (campaignId: string, sessionId: string) => void;
+}) {
   const queryClient = useQueryClient();
   const [invite, setInvite] = useState<string | null>(null);
 
@@ -16,6 +22,19 @@ export function Lobby({ user }: { user: PublicUser }) {
     mutationFn: api.createInvite,
     onSuccess: (result) => setInvite(result.token),
   });
+  const enterSession = useMutation({
+    // Reuse the campaign's open session, or open one if the host has not yet.
+    mutationFn: async (campaign: { id: string; role: string }) => {
+      const existing = await api.sessions(campaign.id);
+      const live = existing.find((s) => s.status !== 'SESSION_ENDED');
+      if (live) return { campaignId: campaign.id, sessionId: live.session_id };
+      if (campaign.role === 'player') throw new ApiError(409, 'NO_OPEN_SESSION');
+      const created = await api.createSession(campaign.id);
+      return { campaignId: campaign.id, sessionId: created.session_id };
+    },
+    onSuccess: ({ campaignId, sessionId }) => onEnter(campaignId, sessionId),
+  });
+
   const logout = useMutation({
     mutationFn: api.logout,
     onSuccess: () => queryClient.invalidateQueries(),
@@ -30,7 +49,12 @@ export function Lobby({ user }: { user: PublicUser }) {
     }
   }
 
-  const failure = [createCampaign.error, acceptInvite.error, createInvite.error].find(Boolean);
+  const failure = [
+    createCampaign.error,
+    acceptInvite.error,
+    createInvite.error,
+    enterSession.error,
+  ].find(Boolean);
 
   return (
     <main>
@@ -56,8 +80,12 @@ export function Lobby({ user }: { user: PublicUser }) {
                 Invite a player
               </button>
             )}
-            {/* Character selection lands with M4 and the session itself with M2. */}
-            <button type="button" disabled title="Sessions arrive with M2">
+            {/* Character selection lands with M4. */}
+            <button
+              type="button"
+              onClick={() => enterSession.mutate({ id: campaign.id, role: campaign.role })}
+              disabled={enterSession.isPending}
+            >
               Enter session
             </button>
           </li>
