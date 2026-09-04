@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { AdminModule } from './admin/admin.module';
 import { AuthModule } from './auth/auth.module';
 import { CampaignsModule } from './campaigns/campaigns.module';
 import { CharactersModule } from './characters/characters.module';
@@ -13,6 +14,7 @@ import { SessionModule } from './session/session.module';
   imports: [
     DbModule,
     AuthModule,
+    AdminModule,
     CampaignsModule,
     RouterModule,
     CharactersModule,
