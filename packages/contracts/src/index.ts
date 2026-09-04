@@ -217,3 +217,59 @@ export const TriggerDefinition = z.object({
   defaultEnabled: z.boolean(),
 });
 export type TriggerDefinition = z.infer<typeof TriggerDefinition>;
+
+/* -------------------------------------------------------------------------- */
+/* Identity, campaigns, memberships (M1)                                      */
+/* -------------------------------------------------------------------------- */
+
+export const MembershipRole = z.enum(['player', 'host', 'admin']);
+export type MembershipRole = z.infer<typeof MembershipRole>;
+
+export const RegisterRequest = z.object({
+  email: z.email().max(254).toLowerCase(),
+  displayName: z.string().min(1).max(64),
+  password: z.string().min(12).max(256),
+});
+export type RegisterRequest = z.infer<typeof RegisterRequest>;
+
+export const LoginRequest = z.object({
+  email: z.email().max(254).toLowerCase(),
+  password: z.string().min(1).max(256),
+});
+export type LoginRequest = z.infer<typeof LoginRequest>;
+
+/** What the API is allowed to say about a user. There is no password field here on purpose. */
+export const PublicUser = z.object({
+  id: Id,
+  email: z.email(),
+  displayName: z.string(),
+});
+export type PublicUser = z.infer<typeof PublicUser>;
+
+export const CreateCampaignRequest = z.object({
+  name: z.string().min(1).max(120),
+});
+export type CreateCampaignRequest = z.infer<typeof CreateCampaignRequest>;
+
+export const CampaignSummary = z.object({
+  id: Id,
+  name: z.string(),
+  ownerUserId: Id,
+  role: MembershipRole,
+  createdAt: z.iso.datetime(),
+});
+export type CampaignSummary = z.infer<typeof CampaignSummary>;
+
+export const CreateInviteRequest = z.object({
+  role: MembershipRole.exclude(['admin']).default('player'),
+  expiresInHours: z.int().min(1).max(720).default(168),
+});
+export type CreateInviteRequest = z.infer<typeof CreateInviteRequest>;
+
+export const InviteResponse = z.object({
+  token: z.string(),
+  campaignId: Id,
+  role: MembershipRole,
+  expiresAt: z.iso.datetime(),
+});
+export type InviteResponse = z.infer<typeof InviteResponse>;

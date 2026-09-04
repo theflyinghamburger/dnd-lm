@@ -4,9 +4,28 @@ on:
   push:
   pull_request:
 
+env:
+  DATABASE_URL: postgres://dnd:dnd@localhost:5432/dnd_lm
+
 jobs:
   check:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: dnd
+          POSTGRES_PASSWORD: dnd
+          POSTGRES_DB: dnd_lm
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U dnd -d dnd_lm"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
     steps:
       - uses: actions/checkout@v4
 
@@ -31,7 +50,12 @@ jobs:
       - name: Format
         run: pnpm format
 
-      - name: Unit tests
+      - name: Apply migrations
+        run: pnpm db:migrate
+
+      # The authorization tests need a real database; app.harness.ts fails the
+      # run rather than skipping if DATABASE_URL is missing under CI.
+      - name: Tests
         run: pnpm test
 
       # M0.2: the checked-in migrations must be exactly what the Drizzle schema
