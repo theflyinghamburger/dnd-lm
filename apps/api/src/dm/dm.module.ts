@@ -1,4 +1,5 @@
 import { Module, forwardRef } from '@nestjs/common';
+import { ProvidersModule } from '../providers/providers.module';
 import { SessionModule } from '../session/session.module';
 import { DmContextReader } from './context';
 import { DmOrchestrator, DmProviderSource, DM_PROVIDER_SOURCE } from './orchestrator';
@@ -9,7 +10,7 @@ import { DmOrchestrator, DmProviderSource, DM_PROVIDER_SOURCE } from './orchestr
  * its gateway consumes — the cycle Nest needs to break, broken once.
  */
 @Module({
-  imports: [forwardRef(() => SessionModule)],
+  imports: [forwardRef(() => SessionModule), ProvidersModule],
   providers: [
     DmContextReader,
     DmOrchestrator,

@@ -37,6 +37,7 @@ import {
   type Tx,
 } from '../session/session.service';
 import { DmContextReader } from './context';
+import { ProviderSecrets } from '../providers/provider-secrets.service';
 import {
   buildDmGraph,
   GRAPH_RECURSION_LIMIT,
@@ -97,6 +98,7 @@ export class DmOrchestrator implements OnApplicationBootstrap {
     private readonly sessionService: SessionService,
     private readonly reader: DmContextReader,
     @Inject(DM_PROVIDER_SOURCE) private readonly providerSource: DmProviderSource,
+    private readonly secrets: ProviderSecrets,
   ) {}
 
   /**
@@ -198,8 +200,11 @@ export class DmOrchestrator implements OnApplicationBootstrap {
       });
     } catch (error) {
       // The trigger path must never take the gateway's publish loop down with it.
+      // NFR-305: SDK errors can echo request headers — the key never reaches the log.
       this.logger.error(
-        `DM trigger failed for session ${sessionId}: ${error instanceof Error ? error.stack : error}`,
+        `DM trigger failed for session ${sessionId}: ${this.secrets.redact(
+          error instanceof Error ? (error.stack ?? error.message) : String(error),
+        )}`,
       );
     }
   }
@@ -346,7 +351,9 @@ export class DmOrchestrator implements OnApplicationBootstrap {
               );
             } else {
               this.logger.error(
-                `graph run failed: ${error instanceof Error ? error.stack : error}`,
+                `graph run failed: ${this.secrets.redact(
+                  error instanceof Error ? (error.stack ?? error.message) : String(error),
+                )}`,
               );
               await this.reportFailure(
                 sessionId,
@@ -568,7 +575,9 @@ export class DmOrchestrator implements OnApplicationBootstrap {
               );
             } else {
               this.logger.error(
-                `graph resume failed: ${error instanceof Error ? error.stack : error}`,
+                `graph resume failed: ${this.secrets.redact(
+                  error instanceof Error ? (error.stack ?? error.message) : String(error),
+                )}`,
               );
               await this.reportFailure(sessionId, resolutionId, 'INTERNAL', actorId, callbacks);
             }
@@ -722,7 +731,9 @@ export class DmOrchestrator implements OnApplicationBootstrap {
     } catch (error) {
       const rejected = error instanceof ConflictException;
       this.logger.warn(
-        `resolution ${resolutionId} not committed: ${error instanceof Error ? error.message : error}`,
+        `resolution ${resolutionId} not committed: ${this.secrets.redact(
+          error instanceof Error ? error.message : String(error),
+        )}`,
       );
       await this.reportFailure(
         sessionId,
@@ -954,7 +965,9 @@ export class DmOrchestrator implements OnApplicationBootstrap {
       callbacks.events(events);
     } catch (error) {
       this.logger.error(
-        `could not record DM failure for session ${sessionId}: ${error instanceof Error ? error.message : error}`,
+        `could not record DM failure for session ${sessionId}: ${this.secrets.redact(
+          error instanceof Error ? error.message : String(error),
+        )}`,
       );
     }
     await this.deleteThread(resolutionId);

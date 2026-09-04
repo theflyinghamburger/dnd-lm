@@ -7,6 +7,10 @@ import { DB, type Db } from '../src/db/db.module';
 
 export const DATABASE_URL = process.env.DATABASE_URL;
 
+// M7.2: the master key is a deployment requirement, not an app default. Tests
+// provision their own the same way CI provisions DATABASE_URL.
+process.env.PROVIDER_KEY_ENCRYPTION_KEY ??= '0'.repeat(64);
+
 // Skipping the integration suite is a local-machine convenience. In CI it would
 // mean the authorization guarantees silently stopped being tested.
 if (!DATABASE_URL && process.env.CI) {
