@@ -1,8 +1,8 @@
 # Build summary — DnD LM
 
 **Repo:** [theflyinghamburger/dnd-lm](https://github.com/theflyinghamburger/dnd-lm) (private)
-**As of:** 2026-09-04
-**Progress:** M0–M6 (M6 on branch `m6-langgraph-dm`, all gates green, PR in flight). M7–M9 not started.
+**As of:** 2026-09-05
+**Progress:** M0–M7.4. M5–M7.1 merged (#17, #18, #28); M7.2–M7.4 open as three stacked PRs (#29 → #30 → #31), all gates green, all tests passing on live Postgres. M7.5–M7.9, M8, M9 not started.
 
 ---
 
@@ -15,13 +15,17 @@
 | M2 — Realtime gateway, ordering, idempotency, replay | [#3](https://github.com/theflyinghamburger/dnd-lm/issues/3) | **merged** | [#14](https://github.com/theflyinghamburger/dnd-lm/pull/14) |
 | M3 — Deterministic router, trigger registry, messaging | [#4](https://github.com/theflyinghamburger/dnd-lm/issues/4) | **merged** | [#15](https://github.com/theflyinghamburger/dnd-lm/pull/15) |
 | M4 — Characters and dice | [#5](https://github.com/theflyinghamburger/dnd-lm/issues/5) | **merged** | [#16](https://github.com/theflyinghamburger/dnd-lm/pull/16) |
-| M5 — Session orchestrator | [#6](https://github.com/theflyinghamburger/dnd-lm/issues/6) | **complete**, branch `m5-orchestrator` | none yet |
-| M6 — The LangGraph DM | [#7](https://github.com/theflyinghamburger/dnd-lm/issues/7) | **complete**, branch `m6-langgraph-dm` (stacked on `m5-orchestrator`) | opening |
-| M7 — Provider configuration and secrets | [#8](https://github.com/theflyinghamburger/dnd-lm/issues/8) | not started | |
+| M5 — Session orchestrator | [#6](https://github.com/theflyinghamburger/dnd-lm/issues/6) | **merged** | [#17](https://github.com/theflyinghamburger/dnd-lm/pull/17) |
+| M6 — The LangGraph DM | [#7](https://github.com/theflyinghamburger/dnd-lm/issues/7) | **merged** | [#18](https://github.com/theflyinghamburger/dnd-lm/pull/18) |
+| M7.1 — Provider connections data model | [#19](https://github.com/theflyinghamburger/dnd-lm/issues/19) | **merged** | [#28](https://github.com/theflyinghamburger/dnd-lm/pull/28) |
+| M7.2 — Secret handling (AES-256-GCM, write-only keys) | [#20](https://github.com/theflyinghamburger/dnd-lm/issues/20) | PR open, branch `m7.2-secret-handling` | [#29](https://github.com/theflyinghamburger/dnd-lm/pull/29) |
+| M7.3 — Base URL validation (SSRF) | [#21](https://github.com/theflyinghamburger/dnd-lm/issues/21) | PR open, stacked on #29 | [#30](https://github.com/theflyinghamburger/dnd-lm/pull/30) |
+| M7.4 — Authorization: admin-managed connections | [#22](https://github.com/theflyinghamburger/dnd-lm/issues/22) | PR open, stacked on #30 | [#31](https://github.com/theflyinghamburger/dnd-lm/pull/31) |
+| M7.5–M7.9 — test connection, UI, adapter wiring, audit, failure behaviour | [#23–#27](https://github.com/theflyinghamburger/dnd-lm/issues/23) | not started | |
 | M8 — Manual campaign notes and retrieval | [#9](https://github.com/theflyinghamburger/dnd-lm/issues/9) | not started | |
 | M9 — MVP acceptance | [#10](https://github.com/theflyinghamburger/dnd-lm/issues/10) | not started | |
 
-230 tests on the M6 branch: 166 unit, 64 integration — all of them run, locally and in CI. CI runs build → typecheck → lint → format → migrate → test → migration-drift on every push, against a real Postgres 16 service.
+276 tests on the M7.4 branch (top of the stack): unit + integration, all of them run, locally and in CI. CI runs build → typecheck → lint → format → migrate → test → migration-drift on every push, against a real Postgres 16 service. The integration suite silently skips without `DATABASE_URL` in the environment — always `set -a; source .env; set +a` first.
 
 ### PR #12 is dead
 
@@ -73,36 +77,36 @@ pnpm --filter @dnd-lm/web dev          # :5173, proxies /api and /ws
 
 ---
 
-## 4. Start here: M6 is done; M7 (provider config) is next
+## 4. Start here: M7.1–M7.4 are done as three stacked PRs; M7.5–M7.9 remain
 
-M6 shipped the whole DM turn and its tests. What is in place for M7:
+M7 is half built. What is in place for the rest of it:
 
-- **The turn is live end to end.** Three things emit `DM_TRIGGERED` (registered
-  tag, closed pending action, `FORCE_DM_TURN`); the gateway dispatches it to
-  `DmOrchestrator`, which runs the LangGraph state graph
-  (context → provider → validate → commit-or-retry) and writes
-  `DM_NARRATION` / `DM_RESOLUTION_FAILED` through `runCommand`. Prose streams
-  to the room as a `dm_stream` socket event before the commit, so the web's
-  provisional bubble disappears atomically with the authoritative event.
-- **`pending_actions.graph_thread_id` is now read.** The roll interrupt parks
-  in a `PGCheckpointSaver` row under that thread id; closing the action
-  re-invokes with a `Command`, so a server restart resumes from the
-  checkpoint — it does not re-roll or re-run the context nodes. The M6.8 e2e
-  test covers the close→restart→resume path.
-- **Provider config is env, and that is M7's job.** `DmProviderSource.get()`
-  reads `DM_PROVIDER_KIND` / `DM_PROVIDER_API_KEY` / `DM_PROVIDER_BASE_URL` /
-  `DM_PROVIDER_MODEL` / `DM_PROVIDER_MAX_TOKENS` at turn start; no provider
-  configured is a clean `NO_PROVIDER` failure, not a crash. M7 moves this to
-  per-connection rows with a UI and makes keys write-only — the injection
-  point is one Symbol provider, `DM_PROVIDER_SOURCE`, so the swap touches one
-  class, not the graph.
-- **`runCommand`'s `mode` carried the turn as `'mutation'` as M5 intended**,
-  with one deliberate extension: a `null` `expected_state_version` marks a
-  server-internal resolution. The client version gate is skipped (a pending
-  resolution must not be invalidated by a player's concurrent chat) while the
-  optimistic lock and every other guarantee stay intact.
+- **Connections are admin-owned, encrypted rows, not env vars — yet the DM still reads env.**
+  `DmProviderSource.get()` still reads `DM_PROVIDER_KIND` / `DM_PROVIDER_API_KEY` /
+  `DM_PROVIDER_BASE_URL` / `DM_PROVIDER_MODEL` / `DM_PROVIDER_MAX_TOKENS` at turn start; no
+  provider configured is a clean `NO_PROVIDER` failure, not a crash. M7.7 swaps the *source*
+  to resolve the campaign's selected connection through the real adapters — the injection
+  point is one Symbol provider, `DM_PROVIDER_SOURCE`, so the swap touches one class, not
+  the graph. M7.5's "test connection" is blocked on that adapter by the issue's own
+  dependency note ("Depends on: M7.4, **M7.7**") — build M7.7 first, or decide in-thread.
+- **The key material lives in `ProviderSecrets` only** (`apps/api/src/providers/`):
+  encrypt/decrypt/replace-key over node:crypto AES-256-GCM, fresh nonce per write, master key
+  from `PROVIDER_KEY_ENCRYPTION_KEY` (64 hex, validated at startup). Keys are write-only at
+  every seam; `redact` is the choke point every provider-facing string passes through (M6's
+  orchestrator already calls it).
+- **The SSRF wall is `BaseUrlService.validate` + `guardedFetch`** (M7.3,
+  `apps/api/src/providers/base-url.ts`). Save-time validation runs in the admin
+  create/update; *request-time* it must be re-run by M7.7 (DNS is not cached on purpose —
+  a save-time pass proves nothing at fetch time), and M7.7's adapters must fetch through
+  `guardedFetch` so a redirect that crosses hosts is refused.
+- **Authorization is done** (M7.4): platform admin = an `admin` membership in *any*
+  campaign (option (a), zero new columns; decided as the in-thread default). `/api/admin/providers`
+  is the admin CRUD surface; `GET /api/providers` returns the redacted enabled list whose
+  `HostConnection` shape structurally cannot carry a URL or key; `PATCH /campaigns/:id/provider`
+  (host-or-admin on that campaign) writes `settings.provider_connection_id`. Deleting a
+  connection a campaign references is 409 naming the campaign, deliberately *not* a silent clear.
 
-### What M5 and M6 decided that should not be re-litigated
+### What M5–M7 decided that should not be re-litigated
 
 **Chat does not bump `state_version`; mutations do.** This is the reconciliation
 M2 deferred. `sequence` is log position, `state_version` is state — a chatty
@@ -135,6 +139,21 @@ A host can ask an idle table for a check without a DM turn first.
 architecture.md §6.3 lists the states but defines no edges, so
 `packages/contracts/src/session-state.ts` is the only definition of them — not
 a contradiction with the doc, but worth knowing it is not from the doc either.
+
+**Connection reads and writes are plain DB transactions, not `runCommand`.**
+A `provider_connections` row is not a session state mutation (M7.4 process,
+step 2), so the admin surface never claims a `commands` row or touches
+`state_version`. "One state-mutating resolution per session" is unchanged.
+
+**The host-facing redaction is the missing columns, not a filter.** The
+`HostConnection` DTO (id, label, kind, modelId, enabled) has no URL and no
+key field to strip — the projection never selects them. A filter that could
+leak is worse than a shape that couldn't.
+
+**The campaign-settings writer takes only `providerConnectionId`.** M7.4's
+endpoint does not also write DM style/tone/difficulty (FR-506's broader
+surface) — that shape is undefined and lands with the M7.6 config UI (#24).
+Said in PR #31, not silently skipped.
 
 ## 5. Environment caveats
 
