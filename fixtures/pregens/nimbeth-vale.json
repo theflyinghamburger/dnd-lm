@@ -1,0 +1,48 @@
+{
+  "name": "Nimbeth Vale",
+  "sheet": {
+    "className": "Wizard",
+    "level": 3,
+    "abilityScores": {
+      "str": 8,
+      "dex": 14,
+      "con": 13,
+      "int": 17,
+      "wis": 12,
+      "cha": 11
+    },
+    "skillProficiencies": ["arcana", "history", "investigation"],
+    "saveProficiencies": ["int", "wis"],
+    "maxHp": 17,
+    "armorClass": 12,
+    "speed": 30,
+    "inventory": [
+      {
+        "name": "Quarterstaff",
+        "quantity": 1,
+        "equipped": true
+      },
+      {
+        "name": "Spellbook",
+        "quantity": 1,
+        "equipped": false
+      },
+      {
+        "name": "Component pouch",
+        "quantity": 1,
+        "equipped": false
+      },
+      {
+        "name": "Scroll of magic missile",
+        "quantity": 1,
+        "equipped": false
+      }
+    ],
+    "currency": {
+      "cp": 0,
+      "sp": 0,
+      "gp": 18,
+      "pp": 0
+    }
+  }
+}

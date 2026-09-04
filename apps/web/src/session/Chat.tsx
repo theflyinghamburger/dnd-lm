@@ -8,6 +8,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { type FormEvent, useMemo, useState } from 'react';
 import { api } from '../api';
+import { SheetPanel } from './SheetPanel';
 import { useSession } from './useSession';
 
 /** Label and icon, never colour alone (NFR-403). */
@@ -26,15 +27,17 @@ export function Chat({
   user,
   campaignId,
   sessionId,
+  characterId,
   onLeave,
 }: {
   user: PublicUser;
   campaignId: string;
   sessionId: string;
+  characterId: string | null;
   onLeave: () => void;
 }) {
   const [draft, setDraft] = useState('');
-  const { snapshot, lines, connected, send } = useSession(sessionId);
+  const { snapshot, lines, rolls, connected, send, roll } = useSession(sessionId, characterId);
 
   const roster = useQuery({
     queryKey: ['roster', campaignId],
@@ -121,6 +124,21 @@ export function Chat({
         })}
       </ol>
 
+      {rolls.length > 0 && (
+        <section>
+          <h2>Rolls</h2>
+          <ul aria-live="polite">
+            {rolls.slice(-8).map((entry) => (
+              <li key={entry.key}>
+                <strong>{entry.total}</strong> — {entry.label} ({entry.expression}):{' '}
+                {entry.dice.join(', ')}
+                {entry.modifiers.map((m) => ` ${m.value >= 0 ? '+' : ''}${m.value} ${m.source}`)}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       <form onSubmit={onSubmit}>
         <label htmlFor="draft">Message</label>
         <input
@@ -172,6 +190,12 @@ export function Chat({
           Send
         </button>
       </form>
+      <SheetPanel
+        user={user}
+        campaignId={campaignId}
+        characterId={characterId}
+        onRoll={(expression) => void roll(expression)}
+      />
     </main>
   );
 }

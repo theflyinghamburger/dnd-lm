@@ -1,17 +1,14 @@
 import type { PublicUser } from '@dnd-lm/contracts';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { type FormEvent, useState } from 'react';
+import type { Seat } from './App';
 import { ApiError, api } from './api';
 
-export function Lobby({
-  user,
-  onEnter,
-}: {
-  user: PublicUser;
-  onEnter: (campaignId: string, sessionId: string) => void;
-}) {
+export function Lobby({ user, onEnter }: { user: PublicUser; onEnter: (seat: Seat) => void }) {
   const queryClient = useQueryClient();
   const [invite, setInvite] = useState<string | null>(null);
+  /** M1.4's "pick a character", now that M4 has characters to pick. */
+  const [seats, setSeats] = useState<Record<string, string>>({});
 
   const campaigns = useQuery({ queryKey: ['campaigns'], queryFn: api.campaigns });
   const refresh = () => queryClient.invalidateQueries({ queryKey: ['campaigns'] });
@@ -24,15 +21,16 @@ export function Lobby({
   });
   const enterSession = useMutation({
     // Reuse the campaign's open session, or open one if the host has not yet.
-    mutationFn: async (campaign: { id: string; role: string }) => {
+    mutationFn: async (campaign: { id: string; role: string }): Promise<Seat> => {
       const existing = await api.sessions(campaign.id);
       const live = existing.find((s) => s.status !== 'SESSION_ENDED');
-      if (live) return { campaignId: campaign.id, sessionId: live.session_id };
+      const characterId = seats[campaign.id] ?? null;
+      if (live) return { campaignId: campaign.id, sessionId: live.session_id, characterId };
       if (campaign.role === 'player') throw new ApiError(409, 'NO_OPEN_SESSION');
       const created = await api.createSession(campaign.id);
-      return { campaignId: campaign.id, sessionId: created.session_id };
+      return { campaignId: campaign.id, sessionId: created.session_id, characterId };
     },
-    onSuccess: ({ campaignId, sessionId }) => onEnter(campaignId, sessionId),
+    onSuccess: onEnter,
   });
 
   const logout = useMutation({
@@ -80,7 +78,14 @@ export function Lobby({
                 Invite a player
               </button>
             )}
-            {/* Character selection lands with M4. */}
+            <CharacterPicker
+              user={user}
+              campaignId={campaign.id}
+              value={seats[campaign.id] ?? ''}
+              onChange={(characterId) =>
+                setSeats((current) => ({ ...current, [campaign.id]: characterId }))
+              }
+            />
             <button
               type="button"
               onClick={() => enterSession.mutate({ id: campaign.id, role: campaign.role })}
@@ -116,5 +121,43 @@ export function Lobby({
         </p>
       )}
     </main>
+  );
+}
+
+/** Only your own characters are selectable — you cannot sit down as someone else. */
+function CharacterPicker({
+  user,
+  campaignId,
+  value,
+  onChange,
+}: {
+  user: PublicUser;
+  campaignId: string;
+  value: string;
+  onChange: (characterId: string) => void;
+}) {
+  const characters = useQuery({
+    queryKey: ['characters', campaignId],
+    queryFn: () => api.characters(campaignId),
+  });
+  const mine = (characters.data ?? []).filter((c) => c.ownerUserId === user.id);
+  const selectId = `character-${campaignId}`;
+
+  if (mine.length === 0) return <span className="role">no character</span>;
+
+  return (
+    <>
+      <label htmlFor={selectId} className="visually-hidden">
+        Character
+      </label>
+      <select id={selectId} value={value} onChange={(event) => onChange(event.target.value)}>
+        <option value="">Watch only</option>
+        {mine.map((character) => (
+          <option key={character.id} value={character.id}>
+            {character.name}
+          </option>
+        ))}
+      </select>
+    </>
   );
 }

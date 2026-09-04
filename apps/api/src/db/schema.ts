@@ -235,3 +235,65 @@ export const messages = pgTable(
   },
   (t) => [uniqueIndex('messages_session_sequence_key').on(t.sessionId, t.sequence)],
 );
+
+/* -------------------------------------------------------------------------- */
+/* M4 — characters and dice                                                   */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * `sheet` holds inputs only (D-3). `level` is a generated column read straight
+ * out of the JSONB rather than a second copy someone has to keep in step.
+ */
+export const characters = pgTable(
+  'characters',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    campaignId: uuid('campaign_id')
+      .notNull()
+      .references(() => campaigns.id, { onDelete: 'cascade' }),
+    ownerUserId: uuid('owner_user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    sheet: jsonb('sheet').notNull(),
+    level: integer('level').generatedAlwaysAs(sql`((sheet->>'level')::integer)`),
+    stateVersion: integer('state_version').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('characters_campaign_id_idx').on(t.campaignId)],
+);
+
+/**
+ * Every published roll originates here (FR-301). `modifiers` carries each
+ * modifier's source so the breakdown is reconstructible from the row alone
+ * (FR-302, spec-doc.md §9.3).
+ */
+export const rolls = pgTable(
+  'rolls',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    sessionId: uuid('session_id')
+      .notNull()
+      .references(() => sessions.id, { onDelete: 'cascade' }),
+    characterId: uuid('character_id').references(() => characters.id, { onDelete: 'set null' }),
+    expression: text('expression').notNull(),
+    dice: integer('dice').array().notNull(),
+    modifiers: jsonb('modifiers').notNull(),
+    total: integer('total').notNull(),
+    visibility: messageVisibility('visibility').notNull().default('public'),
+    requesterId: uuid('requester_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    authorizedRollerId: uuid('authorized_roller_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    /**
+     * No foreign key yet: `pending_actions` is created in M5.5, which is also
+     * where a roll starts being able to close one.
+     */
+    pendingActionId: uuid('pending_action_id'),
+    stateVersion: integer('state_version').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('rolls_session_id_idx').on(t.sessionId)],
+);

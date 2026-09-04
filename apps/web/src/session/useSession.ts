@@ -17,6 +17,16 @@ export type ChatLine = {
   error?: string;
 };
 
+export type RollLine = {
+  key: string;
+  label: string;
+  expression: string;
+  dice: number[];
+  kept: number;
+  modifiers: Array<{ source: string; value: number }>;
+  total: number;
+};
+
 type Posted = {
   content: string;
   recipient_type: ChatLine['recipientType'];
@@ -30,16 +40,22 @@ type Posted = {
  * or below the local high-water mark is dropped, so a resume that overlaps what
  * we already have cannot duplicate a line (M2.4).
  */
-export function useSession(sessionId: string) {
+export function useSession(sessionId: string, characterId: string | null) {
   const socketRef = useRef<Socket | null>(null);
   const highWater = useRef(0);
   const [snapshot, setSnapshot] = useState<SessionSnapshot | null>(null);
   const [lines, setLines] = useState<ChatLine[]>([]);
+  const [rolls, setRolls] = useState<RollLine[]>([]);
   const [connected, setConnected] = useState(false);
 
   const applyEvent = useCallback((event: EventEnvelope) => {
     if (event.sequence <= highWater.current) return;
     highWater.current = event.sequence;
+    if (event.type === 'ROLL_RESULT') {
+      const roll = event.payload as unknown as RollLine;
+      setRolls((current) => [...current, { ...roll, key: event.event_id }]);
+      return;
+    }
     if (event.type !== 'MESSAGE_POSTED') return;
 
     const payload = event.payload as unknown as Posted;
@@ -60,7 +76,11 @@ export function useSession(sessionId: string) {
   }, []);
 
   useEffect(() => {
-    const socket = io({ path: '/ws', auth: { sessionId }, transports: ['websocket'] });
+    const socket = io({
+      path: '/ws',
+      auth: { sessionId, ...(characterId ? { characterId } : {}) },
+      transports: ['websocket'],
+    });
     socketRef.current = socket;
 
     socket.on('connect', () => {
@@ -79,7 +99,7 @@ export function useSession(sessionId: string) {
       socket.disconnect();
       socketRef.current = null;
     };
-  }, [sessionId, applyEvent]);
+  }, [sessionId, characterId, applyEvent]);
 
   const send = useCallback(
     async (content: string) => {
@@ -126,5 +146,21 @@ export function useSession(sessionId: string) {
     [sessionId, snapshot?.state_version],
   );
 
-  return { snapshot, lines, connected, send };
+  /** Click-to-roll from the sheet. The dice themselves are rolled server-side. */
+  const roll = useCallback(
+    async (expression: string) => {
+      const socket = socketRef.current;
+      if (!socket) return;
+      await socket.emitWithAck('command', {
+        command_id: crypto.randomUUID(),
+        type: 'ROLL_DICE',
+        session_id: sessionId,
+        expected_state_version: snapshot?.state_version ?? 0,
+        payload: { expression, ...(characterId ? { character_id: characterId } : {}) },
+      });
+    },
+    [sessionId, characterId, snapshot?.state_version],
+  );
+
+  return { snapshot, lines, rolls, connected, send, roll };
 }

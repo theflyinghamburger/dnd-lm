@@ -106,6 +106,8 @@ export type RoutingDecision =
       visibility: Visibility;
       channel: Channel;
       content: string;
+      /** The text after the leading tag, so callers need not re-split it. */
+      argument: string;
       dmTrigger?: DmTrigger;
     }
   | { kind: 'reject'; code: RoutingRejectionCode; message: string };
@@ -172,6 +174,7 @@ const table = (content: string): RoutingDecision => ({
   visibility: 'public',
   channel: 'in_character',
   content,
+  argument: content,
 });
 
 function resolveNpc(roster: Roster, name: string): RosterNpc[] {
@@ -245,6 +248,7 @@ export function parseMessage(
         visibility: 'public',
         channel: 'in_character',
         content,
+        argument: speech,
         dmTrigger: {
           definitionId: definition.id,
           entryProfile: definition.entryProfile,
@@ -268,6 +272,7 @@ export function parseMessage(
       visibility: 'public',
       channel: 'in_character',
       content,
+      argument: rest,
       dmTrigger: {
         definitionId: definition.id,
         entryProfile: definition.entryProfile,
@@ -286,6 +291,7 @@ export function parseMessage(
         visibility: 'public',
         channel: 'in_character',
         content,
+        argument: rest,
       };
     case '/sheet':
       return {
@@ -295,6 +301,7 @@ export function parseMessage(
         visibility: 'public',
         channel: 'in_character',
         content,
+        argument: rest,
       };
     case '/ooc':
       return {
@@ -304,6 +311,7 @@ export function parseMessage(
         visibility: 'public',
         channel: 'ooc',
         content,
+        argument: rest,
       };
     case '/whisper': {
       const { tag: target, rest: body } = head(rest);
@@ -324,6 +332,7 @@ export function parseMessage(
         visibility: 'private',
         channel: 'in_character',
         content: body,
+        argument: body,
       };
     }
   }
@@ -336,6 +345,7 @@ export function parseMessage(
       visibility: 'public',
       channel: 'in_character',
       content,
+      argument: rest,
     };
   }
 
@@ -349,6 +359,7 @@ export function parseMessage(
         visibility: 'public',
         channel: 'in_character',
         content,
+        argument: rest,
       };
     }
   }

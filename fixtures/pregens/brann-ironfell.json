@@ -1,0 +1,48 @@
+{
+  "name": "Brann Ironfell",
+  "sheet": {
+    "className": "Fighter",
+    "level": 3,
+    "abilityScores": {
+      "str": 17,
+      "dex": 13,
+      "con": 15,
+      "int": 9,
+      "wis": 12,
+      "cha": 10
+    },
+    "skillProficiencies": ["athletics", "intimidation", "survival"],
+    "saveProficiencies": ["str", "con"],
+    "maxHp": 31,
+    "armorClass": 17,
+    "speed": 30,
+    "inventory": [
+      {
+        "name": "Splint armour",
+        "quantity": 1,
+        "equipped": true
+      },
+      {
+        "name": "Greataxe",
+        "quantity": 1,
+        "equipped": true
+      },
+      {
+        "name": "Handaxe",
+        "quantity": 2,
+        "equipped": false
+      },
+      {
+        "name": "Rations (1 day)",
+        "quantity": 5,
+        "equipped": false
+      }
+    ],
+    "currency": {
+      "cp": 0,
+      "sp": 8,
+      "gp": 10,
+      "pp": 0
+    }
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "name": "Sable Quickfoot",
+  "sheet": {
+    "className": "Rogue",
+    "level": 3,
+    "abilityScores": {
+      "str": 9,
+      "dex": 17,
+      "con": 13,
+      "int": 14,
+      "wis": 12,
+      "cha": 13
+    },
+    "skillProficiencies": [
+      "acrobatics",
+      "deception",
+      "investigation",
+      "perception",
+      "sleight_of_hand",
+      "stealth"
+    ],
+    "saveProficiencies": ["dex", "int"],
+    "maxHp": 21,
+    "armorClass": 15,
+    "speed": 30,
+    "inventory": [
+      {
+        "name": "Leather armour",
+        "quantity": 1,
+        "equipped": true
+      },
+      {
+        "name": "Shortsword",
+        "quantity": 2,
+        "equipped": true
+      },
+      {
+        "name": "Thieves' tools",
+        "quantity": 1,
+        "equipped": false
+      },
+      {
+        "name": "Rope, silk (50 ft)",
+        "quantity": 1,
+        "equipped": false
+      }
+    ],
+    "currency": {
+      "cp": 0,
+      "sp": 0,
+      "gp": 22,
+      "pp": 1
+    }
+  }
+}

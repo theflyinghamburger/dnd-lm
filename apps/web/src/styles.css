@@ -100,3 +100,27 @@ li button {
   flex-wrap: wrap;
   margin: 0.25rem 0;
 }
+
+/* Available to screen readers, invisible on screen. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+aside table {
+  border-collapse: collapse;
+}
+
+aside th,
+aside td {
+  text-align: left;
+  padding: 0.15rem 0.5rem 0.15rem 0;
+}
+
+aside[aria-busy='true'] {
+  opacity: 0.7;
+}

@@ -6,23 +6,29 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import { randomUUID } from 'node:crypto';
 import {
   ClientCommand,
   type CommandAck,
+  ErrorCode,
   type EventEnvelope,
   type MembershipRole,
   ResumeRequest,
   type ResumeResponse,
   type RoutingDecision,
   type ServerError,
+  formatExpression,
   parseMessage,
 } from '@dnd-lm/contracts';
 import type { Server, Socket } from 'socket.io';
 import { AuthService, SESSION_COOKIE } from '../auth/auth.service';
 import { MembershipService } from '../campaigns/membership.service';
-import { messages } from '../db/schema';
+import { CharactersService } from '../characters/characters.service';
+import { messages, rolls } from '../db/schema';
+import { DiceService } from '../dice/dice.service';
+import { resolveRollRequest } from '../dice/roll-request';
 import { SessionContextService } from '../router/session-context.service';
-import { type EventDraft, SessionService } from './session.service';
+import { type EventDraft, SessionService, type Tx } from './session.service';
 import { TokenBucket } from './token-bucket';
 
 /** Burst of 20, sustained 5/s. Generous for typing, tight enough to stop a loop. */
@@ -34,9 +40,40 @@ type SocketData = {
   sessionId: string;
   campaignId: string;
   role: MembershipRole;
+  /** Chosen at handshake; `/roll perception` needs to know whose sheet to read. */
+  activeCharacterId: string | null;
   bucket: TokenBucket;
 };
 type SessionSocket = Socket & { data: SocketData };
+
+/**
+ * M3.3: a posted message always gets its row, in the same transaction as its
+ * event. Written once and shared, because the `/roll` path posts a chat line
+ * too — and a second copy of this insert is how one of them ends up missing.
+ */
+async function insertMessageRow(
+  tx: Tx,
+  row: {
+    sessionId: string;
+    senderId: string;
+    sequence: number;
+    decision: Extract<RoutingDecision, { kind: 'route' }>;
+    content?: string;
+  },
+): Promise<void> {
+  await tx.insert(messages).values({
+    sessionId: row.sessionId,
+    senderId: row.senderId,
+    recipientType: row.decision.recipientType,
+    recipientIds: row.decision.recipientIds,
+    channel: row.decision.channel,
+    visibility: row.decision.visibility,
+    content: row.content ?? row.decision.content,
+    sequence: row.sequence,
+    triggersDm: row.decision.dmTrigger !== undefined,
+    triggerDefinitionId: row.decision.dmTrigger?.definitionId ?? null,
+  });
+}
 
 const room = (sessionId: string): string => `session:${sessionId}`;
 /** Per-user room, so a private event is addressed rather than filtered client-side. */
@@ -73,6 +110,8 @@ export class SessionGateway implements OnGatewayInit, OnGatewayConnection {
     private readonly memberships: MembershipService,
     private readonly sessionService: SessionService,
     private readonly context: SessionContextService,
+    private readonly characters: CharactersService,
+    private readonly dice: DiceService,
   ) {}
 
   afterInit(server: Server): void {
@@ -97,11 +136,26 @@ export class SessionGateway implements OnGatewayInit, OnGatewayConnection {
     const role = await this.memberships.roleFor(session.campaignId, user.id);
     if (!role) throw new Error('NOT_A_MEMBER');
 
+    const requested = socket.handshake.auth?.characterId;
+    // Verified here so a forged id cannot reach a sheet; an unowned one is a
+    // refused handshake rather than a socket that fails on its first roll.
+    let activeCharacterId: string | null = null;
+    if (typeof requested === 'string') {
+      try {
+        activeCharacterId = (
+          await this.characters.requireOwned(requested, user.id, session.campaignId)
+        ).id;
+      } catch {
+        throw new Error('NOT_YOUR_CHARACTER');
+      }
+    }
+
     socket.data = {
       userId: user.id,
       sessionId,
       campaignId: session.campaignId,
       role,
+      activeCharacterId,
       bucket: new TokenBucket(BUCKET_CAPACITY, BUCKET_REFILL_PER_SECOND),
     };
   }
@@ -135,26 +189,14 @@ export class SessionGateway implements OnGatewayInit, OnGatewayConnection {
 
     try {
       if (command.type === 'SEND_MESSAGE') return await this.sendMessage(socket, command);
-
-      const { ack, events } = await this.sessionService.runCommand(
-        {
-          commandId: command.command_id,
-          sessionId: command.session_id,
-          senderId: socket.data.userId,
-          type: command.type,
-          expectedStateVersion: command.expected_state_version,
-        },
-        () => [
-          {
-            type: 'ROLL_REQUESTED',
-            payload: { ...command.payload },
-            actor: { type: 'player', id: socket.data.userId },
-            source: { type: 'command', id: command.command_id },
-          },
-        ],
+      return await this.rollDice(
+        socket,
+        command.command_id,
+        command.expected_state_version,
+        command.payload.expression,
+        command.payload.character_id ?? null,
+        null,
       );
-      this.publish(socket.data.sessionId, events, null);
-      return ack;
     } catch (error) {
       return this.fail(socket, toServerError(error, command.command_id));
     }
@@ -217,6 +259,19 @@ export class SessionGateway implements OnGatewayInit, OnGatewayConnection {
       });
     }
 
+    // A `/roll ...` typed into chat is the same resolution as the button: one
+    // command, one transaction, one roll (FR-304 — it is not a DM trigger).
+    if (decision.recipientType === 'dice') {
+      return this.rollDice(
+        socket,
+        command.command_id,
+        command.expected_state_version,
+        decision.argument,
+        socket.data.activeCharacterId,
+        { decision },
+      );
+    }
+
     const { ack, events } = await this.sessionService.runCommand(
       {
         commandId: command.command_id,
@@ -226,25 +281,119 @@ export class SessionGateway implements OnGatewayInit, OnGatewayConnection {
         expectedStateVersion: command.expected_state_version,
       },
       () => drafts,
-      // M3.3: the row lands in the same transaction as its event, so the two
-      // can never disagree about what was said or which trigger fired.
-      async (tx, appended) => {
-        await tx.insert(messages).values({
+      async (tx, appended) =>
+        insertMessageRow(tx, {
           sessionId,
           senderId: userId,
-          recipientType: decision.recipientType,
-          recipientIds: decision.recipientIds,
-          channel: decision.channel,
-          visibility: decision.visibility,
-          content: decision.content,
           sequence: appended[0]!.sequence,
-          triggersDm: decision.dmTrigger !== undefined,
-          triggerDefinitionId: decision.dmTrigger?.definitionId ?? null,
+          decision,
+        }),
+    );
+
+    this.publish(sessionId, events, decision);
+    return ack;
+  }
+
+  /**
+   * Every published roll comes from here (FR-301). The character's ownership is
+   * checked at this point of use, the modifier is read from the server's own
+   * derived sheet, and the dice, their sources and the total are stored so the
+   * row reconstructs its own breakdown (FR-302, FR-303, FR-305).
+   */
+  private async rollDice(
+    socket: SessionSocket,
+    commandId: string,
+    expectedStateVersion: number,
+    request: string,
+    characterId: string | null,
+    /** Set when the roll came from a typed `/roll ...`, which is also a chat line. */
+    chat: { decision: Extract<RoutingDecision, { kind: 'route' }> } | null,
+  ): Promise<CommandAck | ServerError> {
+    const { userId, sessionId, campaignId } = socket.data;
+
+    const character = characterId
+      ? await this.characters.requireOwned(characterId, userId, campaignId)
+      : null;
+
+    const resolved = resolveRollRequest(request, character?.derived ?? null);
+    if (!resolved.ok) {
+      return this.fail(socket, {
+        code: 'ROUTING_REJECTED',
+        message: resolved.error,
+        reason: 'BAD_ROLL',
+        command_id: commandId,
+      });
+    }
+
+    const rolled = this.dice.roll(resolved.expression, resolved.modifiers);
+    const rollId = randomUUID();
+    const actor = { type: 'player' as const, id: userId };
+    const source = { type: 'command' as const, id: commandId };
+    const expression = formatExpression(resolved.expression);
+
+    const drafts: EventDraft[] = [];
+    if (chat) {
+      drafts.push({
+        type: 'MESSAGE_POSTED',
+        payload: {
+          recipient_type: chat.decision.recipientType,
+          recipient_ids: chat.decision.recipientIds,
+          visibility: chat.decision.visibility,
+          channel: chat.decision.channel,
+          content: chat.decision.content,
+          triggers_dm: false,
+          trigger_definition_id: null,
+        },
+        actor,
+        source,
+      });
+    }
+    drafts.push({
+      type: 'ROLL_RESULT',
+      payload: {
+        roll_id: rollId,
+        label: resolved.label,
+        expression,
+        dice: rolled.dice,
+        kept: rolled.kept,
+        modifiers: resolved.modifiers,
+        total: rolled.total,
+        visibility: 'public',
+        character_id: character?.id ?? null,
+      },
+      actor,
+      source,
+    });
+
+    const { ack, events } = await this.sessionService.runCommand(
+      { commandId, sessionId, senderId: userId, type: 'ROLL_DICE', expectedStateVersion },
+      () => drafts,
+      async (tx, appended, stateVersion) => {
+        if (chat) {
+          await insertMessageRow(tx, {
+            sessionId,
+            senderId: userId,
+            sequence: appended[0]!.sequence,
+            decision: chat.decision,
+          });
+        }
+        await tx.insert(rolls).values({
+          id: rollId,
+          sessionId,
+          characterId: character?.id ?? null,
+          expression,
+          dice: rolled.dice,
+          modifiers: resolved.modifiers,
+          total: rolled.total,
+          visibility: 'public',
+          requesterId: userId,
+          authorizedRollerId: userId,
+          stateVersion,
         });
       },
     );
 
-    this.publish(sessionId, events, decision);
+    this.publish(sessionId, events, null);
     return ack;
   }
 
@@ -299,12 +448,18 @@ export class SessionGateway implements OnGatewayInit, OnGatewayConnection {
   }
 }
 
+/**
+ * Maps a thrown HTTP-style exception onto the socket error contract. Codes the
+ * contract knows are passed through verbatim; anything else becomes
+ * INTERNAL_ERROR rather than leaking an unmodelled string to the client.
+ */
 function toServerError(error: unknown, commandId: string): ServerError {
   const body = (error as { response?: unknown } | null)?.response;
   if (typeof body === 'object' && body !== null && 'code' in body) {
     const typed = body as { code: string; state_version?: number };
+    const known = ErrorCode.safeParse(typed.code);
     return {
-      code: typed.code === 'STATE_CONFLICT' ? 'STATE_CONFLICT' : 'SESSION_NOT_FOUND',
+      code: known.success ? known.data : 'INTERNAL_ERROR',
       message: typed.code,
       command_id: commandId,
       ...(typed.state_version === undefined ? {} : { state_version: typed.state_version }),
