@@ -9,12 +9,12 @@ describe('ZodValidationPipe', () => {
   it('returns the parsed value for a valid command', () => {
     const out = pipe.transform({
       command_id: 'cmd_1',
-      type: 'RESUME',
+      type: 'ROLL_DICE',
       session_id: 'session_12',
       expected_state_version: 3,
-      payload: { last_sequence: 184 },
+      payload: { expression: '1d20+5' },
     });
-    expect(out.type).toBe('RESUME');
+    expect(out.type).toBe('ROLL_DICE');
   });
 
   it('throws a 400 carrying the failing paths, not the raw zod error', () => {

@@ -27,6 +27,13 @@ export class AuthGuard implements CanActivate {
     ]);
     if (isPublic) return true;
 
+    // WebSocket frames are out of scope for this guard. A socket is
+    // authenticated once, in the handshake middleware (M2.2) — re-running an
+    // HTTP cookie check per message finds no cookies on the socket and would
+    // reject every frame, which is exactly what it did before this guard
+    // learned to tell the two transports apart.
+    if (context.getType() !== 'http') return true;
+
     const request = context.switchToHttp().getRequest<AuthedRequest>();
     const token = (request.cookies as Record<string, string> | undefined)?.[SESSION_COOKIE];
     if (!token) throw new UnauthorizedException({ code: 'NOT_AUTHENTICATED' });
