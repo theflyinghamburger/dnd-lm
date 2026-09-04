@@ -7,7 +7,9 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   {
     rules: {
-      '@typescript-eslint/consistent-type-imports': 'error',
+      // No `consistent-type-imports`: NestJS resolves constructor dependencies
+      // from `design:paramtypes`, which only exists for value imports. The rule
+      // would autofix DI into runtime failures.
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     },
   },

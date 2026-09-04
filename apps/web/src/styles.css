@@ -1,0 +1,74 @@
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, sans-serif;
+  line-height: 1.5;
+}
+
+body {
+  margin: 0 auto;
+  max-width: 46rem;
+  padding: 2rem 1rem;
+}
+
+form {
+  display: grid;
+  gap: 0.25rem;
+  margin: 1.5rem 0;
+  max-width: 24rem;
+}
+
+label {
+  font-weight: 600;
+}
+
+input {
+  padding: 0.4rem;
+  font: inherit;
+}
+
+button {
+  font: inherit;
+  padding: 0.4rem 0.75rem;
+  margin-top: 0.5rem;
+  justify-self: start;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgb(128 128 128 / 0.3);
+}
+
+li button {
+  margin-top: 0;
+}
+
+/* Role is conveyed by the word itself, never by colour alone (NFR-403). */
+.role {
+  font-size: 0.8em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid currentColor;
+  border-radius: 0.25rem;
+  padding: 0 0.3rem;
+}
+
+.error {
+  font-weight: 600;
+}
+
+.linkish {
+  background: none;
+  border: 0;
+  padding: 0;
+  text-decoration: underline;
+  cursor: pointer;
+  color: inherit;
+}
