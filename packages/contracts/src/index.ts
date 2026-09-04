@@ -351,6 +351,7 @@ export type CreateSessionRequest = z.infer<typeof CreateSessionRequest>;
 
 export * from './dice';
 export * from './router';
+export * from './session-state';
 export * from './sheet';
 export * from './srd';
 
