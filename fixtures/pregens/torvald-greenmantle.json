@@ -1,0 +1,48 @@
+{
+  "name": "Torvald Greenmantle",
+  "sheet": {
+    "className": "Ranger",
+    "level": 3,
+    "abilityScores": {
+      "str": 13,
+      "dex": 16,
+      "con": 14,
+      "int": 10,
+      "wis": 15,
+      "cha": 9
+    },
+    "skillProficiencies": ["animal_handling", "nature", "perception", "stealth", "survival"],
+    "saveProficiencies": ["str", "dex"],
+    "maxHp": 26,
+    "armorClass": 15,
+    "speed": 30,
+    "inventory": [
+      {
+        "name": "Studded leather",
+        "quantity": 1,
+        "equipped": true
+      },
+      {
+        "name": "Longbow",
+        "quantity": 1,
+        "equipped": true
+      },
+      {
+        "name": "Arrows",
+        "quantity": 40,
+        "equipped": false
+      },
+      {
+        "name": "Explorer's pack",
+        "quantity": 1,
+        "equipped": false
+      }
+    ],
+    "currency": {
+      "cp": 0,
+      "sp": 5,
+      "gp": 12,
+      "pp": 0
+    }
+  }
+}

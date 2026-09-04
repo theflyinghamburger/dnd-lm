@@ -27,7 +27,11 @@ export type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
  * sequences are known. M3 uses it to write the `messages` row alongside its
  * event so the two can never disagree (M3.3).
  */
-export type AfterAppend = (tx: Tx, appended: Array<{ sequence: number }>) => Promise<void>;
+export type AfterAppend = (
+  tx: Tx,
+  appended: Array<{ sequence: number }>,
+  stateVersion: number,
+) => Promise<void>;
 
 /** Postgres unique-violation. A duplicate command_id is expected traffic, not a fault. */
 const isUniqueViolation = (error: unknown): boolean =>
@@ -169,7 +173,7 @@ export class SessionService {
                 )
                 .returning();
 
-        if (afterAppend) await afterAppend(tx, rows);
+        if (afterAppend) await afterAppend(tx, rows, stateVersion);
 
         const ack: CommandAck = {
           command_id: input.commandId,

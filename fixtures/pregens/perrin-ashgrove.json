@@ -1,0 +1,48 @@
+{
+  "name": "Perrin Ashgrove",
+  "sheet": {
+    "className": "Bard",
+    "level": 3,
+    "abilityScores": {
+      "str": 10,
+      "dex": 14,
+      "con": 12,
+      "int": 12,
+      "wis": 11,
+      "cha": 17
+    },
+    "skillProficiencies": ["deception", "performance", "persuasion", "insight"],
+    "saveProficiencies": ["dex", "cha"],
+    "maxHp": 20,
+    "armorClass": 14,
+    "speed": 30,
+    "inventory": [
+      {
+        "name": "Leather armour",
+        "quantity": 1,
+        "equipped": true
+      },
+      {
+        "name": "Rapier",
+        "quantity": 1,
+        "equipped": true
+      },
+      {
+        "name": "Lute",
+        "quantity": 1,
+        "equipped": false
+      },
+      {
+        "name": "Diplomat's pack",
+        "quantity": 1,
+        "equipped": false
+      }
+    ],
+    "currency": {
+      "cp": 0,
+      "sp": 0,
+      "gp": 25,
+      "pp": 0
+    }
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "name": "Aria Sunhollow",
+  "sheet": {
+    "className": "Cleric",
+    "level": 3,
+    "abilityScores": {
+      "str": 10,
+      "dex": 12,
+      "con": 14,
+      "int": 11,
+      "wis": 16,
+      "cha": 13
+    },
+    "skillProficiencies": ["insight", "medicine", "perception", "religion"],
+    "saveProficiencies": ["wis", "cha"],
+    "maxHp": 24,
+    "armorClass": 18,
+    "speed": 30,
+    "inventory": [
+      {
+        "name": "Chain mail",
+        "quantity": 1,
+        "equipped": true
+      },
+      {
+        "name": "Shield",
+        "quantity": 1,
+        "equipped": true
+      },
+      {
+        "name": "Warhammer",
+        "quantity": 1,
+        "equipped": true
+      },
+      {
+        "name": "Holy symbol",
+        "quantity": 1,
+        "equipped": false
+      },
+      {
+        "name": "Potion of healing",
+        "quantity": 2,
+        "equipped": false
+      }
+    ],
+    "currency": {
+      "cp": 0,
+      "sp": 0,
+      "gp": 15,
+      "pp": 0
+    }
+  }
+}

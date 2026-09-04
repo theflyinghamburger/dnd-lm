@@ -325,6 +325,9 @@ export const ErrorCode = z.enum([
   'RATE_LIMITED',
   'STATE_CONFLICT',
   'ROUTING_REJECTED',
+  'NOT_YOUR_CHARACTER',
+  'CHARACTER_NOT_FOUND',
+  'CAMPAIGN_NOT_FOUND',
   'INTERNAL_ERROR',
 ]);
 export type ErrorCode = z.infer<typeof ErrorCode>;
@@ -346,7 +349,10 @@ export const CreateSessionRequest = z.object({
 });
 export type CreateSessionRequest = z.infer<typeof CreateSessionRequest>;
 
+export * from './dice';
 export * from './router';
+export * from './sheet';
+export * from './srd';
 
 /** Per-campaign trigger enable/disable (M3.2). Unlisted ids keep their default. */
 export const UpdateTriggersRequest = z.object({

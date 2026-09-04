@@ -5,8 +5,10 @@ import { Lobby } from './Lobby';
 import { SignIn } from './SignIn';
 import { Chat } from './session/Chat';
 
+export type Seat = { campaignId: string; sessionId: string; characterId: string | null };
+
 export function App() {
-  const [at, setAt] = useState<{ campaignId: string; sessionId: string } | null>(null);
+  const [seat, setSeat] = useState<Seat | null>(null);
 
   const me = useQuery({
     queryKey: ['me'],
@@ -18,14 +20,15 @@ export function App() {
   if (me.isPending) return <p>Loading…</p>;
   if (!me.data) return <SignIn />;
 
-  return at ? (
+  return seat ? (
     <Chat
       user={me.data}
-      campaignId={at.campaignId}
-      sessionId={at.sessionId}
-      onLeave={() => setAt(null)}
+      campaignId={seat.campaignId}
+      sessionId={seat.sessionId}
+      characterId={seat.characterId}
+      onLeave={() => setSeat(null)}
     />
   ) : (
-    <Lobby user={me.data} onEnter={(campaignId, sessionId) => setAt({ campaignId, sessionId })} />
+    <Lobby user={me.data} onEnter={setSeat} />
   );
 }

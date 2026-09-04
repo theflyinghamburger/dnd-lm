@@ -1,15 +1,29 @@
 import type {
   CampaignSummary,
   CampaignTriggersResponse,
+  CharacterSheet,
+  DerivedSheet,
   InviteResponse,
   LoginRequest,
   PublicUser,
   RegisterRequest,
   RosterResponse,
   SessionSnapshot,
+  UpdateHpRequest,
 } from '@dnd-lm/contracts';
 
 /** Thrown for any non-2xx; `code` is the server's typed error code when it sent one. */
+/** Mirrors the API's CharacterView: stored inputs plus values derived on read. */
+export type CharacterView = {
+  id: string;
+  campaignId: string;
+  ownerUserId: string;
+  name: string;
+  sheet: CharacterSheet;
+  derived: DerivedSheet;
+  stateVersion: number;
+};
+
 export class ApiError extends Error {
   constructor(
     readonly status: number,
@@ -37,6 +51,9 @@ async function call<T>(path: string, init?: RequestInit): Promise<T> {
 const post = <T>(path: string, body?: unknown): Promise<T> =>
   call<T>(path, { method: 'POST', body: body === undefined ? undefined : JSON.stringify(body) });
 
+const patch = <T>(path: string, body: unknown): Promise<T> =>
+  call<T>(path, { method: 'PATCH', body: JSON.stringify(body) });
+
 export const api = {
   me: () => call<PublicUser>('/auth/me'),
   register: (body: RegisterRequest) => post<PublicUser>('/auth/register', body),
@@ -53,4 +70,7 @@ export const api = {
   sessions: (campaignId: string) => call<SessionSnapshot[]>(`/campaigns/${campaignId}/sessions`),
   createSession: (campaignId: string) =>
     post<SessionSnapshot>(`/campaigns/${campaignId}/sessions`, {}),
+  characters: (campaignId: string) => call<CharacterView[]>(`/campaigns/${campaignId}/characters`),
+  updateHp: (campaignId: string, characterId: string, body: UpdateHpRequest) =>
+    patch<CharacterView>(`/campaigns/${campaignId}/characters/${characterId}/hp`, body),
 };
