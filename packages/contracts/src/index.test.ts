@@ -26,6 +26,18 @@ describe('ClientCommand', () => {
     expect(command).not.toHaveProperty('sender_id');
   });
 
+  it('does not accept RESUME as a command — it mutates nothing (M2.4)', () => {
+    expect(
+      ClientCommand.safeParse({
+        command_id: 'c',
+        type: 'RESUME',
+        session_id: 's',
+        expected_state_version: 1,
+        payload: { last_sequence: 3 },
+      }).success,
+    ).toBe(false);
+  });
+
   it('rejects an unknown command type', () => {
     expect(
       ClientCommand.safeParse({

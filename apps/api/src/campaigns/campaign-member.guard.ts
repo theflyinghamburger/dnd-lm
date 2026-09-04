@@ -3,16 +3,13 @@ import {
   type CanActivate,
   type ExecutionContext,
   ForbiddenException,
-  Inject,
   Injectable,
   SetMetadata,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import type { MembershipRole } from '@dnd-lm/contracts';
-import { and, eq } from 'drizzle-orm';
 import type { AuthedRequest } from '../auth/auth.guard';
-import { DB, type Db } from '../db/db.module';
-import { memberships } from '../db/schema';
+import { MembershipService } from './membership.service';
 
 export const CAMPAIGN_ROLES = 'campaign:roles';
 
@@ -31,7 +28,7 @@ export type MemberRequest = AuthedRequest & { membershipRole?: MembershipRole };
 @Injectable()
 export class CampaignMemberGuard implements CanActivate {
   constructor(
-    @Inject(DB) private readonly db: Db,
+    private readonly memberships: MembershipService,
     private readonly reflector: Reflector,
   ) {}
 
@@ -51,25 +48,21 @@ export class CampaignMemberGuard implements CanActivate {
     if (!UUID.test(raw)) throw new ForbiddenException({ code: 'NOT_A_MEMBER' });
     const campaignId = raw;
 
-    const [membership] = await this.db
-      .select({ role: memberships.role })
-      .from(memberships)
-      .where(and(eq(memberships.campaignId, campaignId), eq(memberships.userId, user.id)))
-      .limit(1);
+    const role = await this.memberships.roleFor(campaignId, user.id);
 
     // A non-member gets the same 403 as a member lacking the role, so campaign
     // existence is not probeable.
-    if (!membership) throw new ForbiddenException({ code: 'NOT_A_MEMBER' });
+    if (!role) throw new ForbiddenException({ code: 'NOT_A_MEMBER' });
 
     const required = this.reflector.getAllAndOverride<MembershipRole[]>(CAMPAIGN_ROLES, [
       context.getHandler(),
       context.getClass(),
     ]);
-    if (required?.length && !required.includes(membership.role)) {
+    if (required?.length && !required.includes(role)) {
       throw new ForbiddenException({ code: 'NOT_A_MEMBER' });
     }
 
-    request.membershipRole = membership.role;
+    request.membershipRole = role;
     return true;
   }
 }

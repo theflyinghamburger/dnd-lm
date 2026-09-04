@@ -6,9 +6,11 @@
 import { sql } from 'drizzle-orm';
 import {
   index,
+  integer,
   jsonb,
   pgEnum,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   uniqueIndex,
@@ -107,4 +109,81 @@ export const invites = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index('invites_campaign_id_idx').on(t.campaignId)],
+);
+
+/* -------------------------------------------------------------------------- */
+/* M2 — sessions, event log, command idempotency                              */
+/* -------------------------------------------------------------------------- */
+
+export const sessionStatus = pgEnum('session_status', [
+  'WAITING_FOR_PLAYERS',
+  'DM_GENERATING',
+  'WAITING_FOR_ROLL',
+  'PAUSED',
+  'SESSION_ENDED',
+]);
+
+/**
+ * A play session. `nextSequence` is the allocator for `session_events.sequence`
+ * and is bumped by an `UPDATE ... RETURNING` inside the same transaction that
+ * inserts the event (M2.1) — never a Postgres sequence, whose gaps on rollback
+ * would break replay contiguity.
+ */
+export const sessions = pgTable(
+  'sessions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    campaignId: uuid('campaign_id')
+      .notNull()
+      .references(() => campaigns.id, { onDelete: 'cascade' }),
+    status: sessionStatus('status').notNull().default('WAITING_FOR_PLAYERS'),
+    nextSequence: integer('next_sequence').notNull().default(1),
+    stateVersion: integer('state_version').notNull().default(0),
+    sceneId: text('scene_id'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('sessions_campaign_id_idx').on(t.campaignId)],
+);
+
+/** Append-only truth (invariant 5). Nothing updates or deletes a row here. */
+export const sessionEvents = pgTable(
+  'session_events',
+  {
+    eventId: uuid('event_id').notNull().defaultRandom(),
+    sessionId: uuid('session_id')
+      .notNull()
+      .references(() => sessions.id, { onDelete: 'cascade' }),
+    sequence: integer('sequence').notNull(),
+    type: text('type').notNull(),
+    payload: jsonb('payload')
+      .notNull()
+      .default(sql`'{}'::jsonb`),
+    actor: jsonb('actor').notNull(),
+    source: jsonb('source').notNull(),
+    stateVersion: integer('state_version').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.sessionId, t.sequence] })],
+);
+
+/**
+ * Idempotency ledger. The row is inserted *before* any work, so a duplicate
+ * `command_id` blocks on the unique index until the original commits and then
+ * reads its stored result instead of performing a second side effect (M2.3).
+ */
+export const commands = pgTable(
+  'commands',
+  {
+    commandId: text('command_id').primaryKey(),
+    sessionId: uuid('session_id')
+      .notNull()
+      .references(() => sessions.id, { onDelete: 'cascade' }),
+    senderId: uuid('sender_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    type: text('type').notNull(),
+    result: jsonb('result'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('commands_session_id_idx').on(t.sessionId)],
 );

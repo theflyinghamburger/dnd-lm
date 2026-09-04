@@ -56,6 +56,10 @@ const commandBase = {
   expected_state_version: z.int().nonnegative(),
 };
 
+/**
+ * State-mutating commands only. RESUME is deliberately not one: it mutates
+ * nothing, so carrying `expected_state_version` would be a lie (see ResumeRequest).
+ */
 export const ClientCommand = z.discriminatedUnion('type', [
   z.object({
     ...commandBase,
@@ -66,11 +70,6 @@ export const ClientCommand = z.discriminatedUnion('type', [
     ...commandBase,
     type: z.literal('ROLL_DICE'),
     payload: z.object({ expression: z.string().min(1).max(64), character_id: Id.optional() }),
-  }),
-  z.object({
-    ...commandBase,
-    type: z.literal('RESUME'),
-    payload: z.object({ last_sequence: z.int().nonnegative() }),
   }),
 ]);
 export type ClientCommand = z.infer<typeof ClientCommand>;
@@ -273,3 +272,65 @@ export const InviteResponse = z.object({
   expiresAt: z.iso.datetime(),
 });
 export type InviteResponse = z.infer<typeof InviteResponse>;
+
+/* -------------------------------------------------------------------------- */
+/* Realtime session protocol (M2)                                             */
+/* -------------------------------------------------------------------------- */
+
+export const SessionSnapshot = z.object({
+  session_id: Id,
+  campaign_id: Id,
+  status: SessionState,
+  state_version: z.int().nonnegative(),
+  /** Highest sequence written. A fresh session has 0 and no events. */
+  last_sequence: z.int().nonnegative(),
+  scene_id: Id.nullable(),
+});
+export type SessionSnapshot = z.infer<typeof SessionSnapshot>;
+
+/** M2.4. Not a `ClientCommand`: it takes no lock and changes no state. */
+export const ResumeRequest = z.object({
+  last_sequence: z.int().nonnegative(),
+});
+export type ResumeRequest = z.infer<typeof ResumeRequest>;
+
+export const ResumeResponse = z.object({
+  snapshot: SessionSnapshot,
+  /** Strictly `sequence > last_sequence`, ascending, contiguous. */
+  events: z.array(EventEnvelope),
+});
+export type ResumeResponse = z.infer<typeof ResumeResponse>;
+
+/** Stored verbatim in `commands.result` and replayed on a duplicate command_id. */
+export const CommandAck = z.object({
+  command_id: Id,
+  sequence: z.int().nonnegative(),
+  state_version: z.int().nonnegative(),
+});
+export type CommandAck = z.infer<typeof CommandAck>;
+
+export const ErrorCode = z.enum([
+  'NOT_AUTHENTICATED',
+  'NOT_A_MEMBER',
+  'SESSION_NOT_FOUND',
+  'INVALID_PAYLOAD',
+  'RATE_LIMITED',
+  'STATE_CONFLICT',
+  'INTERNAL_ERROR',
+]);
+export type ErrorCode = z.infer<typeof ErrorCode>;
+
+/** Rejections are always an explicit typed event — never a silent drop (M2.5). */
+export const ServerError = z.object({
+  code: ErrorCode,
+  message: z.string(),
+  command_id: Id.optional(),
+  /** Present on STATE_CONFLICT so the client can refetch and retry (M5.4). */
+  state_version: z.int().nonnegative().optional(),
+});
+export type ServerError = z.infer<typeof ServerError>;
+
+export const CreateSessionRequest = z.object({
+  scene_id: Id.nullish(),
+});
+export type CreateSessionRequest = z.infer<typeof CreateSessionRequest>;
