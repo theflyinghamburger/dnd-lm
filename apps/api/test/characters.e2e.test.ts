@@ -23,6 +23,18 @@ describe.skipIf(!DATABASE_URL)('characters and dice', () => {
   let db: Db;
   let port: number;
   const open: Socket[] = [];
+  let counter = 0;
+  /**
+   * Rolls are mutating, so each one bumps `state_version` and the next command
+   * has to quote it (M5.4). Tracked from the acks exactly as the real client
+   * does, rather than hard-coding 0 and relying on the check being absent.
+   */
+  let version = 0;
+  const track = (result: unknown): unknown => {
+    const seen = (result as { state_version?: number }).state_version;
+    if (typeof seen === 'number') version = Math.max(version, seen);
+    return result;
+  };
 
   beforeAll(async () => {
     ({ app, db, port } = await createTestApp());
@@ -32,6 +44,7 @@ describe.skipIf(!DATABASE_URL)('characters and dice', () => {
   });
   beforeEach(async () => {
     await truncateAll(db);
+    version = 0;
   });
   afterEach(() => {
     for (const socket of open.splice(0)) socket.disconnect();
@@ -102,15 +115,17 @@ describe.skipIf(!DATABASE_URL)('characters and dice', () => {
     });
   }
 
-  let counter = 0;
   const say = (socket: Socket, sessionId: string, content: string) =>
-    socket.timeout(5000).emitWithAck('command', {
-      command_id: `cmd_${(counter += 1)}`,
-      type: 'SEND_MESSAGE',
-      session_id: sessionId,
-      expected_state_version: 0,
-      payload: { content, channel: 'in_character' },
-    });
+    socket
+      .timeout(5000)
+      .emitWithAck('command', {
+        command_id: `cmd_${(counter += 1)}`,
+        type: 'SEND_MESSAGE',
+        session_id: sessionId,
+        expected_state_version: version,
+        payload: { content, channel: 'in_character' },
+      })
+      .then(track);
 
   const rollCommand = (
     socket: Socket,
@@ -118,13 +133,16 @@ describe.skipIf(!DATABASE_URL)('characters and dice', () => {
     expression: string,
     characterId?: string,
   ) =>
-    socket.timeout(5000).emitWithAck('command', {
-      command_id: `cmd_${(counter += 1)}`,
-      type: 'ROLL_DICE',
-      session_id: sessionId,
-      expected_state_version: 0,
-      payload: { expression, ...(characterId ? { character_id: characterId } : {}) },
-    });
+    socket
+      .timeout(5000)
+      .emitWithAck('command', {
+        command_id: `cmd_${(counter += 1)}`,
+        type: 'ROLL_DICE',
+        session_id: sessionId,
+        expected_state_version: version,
+        payload: { expression, ...(characterId ? { character_id: characterId } : {}) },
+      })
+      .then(track);
 
   describe('import (M4.2, D-3)', () => {
     it('imports a pregen and computes every derived value on read', async () => {

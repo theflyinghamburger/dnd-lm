@@ -22,5 +22,13 @@ export default defineConfig({
   test: {
     include: ['{apps,packages}/*/src/**/*.test.ts', 'apps/*/test/**/*.test.ts'],
     testTimeout: 20_000,
+    /**
+     * The integration suites share one database and each one TRUNCATEs it in
+     * `beforeEach`, so running two files at once has them deleting each other's
+     * rows and colliding on `users_email_key`. Serial by file is the fix; the
+     * whole suite is a few seconds, so there is nothing to win by parallelising
+     * it. Per-file databases would be the alternative, and are not worth it.
+     */
+    fileParallelism: false,
   },
 });

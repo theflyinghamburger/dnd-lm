@@ -141,6 +141,11 @@ export const sessions = pgTable(
     nextSequence: integer('next_sequence').notNull().default(1),
     stateVersion: integer('state_version').notNull().default(0),
     sceneId: text('scene_id'),
+    /**
+     * Which state a pause interrupted, so resuming returns there rather than
+     * dropping a parked roll on the floor (M5.6).
+     */
+    pausedFrom: sessionStatus('paused_from'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index('sessions_campaign_id_idx').on(t.campaignId)],
@@ -288,12 +293,55 @@ export const rolls = pgTable(
       onDelete: 'set null',
     }),
     /**
-     * No foreign key yet: `pending_actions` is created in M5.5, which is also
-     * where a roll starts being able to close one.
+     * Set when this roll closed an open pending action (M5.5). Null for an
+     * ordinary roll, which is most of them.
      */
-    pendingActionId: uuid('pending_action_id'),
+    pendingActionId: uuid('pending_action_id').references(() => pendingActions.id, {
+      onDelete: 'set null',
+    }),
     stateVersion: integer('state_version').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index('rolls_session_id_idx').on(t.sessionId)],
+);
+
+/* -------------------------------------------------------------------------- */
+/* M5 — pending actions                                                       */
+/* -------------------------------------------------------------------------- */
+
+export const pendingActionStatus = pgEnum('pending_action_status', [
+  'open',
+  'completed',
+  'cancelled',
+]);
+
+/**
+ * An open request the session is waiting on — in the MVP, a roll (M5.5).
+ *
+ * `graphThreadId` is where M6 parks its checkpoint so a run interrupted for a
+ * roll survives a restart. Only a roll by an authorized character closes one;
+ * an unrelated roll changes nothing.
+ */
+export const pendingActions = pgTable(
+  'pending_actions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    sessionId: uuid('session_id')
+      .notNull()
+      .references(() => sessions.id, { onDelete: 'cascade' }),
+    type: text('type').notNull(),
+    requesterId: uuid('requester_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    authorizedCharacterIds: uuid('authorized_character_ids').array().notNull().default([]),
+    payload: jsonb('payload')
+      .notNull()
+      .default(sql`'{}'::jsonb`),
+    status: pendingActionStatus('status').notNull().default('open'),
+    resolutionId: uuid('resolution_id'),
+    graphThreadId: text('graph_thread_id'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    completedAt: timestamp('completed_at', { withTimezone: true }),
+  },
+  (t) => [index('pending_actions_session_id_idx').on(t.sessionId)],
 );

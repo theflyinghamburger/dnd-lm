@@ -56,6 +56,10 @@ const commandBase = {
   expected_state_version: z.int().nonnegative(),
 };
 
+/** M5.6. Host-only, and the only mutating commands a paused session accepts. */
+export const HostControlAction = z.enum(['PAUSE', 'RESUME', 'END', 'FORCE_DM_TURN']);
+export type HostControlAction = z.infer<typeof HostControlAction>;
+
 /**
  * State-mutating commands only. RESUME is deliberately not one: it mutates
  * nothing, so carrying `expected_state_version` would be a lie (see ResumeRequest).
@@ -70,6 +74,26 @@ export const ClientCommand = z.discriminatedUnion('type', [
     ...commandBase,
     type: z.literal('ROLL_DICE'),
     payload: z.object({ expression: z.string().min(1).max(64), character_id: Id.optional() }),
+  }),
+  /**
+   * Host asks the party for a check (M5.5). It opens a `pending_action` and
+   * parks the session on `WAITING_FOR_ROLL`; M6's graph interrupt reuses the
+   * same seam rather than inventing a second one.
+   */
+  z.object({
+    ...commandBase,
+    type: z.literal('REQUEST_ROLL'),
+    payload: z.object({
+      expression: z.string().min(1).max(64),
+      prompt: z.string().min(1).max(200),
+      /** Whose roll closes it. An unlisted character's roll changes nothing. */
+      character_ids: z.array(Id).min(1).max(12),
+    }),
+  }),
+  z.object({
+    ...commandBase,
+    type: z.literal('HOST_CONTROL'),
+    payload: z.object({ action: HostControlAction }),
   }),
 ]);
 export type ClientCommand = z.infer<typeof ClientCommand>;
@@ -328,6 +352,10 @@ export const ErrorCode = z.enum([
   'NOT_YOUR_CHARACTER',
   'CHARACTER_NOT_FOUND',
   'CAMPAIGN_NOT_FOUND',
+  /** A mutating command arrived while the host had the session paused (M5.6). */
+  'SESSION_PAUSED',
+  'ILLEGAL_TRANSITION',
+  'NOT_THE_HOST',
   'INTERNAL_ERROR',
 ]);
 export type ErrorCode = z.infer<typeof ErrorCode>;
@@ -351,6 +379,7 @@ export type CreateSessionRequest = z.infer<typeof CreateSessionRequest>;
 
 export * from './dice';
 export * from './router';
+export * from './session-state';
 export * from './sheet';
 export * from './srd';
 

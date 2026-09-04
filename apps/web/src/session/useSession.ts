@@ -43,6 +43,13 @@ type Posted = {
 export function useSession(sessionId: string, characterId: string | null) {
   const socketRef = useRef<Socket | null>(null);
   const highWater = useRef(0);
+  /**
+   * The version a mutating command must quote (M5.4). A ref, not the snapshot:
+   * two rolls in quick succession would both read the same rendered snapshot
+   * and the second would be stale. Chat does not move it — only a mutating
+   * resolution does, which is exactly what the server enforces.
+   */
+  const stateVersion = useRef(0);
   const [snapshot, setSnapshot] = useState<SessionSnapshot | null>(null);
   const [lines, setLines] = useState<ChatLine[]>([]);
   const [rolls, setRolls] = useState<RollLine[]>([]);
@@ -51,6 +58,7 @@ export function useSession(sessionId: string, characterId: string | null) {
   const applyEvent = useCallback((event: EventEnvelope) => {
     if (event.sequence <= highWater.current) return;
     highWater.current = event.sequence;
+    stateVersion.current = Math.max(stateVersion.current, event.state_version);
     if (event.type === 'ROLL_RESULT') {
       const roll = event.payload as unknown as RollLine;
       setRolls((current) => [...current, { ...roll, key: event.event_id }]);
@@ -89,6 +97,7 @@ export function useSession(sessionId: string, characterId: string | null) {
         .emitWithAck('resume', { last_sequence: highWater.current })
         .then((response: { snapshot: SessionSnapshot; events: EventEnvelope[] }) => {
           setSnapshot(response.snapshot);
+          stateVersion.current = response.snapshot.state_version;
           for (const event of response.events) applyEvent(event);
         });
     });
@@ -100,6 +109,17 @@ export function useSession(sessionId: string, characterId: string | null) {
       socketRef.current = null;
     };
   }, [sessionId, characterId, applyEvent]);
+
+  /**
+   * Both an ack and a STATE_CONFLICT carry the version to quote next, so a
+   * client that lost a race catches up from the rejection itself rather than
+   * having to refetch the snapshot.
+   */
+  const absorb = useCallback((result: CommandAck | ServerError) => {
+    if (typeof result.state_version === 'number') {
+      stateVersion.current = Math.max(stateVersion.current, result.state_version);
+    }
+  }, []);
 
   const send = useCallback(
     async (content: string) => {
@@ -128,9 +148,10 @@ export function useSession(sessionId: string, characterId: string | null) {
         command_id: commandId,
         type: 'SEND_MESSAGE',
         session_id: sessionId,
-        expected_state_version: snapshot?.state_version ?? 0,
+        expected_state_version: stateVersion.current,
         payload: { content, channel: 'in_character' },
       })) as CommandAck | ServerError;
+      absorb(result);
 
       setLines((current) =>
         'code' in result
@@ -143,7 +164,7 @@ export function useSession(sessionId: string, characterId: string | null) {
             current.filter((line) => line.key !== commandId),
       );
     },
-    [sessionId, snapshot?.state_version],
+    [sessionId, absorb],
   );
 
   /** Click-to-roll from the sheet. The dice themselves are rolled server-side. */
@@ -151,15 +172,17 @@ export function useSession(sessionId: string, characterId: string | null) {
     async (expression: string) => {
       const socket = socketRef.current;
       if (!socket) return;
-      await socket.emitWithAck('command', {
-        command_id: crypto.randomUUID(),
-        type: 'ROLL_DICE',
-        session_id: sessionId,
-        expected_state_version: snapshot?.state_version ?? 0,
-        payload: { expression, ...(characterId ? { character_id: characterId } : {}) },
-      });
+      absorb(
+        (await socket.emitWithAck('command', {
+          command_id: crypto.randomUUID(),
+          type: 'ROLL_DICE',
+          session_id: sessionId,
+          expected_state_version: stateVersion.current,
+          payload: { expression, ...(characterId ? { character_id: characterId } : {}) },
+        })) as CommandAck | ServerError,
+      );
     },
-    [sessionId, characterId, snapshot?.state_version],
+    [sessionId, characterId, absorb],
   );
 
   return { snapshot, lines, rolls, connected, send, roll };
