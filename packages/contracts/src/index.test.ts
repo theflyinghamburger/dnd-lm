@@ -104,16 +104,43 @@ describe('EventEnvelope', () => {
 });
 
 describe('DmOutput', () => {
-  it('accepts the architecture.md §6.4 example and defaults the optional arrays', () => {
+  it('accepts a M6-shaped output and defaults the optional arrays', () => {
     const output = DmOutput.parse({
       narration: 'The lock gives a faint metallic click.',
       addressed_to: ['party'],
       tool_requests: [],
-      proposed_state_changes: [{ operation: 'mark_door_unlocked', target_id: 'door.crypt_west' }],
+      proposed_state_changes: [
+        {
+          operation: 'set_scene',
+          target_id: 'scene.crypt_west',
+          actor: { type: 'dm', id: 'campaign_1' },
+          scope: 'host',
+          expected_state_version: 41,
+        },
+      ],
       memory_candidates: [{ fact: 'The party unlocked the western crypt door.', importance: 0.55 }],
       next_state: 'WAITING_FOR_PLAYERS',
     });
     expect(output.proposed_state_changes[0]?.payload).toEqual({});
+  });
+
+  it('rejects an operation outside the closed M6.5 set', () => {
+    expect(
+      DmOutput.safeParse({
+        narration: '',
+        addressed_to: [],
+        next_state: 'WAITING_FOR_PLAYERS',
+        proposed_state_changes: [
+          {
+            operation: 'grant_gold',
+            target_id: 'char_1',
+            actor: { type: 'dm', id: 'campaign_1' },
+            scope: 'host',
+            expected_state_version: 1,
+          },
+        ],
+      }).success,
+    ).toBe(false);
   });
 
   it('rejects a next_state outside the MVP state machine (M5.1)', () => {

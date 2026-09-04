@@ -173,15 +173,30 @@ export type EventEnvelope = z.infer<typeof EventEnvelope>;
 /* -------------------------------------------------------------------------- */
 
 /**
+ * The closed mutating-proposal set (M6.5). There is deliberately no generic
+ * `update_state` escape hatch: anything not listed here does not reach a
+ * database write, not because of a validator someone must remember, but
+ * because the type has nowhere to go (FR-503).
+ */
+export const MutatingOperation = z.enum(['set_scene', 'adjust_hp', 'add_item', 'remove_item']);
+export type MutatingOperation = z.infer<typeof MutatingOperation>;
+
+/**
  * A *proposal*, never a commit. The orchestrator validates every entry against
  * permissions and current state before anything touches the database (FR-503,
- * FR-505). M6.5 tightens `operation` into a closed union once the mutating tool
- * set exists; until then the validator is the only thing that may accept one.
+ * FR-505). `expected_state_version` is recorded for provenance and validated
+ * against the state read under the commit lock — not gated on, because state
+ * legitimately moves between context assembly and commit (M6.5).
  */
 export const ProposedStateChange = z.object({
-  operation: z.string().min(1),
+  operation: MutatingOperation,
   target_id: Id,
   payload: z.record(z.string(), z.unknown()).default({}),
+  /** Who proposes it. In the MVP only the DM proposes; the field stays because a host tool in Phase 3 will not be a special case. */
+  actor: ActorRef,
+  /** The permission scope the proposal was made under; the commit re-checks it server-side. */
+  scope: z.enum(['member', 'host']),
+  expected_state_version: z.int().nonnegative(),
 });
 export type ProposedStateChange = z.infer<typeof ProposedStateChange>;
 
@@ -206,6 +221,20 @@ export const DmOutput = z.object({
   next_state: SessionState,
 });
 export type DmOutput = z.infer<typeof DmOutput>;
+
+/**
+ * Why a resolution ended without committing (M6.7). Closed set, so the client
+ * can react to each one; the message on the event is what the table sees.
+ */
+export const DmFailureReason = z.enum([
+  'NO_PROVIDER',
+  'PROVIDER_ERROR',
+  'INVALID_OUTPUT',
+  'MUTATION_REJECTED',
+  'RECURSION_LIMIT',
+  'INTERNAL',
+]);
+export type DmFailureReason = z.infer<typeof DmFailureReason>;
 
 /* -------------------------------------------------------------------------- */
 /* Trigger registry (MVP.md §4.2)                                             */
