@@ -28,7 +28,7 @@ import { messages, rolls } from '../db/schema';
 import { DiceService } from '../dice/dice.service';
 import { resolveRollRequest } from '../dice/roll-request';
 import { SessionContextService } from '../router/session-context.service';
-import { type EventDraft, SessionService } from './session.service';
+import { type EventDraft, SessionService, type Tx } from './session.service';
 import { TokenBucket } from './token-bucket';
 
 /** Burst of 20, sustained 5/s. Generous for typing, tight enough to stop a loop. */
@@ -45,6 +45,35 @@ type SocketData = {
   bucket: TokenBucket;
 };
 type SessionSocket = Socket & { data: SocketData };
+
+/**
+ * M3.3: a posted message always gets its row, in the same transaction as its
+ * event. Written once and shared, because the `/roll` path posts a chat line
+ * too — and a second copy of this insert is how one of them ends up missing.
+ */
+async function insertMessageRow(
+  tx: Tx,
+  row: {
+    sessionId: string;
+    senderId: string;
+    sequence: number;
+    decision: Extract<RoutingDecision, { kind: 'route' }>;
+    content?: string;
+  },
+): Promise<void> {
+  await tx.insert(messages).values({
+    sessionId: row.sessionId,
+    senderId: row.senderId,
+    recipientType: row.decision.recipientType,
+    recipientIds: row.decision.recipientIds,
+    channel: row.decision.channel,
+    visibility: row.decision.visibility,
+    content: row.content ?? row.decision.content,
+    sequence: row.sequence,
+    triggersDm: row.decision.dmTrigger !== undefined,
+    triggerDefinitionId: row.decision.dmTrigger?.definitionId ?? null,
+  });
+}
 
 const room = (sessionId: string): string => `session:${sessionId}`;
 /** Per-user room, so a private event is addressed rather than filtered client-side. */
@@ -239,7 +268,7 @@ export class SessionGateway implements OnGatewayInit, OnGatewayConnection {
         command.expected_state_version,
         decision.argument,
         socket.data.activeCharacterId,
-        decision.content,
+        { decision },
       );
     }
 
@@ -252,22 +281,13 @@ export class SessionGateway implements OnGatewayInit, OnGatewayConnection {
         expectedStateVersion: command.expected_state_version,
       },
       () => drafts,
-      // M3.3: the row lands in the same transaction as its event, so the two
-      // can never disagree about what was said or which trigger fired.
-      async (tx, appended) => {
-        await tx.insert(messages).values({
+      async (tx, appended) =>
+        insertMessageRow(tx, {
           sessionId,
           senderId: userId,
-          recipientType: decision.recipientType,
-          recipientIds: decision.recipientIds,
-          channel: decision.channel,
-          visibility: decision.visibility,
-          content: decision.content,
           sequence: appended[0]!.sequence,
-          triggersDm: decision.dmTrigger !== undefined,
-          triggerDefinitionId: decision.dmTrigger?.definitionId ?? null,
-        });
-      },
+          decision,
+        }),
     );
 
     this.publish(sessionId, events, decision);
@@ -286,7 +306,8 @@ export class SessionGateway implements OnGatewayInit, OnGatewayConnection {
     expectedStateVersion: number,
     request: string,
     characterId: string | null,
-    chatLine: string | null,
+    /** Set when the roll came from a typed `/roll ...`, which is also a chat line. */
+    chat: { decision: Extract<RoutingDecision, { kind: 'route' }> } | null,
   ): Promise<CommandAck | ServerError> {
     const { userId, sessionId, campaignId } = socket.data;
 
@@ -311,15 +332,15 @@ export class SessionGateway implements OnGatewayInit, OnGatewayConnection {
     const expression = formatExpression(resolved.expression);
 
     const drafts: EventDraft[] = [];
-    if (chatLine !== null) {
+    if (chat) {
       drafts.push({
         type: 'MESSAGE_POSTED',
         payload: {
-          recipient_type: 'dice',
-          recipient_ids: [],
-          visibility: 'public',
-          channel: 'in_character',
-          content: chatLine,
+          recipient_type: chat.decision.recipientType,
+          recipient_ids: chat.decision.recipientIds,
+          visibility: chat.decision.visibility,
+          channel: chat.decision.channel,
+          content: chat.decision.content,
           triggers_dm: false,
           trigger_definition_id: null,
         },
@@ -347,7 +368,15 @@ export class SessionGateway implements OnGatewayInit, OnGatewayConnection {
     const { ack, events } = await this.sessionService.runCommand(
       { commandId, sessionId, senderId: userId, type: 'ROLL_DICE', expectedStateVersion },
       () => drafts,
-      async (tx, _appended, stateVersion) => {
+      async (tx, appended, stateVersion) => {
+        if (chat) {
+          await insertMessageRow(tx, {
+            sessionId,
+            senderId: userId,
+            sequence: appended[0]!.sequence,
+            decision: chat.decision,
+          });
+        }
         await tx.insert(rolls).values({
           id: rollId,
           sessionId,

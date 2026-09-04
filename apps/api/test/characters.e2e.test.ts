@@ -7,7 +7,7 @@ import { type Socket, io } from 'socket.io-client';
 import request from 'supertest';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Db } from '../src/db/db.module';
-import { rolls } from '../src/db/schema';
+import { messages, rolls } from '../src/db/schema';
 import { DATABASE_URL, createTestApp, truncateAll } from './app.harness';
 
 // vitest runs from the workspace root, so the fixtures resolve from cwd.
@@ -216,6 +216,14 @@ describe.skipIf(!DATABASE_URL)('characters and dice', () => {
       expect(received.some((e) => e.type === 'ROLL_RESULT')).toBe(true);
       expect(received.some((e) => e.type === 'DM_TRIGGERED')).toBe(false);
       expect(await db.select().from(rolls)).toHaveLength(1);
+
+      // The typed line is a chat message too, and M3.3 says it gets its row in
+      // the same transaction. It did not, until CI caught the missing insert.
+      const posted = await db.select().from(messages);
+      expect(posted).toHaveLength(1);
+      expect(posted[0]!.recipientType).toBe('dice');
+      expect(posted[0]!.content).toBe('/roll perception');
+      expect(posted[0]!.triggersDm).toBe(false);
     });
 
     it('refuses a roll as another player’s character', async () => {
