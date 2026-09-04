@@ -37,7 +37,10 @@ export function Chat({
   onLeave: () => void;
 }) {
   const [draft, setDraft] = useState('');
-  const { snapshot, lines, rolls, connected, send, roll } = useSession(sessionId, characterId);
+  const { snapshot, lines, rolls, connected, dmNarration, send, roll } = useSession(
+    sessionId,
+    characterId,
+  );
 
   const roster = useQuery({
     queryKey: ['roster', campaignId],
@@ -83,7 +86,9 @@ export function Chat({
   const nameOf = (userId: string): string =>
     userId === 'me'
       ? user.displayName
-      : (roster.data?.members.find((m) => m.userId === userId)?.displayName ?? 'Someone');
+      : userId === 'dm'
+        ? 'The Dungeon Master'
+        : (roster.data?.members.find((m) => m.userId === userId)?.displayName ?? 'Someone');
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -122,6 +127,16 @@ export function Chat({
             </li>
           );
         })}
+        {Object.entries(dmNarration)
+          .filter(([, text]) => text.length > 0)
+          .map(([resolutionId, text]) => (
+            <li key={resolutionId} data-delivery="provisional">
+              <span className="role" aria-label="Visibility: Dungeon Master">
+                <span aria-hidden="true">★</span> Dungeon Master
+              </span>{' '}
+              <em>{text}…</em>
+            </li>
+          ))}
       </ol>
 
       {rolls.length > 0 && (

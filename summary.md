@@ -2,7 +2,7 @@
 
 **Repo:** [theflyinghamburger/dnd-lm](https://github.com/theflyinghamburger/dnd-lm) (private)
 **As of:** 2026-09-04
-**Progress:** M0–M5 done (M5 on a branch, green). M6–M9 not started.
+**Progress:** M0–M6 (M6 on branch `m6-langgraph-dm`, all gates green, PR in flight). M7–M9 not started.
 
 ---
 
@@ -16,12 +16,12 @@
 | M3 — Deterministic router, trigger registry, messaging | [#4](https://github.com/theflyinghamburger/dnd-lm/issues/4) | **merged** | [#15](https://github.com/theflyinghamburger/dnd-lm/pull/15) |
 | M4 — Characters and dice | [#5](https://github.com/theflyinghamburger/dnd-lm/issues/5) | **merged** | [#16](https://github.com/theflyinghamburger/dnd-lm/pull/16) |
 | M5 — Session orchestrator | [#6](https://github.com/theflyinghamburger/dnd-lm/issues/6) | **complete**, branch `m5-orchestrator` | none yet |
-| M6 — The LangGraph DM | [#7](https://github.com/theflyinghamburger/dnd-lm/issues/7) | not started | |
+| M6 — The LangGraph DM | [#7](https://github.com/theflyinghamburger/dnd-lm/issues/7) | **complete**, branch `m6-langgraph-dm` (stacked on `m5-orchestrator`) | opening |
 | M7 — Provider configuration and secrets | [#8](https://github.com/theflyinghamburger/dnd-lm/issues/8) | not started | |
 | M8 — Manual campaign notes and retrieval | [#9](https://github.com/theflyinghamburger/dnd-lm/issues/9) | not started | |
 | M9 — MVP acceptance | [#10](https://github.com/theflyinghamburger/dnd-lm/issues/10) | not started | |
 
-193 tests on the M5 branch: 137 unit, 56 integration — all of them run, locally and in CI. CI runs build → typecheck → lint → format → migrate → test → migration-drift on every push, against a real Postgres 16 service.
+230 tests on the M6 branch: 166 unit, 64 integration — all of them run, locally and in CI. CI runs build → typecheck → lint → format → migrate → test → migration-drift on every push, against a real Postgres 16 service.
 
 ### PR #12 is dead
 
@@ -32,7 +32,7 @@ GitHub auto-closed it when its base branch was deleted on merge of #11. #13 is t
 ## 2. What exists
 
 ```
-apps/api            NestJS 12 — auth, campaigns, session, router, dice, characters
+apps/api            NestJS 12 — auth, campaigns, session, router, dice, characters, dm (LangGraph)
 apps/web            React 19 + Vite + TanStack Query — lobby, chat, character sheet
 packages/contracts  Zod schemas AND the pure logic both sides must agree on
 fixtures/pregens    Six level-3 SRD characters
@@ -73,30 +73,36 @@ pnpm --filter @dnd-lm/web dev          # :5173, proxies /api and /ws
 
 ---
 
-## 4. Start here: M6, the LangGraph DM
+## 4. Start here: M6 is done; M7 (provider config) is next
 
-M5 is finished and green. What it left in place for M6, deliberately:
+M6 shipped the whole DM turn and its tests. What is in place for M7:
 
-- **`DM_TRIGGERED` is the only entry point.** Three things emit it now — a
-  registered tag (M3), a closed pending action, and a host's `FORCE_DM_TURN`.
-  Each carries `definition_id` and `entry_profile`, so M6 dispatches on the
-  event rather than re-deriving why the DM woke.
-- **`pending_actions.graph_thread_id` is written but never read.** M5.5 parks the
-  action; M6 parks the checkpoint alongside it and resumes from it when
-  `PENDING_ACTION_COMPLETED` fires. The resume trigger already fires correctly
-  and is tested — it just has nothing to resume.
-- **`REQUEST_ROLL` is the interrupt seam, already built.** A host asking the
-  party for a check and a graph interrupting for one are the same operation:
-  open a pending action, park on `WAITING_FOR_ROLL`. M6 calls the same path
-  instead of adding a second one.
-- **`runCommand` takes a `mode`.** A DM resolution is `'mutation'`: it takes the
-  per-session lock, enforces `expected_state_version`, and is refused while
-  paused. Getting that wrong is how the graph would acquire a write handle it
-  is not supposed to have (D-5).
-- **`WAITING_FOR_PLAYERS → DM_GENERATING` exists and is unused.** Nothing enters
-  `DM_GENERATING` yet, because nothing generates.
+- **The turn is live end to end.** Three things emit `DM_TRIGGERED` (registered
+  tag, closed pending action, `FORCE_DM_TURN`); the gateway dispatches it to
+  `DmOrchestrator`, which runs the LangGraph state graph
+  (context → provider → validate → commit-or-retry) and writes
+  `DM_NARRATION` / `DM_RESOLUTION_FAILED` through `runCommand`. Prose streams
+  to the room as a `dm_stream` socket event before the commit, so the web's
+  provisional bubble disappears atomically with the authoritative event.
+- **`pending_actions.graph_thread_id` is now read.** The roll interrupt parks
+  in a `PGCheckpointSaver` row under that thread id; closing the action
+  re-invokes with a `Command`, so a server restart resumes from the
+  checkpoint — it does not re-roll or re-run the context nodes. The M6.8 e2e
+  test covers the close→restart→resume path.
+- **Provider config is env, and that is M7's job.** `DmProviderSource.get()`
+  reads `DM_PROVIDER_KIND` / `DM_PROVIDER_API_KEY` / `DM_PROVIDER_BASE_URL` /
+  `DM_PROVIDER_MODEL` / `DM_PROVIDER_MAX_TOKENS` at turn start; no provider
+  configured is a clean `NO_PROVIDER` failure, not a crash. M7 moves this to
+  per-connection rows with a UI and makes keys write-only — the injection
+  point is one Symbol provider, `DM_PROVIDER_SOURCE`, so the swap touches one
+  class, not the graph.
+- **`runCommand`'s `mode` carried the turn as `'mutation'` as M5 intended**,
+  with one deliberate extension: a `null` `expected_state_version` marks a
+  server-internal resolution. The client version gate is skipped (a pending
+  resolution must not be invalidated by a player's concurrent chat) while the
+  optimistic lock and every other guarantee stay intact.
 
-### What M5 decided that M6 should not re-litigate
+### What M5 and M6 decided that should not be re-litigated
 
 **Chat does not bump `state_version`; mutations do.** This is the reconciliation
 M2 deferred. `sequence` is log position, `state_version` is state — a chatty
@@ -115,6 +121,15 @@ player rolling `1d4` closes a requested Perception check. Marked with a
 `ponytail:` comment — matching the expression is M6's call, once the graph
 states what it asked for.
 
+**The DM's output channel is structured output, not native provider tool calls.**
+One narrow `DmProvider` interface (not a LangChain `ChatModel`) returns prose
+plus a fenced ` ```dm-json ` block; `parseDmOutput` is the single parser, and a
+delta gate streams only prose so the block can never leak into the transcript.
+A malformed block is a retryable `INVALID_OUTPUT`, not an exception. This keeps
+the turn identical across the `anthropic` and `openai_compatible` adapters —
+a real design deviation from "the provider's tool channel", deliberate and
+tested.
+
 **`WAITING_FOR_PLAYERS → WAITING_FOR_ROLL` was added to the transition table.**
 A host can ask an idle table for a check without a DM turn first.
 architecture.md §6.3 lists the states but defines no edges, so
@@ -123,7 +138,7 @@ a contradiction with the doc, but worth knowing it is not from the doc either.
 
 ## 5. Environment caveats
 
-**Docker works now** (Docker Desktop WSL integration), so all 56 integration tests run locally: `docker compose up -d`, then `pnpm db:migrate && pnpm test`. Before that, CI was their only execution — and it caught three real bugs unit tests could not.
+**Docker works now** (Docker Desktop WSL integration), so all 64 integration tests run locally: `docker compose up -d`, then `pnpm db:migrate && pnpm test`. Before that, CI was their only execution — and it caught three real bugs unit tests could not.
 
 - The global `AuthGuard` was running on WebSocket message handlers, finding no cookies, and rejecting every frame. Handshake tests passed the whole time because they never reach a handler. Fixed by scoping the guard to HTTP; there is now a unit test with a stubbed ws `ExecutionContext` so it needs no database.
 - The character import schema required a `campaignId` the route already supplied, and the pipe validated the body first — every import was a 400.
@@ -142,9 +157,8 @@ a contradiction with the doc, but worth knowing it is not from the doc either.
 | Gap | Lands in |
 |---|---|
 | `@npc <name>` always answers "no NPC here is called that" — the roster's NPC list is empty until campaign notes exist. Alias and ambiguity logic is unit-tested against a populated roster. | M8 (#9) |
-| `ProposedStateChange.operation` is an open string; only the validator may accept one. | M6.5 (#7) |
-| No provider, so nothing consumes `DM_TRIGGERED` yet. | M6 (#7) |
-| A pending action is closed by character, not by the requested expression. | M6 (#7) |
+| A pending action is closed by character, not by the requested expression. The resumed turn is told the roll result as data; it never re-validates the expression. | product decision (M5 ponytail, kept) |
+| Provider config is env vars; nothing stores, selects, or displays credentials in the UI yet. | M7 (#8) |
 | No host-control UI. Pause/resume/end/force and `REQUEST_ROLL` are server-side only; M5 has no UI subtask. | M9 (#10) |
 | Whispers are hard-coded never DM-visible — the strictest reading of FR-207, and spec-doc.md §16's open question is untouched. | product decision |
 

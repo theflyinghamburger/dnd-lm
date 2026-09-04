@@ -54,6 +54,12 @@ export function useSession(sessionId: string, characterId: string | null) {
   const [lines, setLines] = useState<ChatLine[]>([]);
   const [rolls, setRolls] = useState<RollLine[]>([]);
   const [connected, setConnected] = useState(false);
+  /**
+   * Provisional DM narration, keyed by resolution (M6.6). The stream carries
+   * only what the delta gate allows; the committed DM_NARRATION event replaces
+   * the buffer line, and DM_RESOLUTION_FAILED drops it.
+   */
+  const [dmNarration, setDmNarration] = useState<Record<string, string>>({});
 
   const applyEvent = useCallback((event: EventEnvelope) => {
     if (event.sequence <= highWater.current) return;
@@ -62,6 +68,53 @@ export function useSession(sessionId: string, characterId: string | null) {
     if (event.type === 'ROLL_RESULT') {
       const roll = event.payload as unknown as RollLine;
       setRolls((current) => [...current, { ...roll, key: event.event_id }]);
+      return;
+    }
+    if (event.type === 'DM_NARRATION') {
+      const payload = event.payload as unknown as { resolution_id: string; narration: string };
+      setLines((current) => [
+        ...current,
+        {
+          key: event.event_id,
+          sequence: event.sequence,
+          senderId: 'dm',
+          content: payload.narration,
+          recipientType: 'dm',
+          visibility: 'public',
+          channel: 'in_character',
+          triggersDm: false,
+          delivery: 'delivered',
+        },
+      ]);
+      setDmNarration((current) => {
+        const rest = { ...current };
+        delete rest[payload.resolution_id];
+        return rest;
+      });
+      return;
+    }
+    if (event.type === 'DM_RESOLUTION_FAILED') {
+      const payload = event.payload as unknown as { resolution_id: string | null; message: string };
+      setLines((current) => [
+        ...current,
+        {
+          key: event.event_id,
+          sequence: event.sequence,
+          senderId: 'dm',
+          content: payload.message,
+          recipientType: 'ooc',
+          visibility: 'public',
+          channel: 'ooc',
+          triggersDm: false,
+          delivery: 'delivered',
+        },
+      ]);
+      setDmNarration((current) => {
+        if (!payload.resolution_id) return current;
+        const rest = { ...current };
+        delete rest[payload.resolution_id];
+        return rest;
+      });
       return;
     }
     if (event.type !== 'MESSAGE_POSTED') return;
@@ -103,6 +156,20 @@ export function useSession(sessionId: string, characterId: string | null) {
     });
     socket.on('disconnect', () => setConnected(false));
     socket.on('event', applyEvent);
+    socket.on(
+      'dm_stream',
+      (payload: { resolution_id: string; delta?: string; reset?: boolean }) => {
+        setDmNarration((current) => {
+          const currentText = current[payload.resolution_id] ?? '';
+          return {
+            ...current,
+            [payload.resolution_id]: payload.reset
+              ? (payload.delta ?? '')
+              : currentText + (payload.delta ?? ''),
+          };
+        });
+      },
+    );
 
     return () => {
       socket.disconnect();
@@ -185,5 +252,5 @@ export function useSession(sessionId: string, characterId: string | null) {
     [sessionId, characterId, absorb],
   );
 
-  return { snapshot, lines, rolls, connected, send, roll };
+  return { snapshot, lines, rolls, connected, dmNarration, send, roll };
 }

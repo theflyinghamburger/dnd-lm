@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Inject, Logger, forwardRef } from '@nestjs/common';
 import {
   type OnGatewayConnection,
   type OnGatewayInit,
@@ -28,6 +28,7 @@ import type { Server, Socket } from 'socket.io';
 import { AuthService, SESSION_COOKIE } from '../auth/auth.service';
 import { MembershipService } from '../campaigns/membership.service';
 import { CharactersService } from '../characters/characters.service';
+import { DmOrchestrator, type DmTriggerCallbacks } from '../dm/orchestrator';
 import { messages, pendingActions, rolls } from '../db/schema';
 import { DiceService } from '../dice/dice.service';
 import { resolveRollRequest } from '../dice/roll-request';
@@ -116,6 +117,10 @@ export class SessionGateway implements OnGatewayInit, OnGatewayConnection {
     private readonly context: SessionContextService,
     private readonly characters: CharactersService,
     private readonly dice: DiceService,
+    // DMModule forward-imports this one and vice versa: the orchestrator needs
+    // the session service, the gateway needs the orchestrator, and Nest breaks
+    // the cycle with the two `forwardRef`s (one per side).
+    @Inject(forwardRef(() => DmOrchestrator)) private readonly dm: DmOrchestrator,
   ) {}
 
   afterInit(server: Server): void {
@@ -693,6 +698,41 @@ export class SessionGateway implements OnGatewayInit, OnGatewayConnection {
       // the world; there is no private trigger in the MVP (FR-207).
       const to = event.type === 'DM_TRIGGERED' ? [room(sessionId)] : targets;
       this.server.to(to).emit('event', event);
+
+      if (event.type === 'DM_TRIGGERED') {
+        // M6.6. The event is committed; the resolution is not. The orchestrator
+        // runs after the commit and gets back the same room to publish into,
+        // plus the provisional stream address it pushes narration to.
+        const payload = event.payload as {
+          definition_id: string;
+          entry_profile: string;
+          args?: Record<string, unknown>;
+        };
+        const callbacks: DmTriggerCallbacks = {
+          stream: (p) =>
+            this.server.to(room(sessionId)).emit('dm_stream', {
+              resolution_id: p.resolutionId,
+              ...(p.delta !== undefined ? { delta: p.delta } : {}),
+              ...(p.reset ? { reset: true } : {}),
+            }),
+          events: (published) => {
+            published.forEach((e) => this.server.to(room(sessionId)).emit('event', e));
+          },
+        };
+        void this.dm.onTriggered(
+          sessionId,
+          { ...payload, args: payload.args ?? {} },
+          event.actor.id,
+          callbacks,
+        );
+      }
+
+      if (
+        event.type === 'SESSION_STATE_CHANGED' &&
+        (event.payload as { to?: string }).to === 'SESSION_ENDED'
+      ) {
+        void this.dm.onSessionEnded(sessionId);
+      }
     }
   }
 

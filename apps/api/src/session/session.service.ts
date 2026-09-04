@@ -148,7 +148,13 @@ export class SessionService {
       sessionId: string;
       senderId: string;
       type: string;
-      expectedStateVersion: number;
+      /**
+       * `null` is the server-internal value (M6.6): the resolution re-reads and
+       * validates against the locked row and gates nothing, because the
+       * state the command was built for legitimately moved while the DM
+       * generated. Client commands always name the version they were shown.
+       */
+      expectedStateVersion: number | null;
       mode: ResolutionMode;
     },
     produce: Produce,
@@ -205,7 +211,13 @@ export class SessionService {
         // M5.4. Under the lock, so the version read here is the one committed
         // against. Rejecting rolls back the `commands` row too, which is what
         // lets the client refetch and retry with the same `command_id`.
-        if (mutating && input.expectedStateVersion !== session.stateVersion) {
+        // `null` (server-internal) skips the gate by contract; every other
+        // caller names the version it was shown.
+        if (
+          mutating &&
+          input.expectedStateVersion !== null &&
+          input.expectedStateVersion !== session.stateVersion
+        ) {
           throw new ConflictException({
             code: 'STATE_CONFLICT',
             state_version: session.stateVersion,
