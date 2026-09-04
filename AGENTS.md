@@ -115,6 +115,9 @@ CI on every push/PR: build → typecheck → lint → format → migrate → tes
   that same metadata and turns DI into a runtime failure.
 - **`fileParallelism: false` in `vitest.config.ts` is load-bearing.** The integration suites share
   one database and each `TRUNCATE`s it in `beforeEach`; two files at once delete each other's rows.
+- **Drizzle 0.45: `insert().returning('*')` crashes with `RangeError`** (the `'*'` string recurses
+  itself in `orderSelectedFields`); this is the library, not your schema. Use `.returning()` or
+  explicit column objects.
 
 ## Migrations
 

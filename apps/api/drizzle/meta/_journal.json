@@ -43,6 +43,13 @@
       "when": 1788511272592,
       "tag": "0005_stale_logan",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1788545131018,
+      "tag": "0006_zippy_scarlet_witch",
+      "breakpoints": true
     }
   ]
 }

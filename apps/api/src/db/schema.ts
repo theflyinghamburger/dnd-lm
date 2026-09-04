@@ -6,6 +6,7 @@
 import { sql } from 'drizzle-orm';
 import {
   boolean,
+  customType,
   index,
   integer,
   jsonb,
@@ -66,9 +67,9 @@ export const campaigns = pgTable('campaigns', {
     .references(() => users.id, { onDelete: 'restrict' }),
   name: text('name').notNull(),
   /**
-   * Carries the enabled trigger set (M3.2) and, later, the provider connection
-   * and DM style knobs (M7.1). One JSONB column rather than a settings table:
-   * it is read whole, per campaign, and never queried by field.
+   * Carries the enabled trigger set (M3.2) and the provider connection and DM
+   * style knobs (M7.1). One JSONB column rather than a settings table: it is
+   * read whole, per campaign, and never queried by field.
    */
   settings: jsonb('settings')
     .notNull()
@@ -345,3 +346,50 @@ export const pendingActions = pgTable(
   },
   (t) => [index('pending_actions_session_id_idx').on(t.sessionId)],
 );
+
+/* -------------------------------------------------------------------------- */
+/* M7 — provider connections                                                  */
+/* -------------------------------------------------------------------------- */
+
+export const providerConnectionKind = pgEnum('provider_connection_kind', [
+  'anthropic',
+  'openai_compatible',
+]);
+
+// ponytail: drizzle 0.45 has no bytea column; identity transform, the
+// postgres.js driver already serializes Buffers to \x-hex and back.
+const bytea = customType<{ data: Buffer; driverData: Buffer }>({
+  dataType() {
+    return 'bytea';
+  },
+  toDriver: (v) => v,
+  fromDriver: (v) => v,
+});
+
+/**
+ * A configured LLM endpoint (M7.1, FR-506). The key exists only as
+ * AES-256-GCM ciphertext plus nonce (M7.2) — the plaintext never touches the
+ * database, and `api_key_last4` is the only form the API may surface. Null
+ * key columns are for keyless endpoints (M7.3 local inference). `base_url` is
+ * a user-supplied fetch target and therefore an SSRF boundary (M7.3).
+ * Campaigns point at one of these through
+ * `campaigns.settings.provider_connection_id`.
+ */
+export const providerConnections = pgTable('provider_connections', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  label: text('label').notNull(),
+  kind: providerConnectionKind('kind').notNull(),
+  baseUrl: text('base_url').notNull(),
+  apiKeyCiphertext: bytea('api_key_ciphertext'),
+  /** The GCM nonce in the clear — it is not a secret. */
+  apiKeyNonce: bytea('api_key_nonce'),
+  apiKeyLast4: text('api_key_last4'),
+  modelId: text('model_id').notNull(),
+  maxTokens: integer('max_tokens').notNull().default(1024),
+  enabled: boolean('enabled').notNull().default(true),
+  createdBy: uuid('created_by')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});

@@ -33,6 +33,6 @@ export async function createTestApp(): Promise<TestApp> {
 
 export async function truncateAll(db: Db): Promise<void> {
   await db.execute(
-    sql`TRUNCATE TABLE messages, commands, session_events, sessions, invites, memberships, campaigns, auth_sessions, users RESTART IDENTITY CASCADE`,
+    sql`TRUNCATE TABLE messages, commands, session_events, sessions, invites, memberships, campaigns, auth_sessions, provider_connections, users RESTART IDENTITY CASCADE`,
   );
 }
