@@ -1,0 +1,45 @@
+# .sdlc/policy.yaml - the only configuration sdlcctl reads.
+#
+# Paths here compute the MINIMUM process profile for a change. The agent may
+# escalate freely and must escalate when inspection reveals more risk. Going
+# below the computed floor needs a human to apply the `sdlc-profile-downgrade`
+# label on the pull request.
+#
+# Every pattern below was checked against this tree. Do not add speculative ones.
+
+work_items: docs/changes
+
+profiles:
+  # Anything matching these paths forces the high-assurance profile.
+  high-assurance:
+    # Auth, session, and the admin surface. The authorization tests in
+    # app.harness.ts guard these; a change here that skips them is the failure
+    # mode this profile exists for.
+    - 'apps/api/src/auth/**'
+    - 'apps/api/src/session/**'
+    - 'apps/api/src/admin/**'
+    # Drizzle migrations. CI already fails on schema drift; this adds the
+    # migration and rollback plans on top.
+    - 'apps/api/drizzle/**'
+    - 'apps/api/src/db/**'
+    # The shared contract between apps/api and apps/web. Breaking it breaks
+    # both, and neither one's tests would notice on its own.
+    - 'packages/contracts/src/**'
+    # The controls enforce themselves only while these two are guarded.
+    - '.github/workflows/**'
+    - '.sdlc/policy.yaml'
+
+  # Matching these does not lower anything - it only fails to raise the floor.
+  # Listed for documentation; the floor starts at `fast` regardless.
+  fast:
+    - 'apps/web/**'
+    - 'docs/**'
+    - '**/*.md'
+
+# Conditional documents. If any changed path matches, `<work-item>.<name>.md`
+# must exist beside the work item and be non-empty.
+requires:
+  migration-plan:
+    - 'apps/api/drizzle/**'
+  rollback-plan:
+    - 'apps/api/drizzle/**'

@@ -9,3 +9,11 @@ coverage/
 .DS_Store
 *:Zone.Identifier
 .turbo/
+
+.claude/*
+!.claude/skills/
+
+# sdlc review artifacts are per-commit; CI produces them, git does not keep them
+review.json
+review.md
+__pycache__/

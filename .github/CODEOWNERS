@@ -1,0 +1,18 @@
+# CODEOWNERS - who must approve a change to the controls themselves.
+#
+# TODO: replace @theflyinghamburger with a team once this repo has more than one
+# maintainer. A single owner cannot approve their own pull request, which is why
+# branch protection runs with enforce_admins: false. See SDLC.md, "Enforcement".
+
+*                           @theflyinghamburger
+
+# These make every other control binding. Guard them first.
+/.github/workflows/         @theflyinghamburger
+/.sdlc/policy.yaml          @theflyinghamburger
+/tools/sdlcctl.py           @theflyinghamburger
+/.claude/skills/            @theflyinghamburger
+
+# Auth, migrations, and the shared contract.
+/apps/api/src/auth/         @theflyinghamburger
+/apps/api/drizzle/          @theflyinghamburger
+/packages/contracts/src/    @theflyinghamburger

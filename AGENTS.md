@@ -12,6 +12,8 @@ socket.io, LangGraphJS bounded inside the DM turn.
   trigger registry, §7 deliberate gaps. Repo issues mirror it one-to-one.
 - `spec-doc.md` — requirements (`FR-xxx`/`NFR-xxx`) and journeys; §16 open decisions; §17 MVP scope.
 - `architecture.md` — stack, module responsibilities, data model, context design, trust boundaries.
+- `SDLC.md` — the change workflow and CI gate. Read it before starting a change; the
+  procedure itself is `.claude/skills/sdlc-change/SKILL.md`.
 
 Cite the requirement ID a change satisfies (`FR-206`, `NFR-202`) in comments and commits — that is
 the codebase's convention. Contradictions between the docs are real bugs: flag them, don't silently
