@@ -15,30 +15,30 @@ profiles:
     # Auth, session, and the admin surface. The authorization tests in
     # app.harness.ts guard these; a change here that skips them is the failure
     # mode this profile exists for.
-    - "apps/api/src/auth/**"
-    - "apps/api/src/session/**"
-    - "apps/api/src/admin/**"
+    - 'apps/api/src/auth/**'
+    - 'apps/api/src/session/**'
+    - 'apps/api/src/admin/**'
     # Drizzle migrations. CI already fails on schema drift; this adds the
     # migration and rollback plans on top.
-    - "apps/api/drizzle/**"
-    - "apps/api/src/db/**"
+    - 'apps/api/drizzle/**'
+    - 'apps/api/src/db/**'
     # The shared contract between apps/api and apps/web. Breaking it breaks
     # both, and neither one's tests would notice on its own.
-    - "packages/contracts/src/**"
+    - 'packages/contracts/src/**'
     # The controls enforce themselves only while these two are guarded.
-    - ".github/workflows/**"
-    - ".sdlc/policy.yaml"
+    - '.github/workflows/**'
+    - '.sdlc/policy.yaml'
 
   # Matching these does not lower anything - it only fails to raise the floor.
   # Listed for documentation; the floor starts at `fast` regardless.
   fast:
-    - "docs/**"
-    - "**/*.md"
+    - 'docs/**'
+    - '**/*.md'
 
 # Conditional documents. If any changed path matches, `<work-item>.<name>.md`
 # must exist beside the work item and be non-empty.
 requires:
   migration-plan:
-    - "apps/api/drizzle/**"
+    - 'apps/api/drizzle/**'
   rollback-plan:
-    - "apps/api/drizzle/**"
+    - 'apps/api/drizzle/**'
