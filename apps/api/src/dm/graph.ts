@@ -20,6 +20,8 @@
 import { Annotation, END, START, StateGraph, interrupt } from '@langchain/langgraph';
 import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint';
 import { type DmFailureReason, type DmOutput, type GraphEntryProfile } from '@dnd-lm/contracts';
+import { classifyProviderError, type ProviderFailureClass } from '../providers/provider-error';
+import { redactSecrets } from '../providers/provider-secrets.service';
 import {
   buildContextPackage,
   buildDmSystem,
@@ -38,7 +40,17 @@ import {
   validateRollRequest,
 } from './tools';
 
-export type DmFailure = { reason: DmFailureReason; message: string };
+export type DmFailure = {
+  reason: DmFailureReason;
+  /** Operator detail, already redacted. Never reaches the table (M7.9). */
+  message: string;
+  /**
+   * The fine-grained class behind the client-facing reason (M7.9). It exists
+   * only for the operator log line: the closed `DmFailureReason` enum is what
+   * the client reacts to and does not grow to carry this.
+   */
+  providerClass?: ProviderFailureClass;
+};
 
 export type DmTriggerState = {
   resolutionId: string;
@@ -196,16 +208,41 @@ export function buildDmGraph(deps: DmGraphDeps, checkpointer: BaseCheckpointSave
     const gate = makeDeltaGate((chunk) =>
       emit({ resolutionId: trigger.resolutionId, delta: chunk }),
     );
-    const completion = await sourced.provider.generate(
-      { system: state.system, prompt: parts.join('\n\n'), maxTokens: sourced.config.maxTokens },
-      (chunk) => gate.push(chunk),
-    );
+    // M7.9: both SDKs throw their own error types, and a local endpoint throws
+    // undici's. One catch at the single call site classifies all three, so the
+    // operator line can report DNS from auth from a wrong model id — and the
+    // client still sees only the closed `PROVIDER_ERROR`.
+    let completion;
+    try {
+      completion = await sourced.provider.generate(
+        { system: state.system, prompt: parts.join('\n\n'), maxTokens: sourced.config.maxTokens },
+        (chunk) => gate.push(chunk),
+      );
+    } catch (error) {
+      gate.end();
+      const classified = classifyProviderError(error);
+      return {
+        failure: {
+          reason: 'PROVIDER_ERROR' as const,
+          message: redactSecrets(classified.detail, [sourced.config.apiKey]),
+          providerClass: classified.class,
+        },
+      };
+    }
     gate.end();
 
     if (completion.kind === 'error') {
+      // The adapters return this rather than throwing when the request-time URL
+      // re-check refuses the call, so nothing was sent: unreachable, by policy.
       // `attempt` is left to `validate_output`, which owns the increment for
       // both failure kinds — one bounded retry either way (M6.7).
-      return { failure: { reason: 'PROVIDER_ERROR' as const, message: completion.message } };
+      return {
+        failure: {
+          reason: 'PROVIDER_ERROR' as const,
+          message: redactSecrets(completion.message, [sourced.config.apiKey]),
+          providerClass: 'unreachable' as const,
+        },
+      };
     }
 
     const { narration, output } = parseDmOutput(completion.raw);
