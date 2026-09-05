@@ -94,20 +94,22 @@ export class ConnectionTestService {
    * to prove a draft connection works before enabling it for a table.
    */
   async test(id: string): Promise<ConnectionTestResult> {
-    // Taken before anything else, so a refused press cannot reach the provider.
+    const [row] = await this.db
+      .select()
+      .from(providerConnections)
+      .where(eq(providerConnections.id, id))
+      .limit(1);
+    // The row is read first so an id that does not exist cannot mint a bucket
+    // that nothing will ever evict; the token is still taken before anything
+    // reaches the provider, which is what the limit is for.
+    if (!row) throw new NotFoundException({ code: 'CONNECTION_NOT_FOUND' });
+
     if (!this.bucket(id).take()) {
       throw new HttpException(
         { code: 'TEST_RATE_LIMITED', limit: TESTS_PER_MINUTE, window: '1 minute' },
         429,
       );
     }
-
-    const [row] = await this.db
-      .select()
-      .from(providerConnections)
-      .where(eq(providerConnections.id, id))
-      .limit(1);
-    if (!row) throw new NotFoundException({ code: 'CONNECTION_NOT_FOUND' });
 
     const result = await this.run(row);
     await this.db

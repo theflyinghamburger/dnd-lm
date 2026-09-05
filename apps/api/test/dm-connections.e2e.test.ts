@@ -358,14 +358,33 @@ describe.skipIf(!DATABASE_URL)('DM adapter wiring from connections (M7.7)', () =
           connection_id: r.connection_id,
           model_id: r.model_id,
           resolutions: Number(r.resolutions),
+          failures: Number(r.failures),
           input_tokens: Number(r.input_tokens),
+          output_tokens: Number(r.output_tokens),
         })),
       ).toEqual(
         [
-          { connection_id: connA, model_id: 'model-a', resolutions: 1, input_tokens: 9 },
-          { connection_id: connB, model_id: 'model-b', resolutions: 1, input_tokens: 9 },
+          {
+            connection_id: connA,
+            model_id: 'model-a',
+            resolutions: 1,
+            failures: 0,
+            input_tokens: 9,
+            output_tokens: 4,
+          },
+          {
+            connection_id: connB,
+            model_id: 'model-b',
+            resolutions: 1,
+            failures: 0,
+            input_tokens: 9,
+            output_tokens: 4,
+          },
         ].sort((x, y) => x.connection_id.localeCompare(y.connection_id)),
       );
+      // The failure half of the query is exercised where failures happen:
+      // `dm-failures.e2e.test.ts` attributes each failed turn to its own
+      // connection, which is the same payload field this groups on.
 
       expect(mock.recs).toEqual([
         { auth: 'Bearer sk-key-a', model: 'model-a', path: '/v1/chat/completions' },

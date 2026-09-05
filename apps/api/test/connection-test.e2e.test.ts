@@ -144,14 +144,20 @@ describe.skipIf(!DATABASE_URL)('test connection (M7.5)', () => {
     const res = await api()
       .post('/api/admin/providers')
       .set('Cookie', cookie)
-      .send({
-        label: 'Local',
-        kind: 'openai_compatible',
-        baseUrl: base,
-        apiKey: API_KEY,
-        modelId: 'local-model',
-        ...over,
-      })
+      .send(
+        // An explicit `apiKey: undefined` in `over` drops the key entirely,
+        // which is the keyless local-inference row (M7.3).
+        Object.fromEntries(
+          Object.entries({
+            label: 'Local',
+            kind: 'openai_compatible',
+            baseUrl: base,
+            apiKey: API_KEY,
+            modelId: 'local-model',
+            ...over,
+          }).filter(([, value]) => value !== undefined),
+        ),
+      )
       .expect(201);
     return res.body;
   }
@@ -316,6 +322,63 @@ describe.skipIf(!DATABASE_URL)('test connection (M7.5)', () => {
 
     expect(result.detail!.length).toBeLessThanOrEqual(501);
     long = false;
+  });
+
+  it('drops the stored result when the configuration it attested changes', async () => {
+    const admin = await makeAdmin('admin@example.com');
+    const connection = await connect(admin);
+    await test(admin, connection.id);
+
+    // Renaming does not invalidate a verdict about an endpoint and a model.
+    const renamed = await api()
+      .patch(`/api/admin/providers/${connection.id}`)
+      .set('Cookie', admin)
+      .send({ label: 'Renamed' })
+      .expect(200);
+    expect(renamed.body.lastTest).not.toBeNull();
+
+    // Replacing the key does: `authenticated` was about the old credential.
+    const rekeyed = await api()
+      .post(`/api/admin/providers/${connection.id}/key`)
+      .set('Cookie', admin)
+      .send({ apiKey: 'sk-test-rotated-0000' })
+      .expect(200);
+    expect(rekeyed.body.lastTest).toBeNull();
+
+    await test(admin, connection.id);
+    const remodelled = await api()
+      .patch(`/api/admin/providers/${connection.id}`)
+      .set('Cookie', admin)
+      .send({ modelId: 'another-model' })
+      .expect(200);
+    expect(remodelled.body.lastTest).toBeNull();
+  });
+
+  it('tests a keyless endpoint — an empty key redacts nothing and hides nothing', async () => {
+    const admin = await makeAdmin('admin@example.com');
+    // No apiKey at all: the M7.3 local-inference case.
+    const connection = await connect(admin, { apiKey: undefined });
+    expect(connection.apiKeyLast4).toBeNull();
+
+    const passing = await test(admin, connection.id);
+    expect(passing.structuredOutput).toBe(true);
+
+    mode = 'unauthorized';
+    const failing = await test(admin, connection.id);
+    expect(failing.authenticated).toBe(false);
+    // The provider's text is kept whole: there is no secret to scrub, and an
+    // empty key must not turn into a redaction that eats the message.
+    expect(failing.detail).toContain('Incorrect API key provided');
+    expect(failing.detail).not.toBe('[REDACTED]');
+  });
+
+  it('a test against an id that does not exist is a 404, not a rate-limit entry', async () => {
+    const admin = await makeAdmin('admin@example.com');
+    await api()
+      .post('/api/admin/providers/00000000-0000-0000-0000-000000000000/test')
+      .set('Cookie', admin)
+      .expect(404);
+    expect(calls).toBe(0);
   });
 
   it('refuses a non-admin, and makes no provider call for them (AC-10)', async () => {

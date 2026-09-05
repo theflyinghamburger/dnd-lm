@@ -185,6 +185,14 @@ export class ProviderConnectionsService {
         (set as Record<string, unknown>)[field] = next;
         changed.push(column);
       }
+      // A test result attests one configuration (M7.5). Move the endpoint or
+      // the model and the stored verdict stops being about the row it sits on,
+      // so it is cleared rather than left claiming `authenticated: true` for a
+      // setup that no longer exists. Renaming or enabling changes nothing it
+      // measured, and re-sending an unchanged value is not a change at all.
+      if (changed.includes('base_url') || changed.includes('model_id')) {
+        set.lastTestResult = null;
+      }
 
       const [row] = await tx
         .update(providerConnections)
@@ -257,6 +265,11 @@ export class ProviderConnectionsService {
         .limit(1);
       if (!before) throw new NotFoundException({ code: 'CONNECTION_NOT_FOUND' });
       await this.secrets.replaceKey(id, apiKey, tx);
+      // Same reason as `update`: the previous key's verdict is not this key's.
+      await tx
+        .update(providerConnections)
+        .set({ lastTestResult: null })
+        .where(eq(providerConnections.id, id));
       // The name of the field, never a fragment of its value (NFR-305).
       await this.audit(tx, id, userId, 'replaced_key', ['api_key']);
       const [row] = await tx
