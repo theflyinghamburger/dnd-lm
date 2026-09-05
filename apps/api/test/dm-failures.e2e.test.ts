@@ -240,6 +240,36 @@ describe.skipIf(!DATABASE_URL)('DM provider failure behaviour (M7.9)', () => {
       .map((entry) => String(entry))
       .filter((line) => line.startsWith('dm.resolution.failed'));
 
+  /**
+   * AC-2, applied to every class rather than to one: the sentence the table
+   * reads is the static per-reason string and carries nothing about the
+   * infrastructure that failed.
+   */
+  const PLAYER_MESSAGE: Record<string, string> = {
+    PROVIDER_ERROR: 'The DM service had a problem and the turn was not committed.',
+    NO_PROVIDER: 'The DM is not configured for this table yet.',
+    INVALID_OUTPUT:
+      'The DM could not produce a well-formed answer, and the turn was not committed.',
+  };
+
+  function expectNoLeak(event: EventEnvelope): void {
+    const { reason, message } = event.payload as { reason: string; message: string };
+    expect(message).toBe(PLAYER_MESSAGE[reason]);
+    for (const leak of [
+      API_KEY,
+      String(primary.port),
+      '127.0.0.1',
+      MODEL,
+      'Incorrect API key',
+      'does not exist',
+      'dm-json',
+      '401',
+      '404',
+    ]) {
+      expect(message).not.toContain(leak);
+    }
+  }
+
   /** Runs one @dm turn against the staged table and returns the failure event. */
   async function failedTurn(table: { sessionId: string; host: string }): Promise<EventEnvelope> {
     const host = await connect(table.sessionId, table.host);
@@ -266,6 +296,7 @@ describe.skipIf(!DATABASE_URL)('DM provider failure behaviour (M7.9)', () => {
       const event = await failedTurn(table);
 
       expect(event.payload).toMatchObject({ reason });
+      expectNoLeak(event);
       const lines = operatorLines();
       expect(lines).toHaveLength(1);
       expect(lines[0]).toContain(`reason=${reason}`);
@@ -296,6 +327,7 @@ describe.skipIf(!DATABASE_URL)('DM provider failure behaviour (M7.9)', () => {
     const event = await failedTurn(table);
 
     expect(event.payload).toMatchObject({ reason: 'NO_PROVIDER' });
+    expectNoLeak(event);
     expect(operatorLines()[0]).toContain(`class=${failureClass}`);
     // No connection was resolved, so the line says so rather than guessing.
     expect(operatorLines()[0]).toContain('connection=-');
@@ -310,18 +342,7 @@ describe.skipIf(!DATABASE_URL)('DM provider failure behaviour (M7.9)', () => {
 
     const event = await failedTurn(table);
 
-    const message = (event.payload as { message: string }).message;
-    expect(message).toBe('The DM service had a problem and the turn was not committed.');
-    for (const leak of [
-      API_KEY,
-      String(primary.port),
-      '127.0.0.1',
-      MODEL,
-      'Incorrect API key',
-      '401',
-    ]) {
-      expect(message).not.toContain(leak);
-    }
+    expectNoLeak(event);
     // M7.8's attribution fields are separate keys and stay (see CL-001): the
     // rule is about the sentence the table reads, not about the payload.
     expect(event.payload).toMatchObject({
@@ -342,6 +363,26 @@ describe.skipIf(!DATABASE_URL)('DM provider failure behaviour (M7.9)', () => {
     expect(line).not.toContain(API_KEY);
     expect(line).toContain('[REDACTED]');
     expect(line).toContain('class=unauthenticated');
+  });
+
+  it('a model id cannot forge a field on the operator line', async () => {
+    const table = await stage();
+    const connectionId = await createConnection({
+      modelId: 'evil model" class=unauthenticated connection=someone-elses',
+    });
+    primary.mode = 'unauthorized';
+    await pick(table.host, table.campaignId, connectionId);
+
+    await failedTurn(table);
+
+    const line = operatorLines()[0]!;
+    // One `class=` field, and it is the classifier's, not the model id's.
+    expect(line.match(/class=/g)).toHaveLength(1);
+    expect(line).toContain('class=unauthenticated');
+    expect(line).toContain(`connection=${connectionId}`);
+    expect(line).not.toContain('connection=someone-elses');
+    // The id is still recognisable, just unable to open a field.
+    expect(line).toContain('model=evil_model_class_unauthenticated_connection_someone-elses');
   });
 
   it('never fails over to another connection (AC-5)', async () => {
@@ -384,6 +425,7 @@ describe.skipIf(!DATABASE_URL)('DM provider failure behaviour (M7.9)', () => {
     const event = await failedTurn(table);
 
     expect(event.payload).toMatchObject({ reason: 'INVALID_OUTPUT' });
+    expectNoLeak(event);
     expect(operatorLines()[0]).toContain('class=graph');
     // The bounded retry ran: two attempts, one endpoint.
     expect(primary.calls).toBe(2);

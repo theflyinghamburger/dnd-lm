@@ -76,6 +76,14 @@ export type DmAttribution = {
 const NO_ATTRIBUTION: DmAttribution = { connectionId: null, model: null };
 
 /**
+ * A log field that cannot become two. Anything outside a model id's plausible
+ * charset collapses to `_`, so no space, quote or `=` from admin-typed text
+ * can forge a field on a line whose whole value is being greppable (M7.9).
+ */
+const safeField = (value: string | null): string =>
+  value === null || value === '' ? '-' : value.replace(/[^\w.:/@-]+/g, '_').slice(0, 128);
+
+/**
  * What the graph knew about its own failure (M7.9): the fine-grained class it
  * classified, and the detail it already redacted. `graph` covers the failures
  * the graph raises itself — an unreadable control block, a refused proposal —
@@ -1021,7 +1029,12 @@ export class DmOrchestrator implements OnApplicationBootstrap {
       `resolution=${resolutionId ?? '-'}`,
       `session=${sessionId}`,
       `connection=${attribution.connectionId ?? '-'}`,
-      `model=${attribution.model ?? '-'}`,
+      // Every other field is system-generated; a model id is admin-typed free
+      // text. Quoting it would keep a parser safe but still let a `class=` hide
+      // inside the quotes for a grep, so it is reduced to a charset that cannot
+      // open a field at all. The connection id above is the authoritative key
+      // if a mangled model id ever needs resolving.
+      `model=${safeField(attribution.model)}`,
     ];
     const detail = attribution.detail?.replace(/\s+/g, ' ').trim();
     if (detail) fields.push(`detail=${JSON.stringify(detail)}`);
