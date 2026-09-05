@@ -57,6 +57,14 @@ export function AdminProviders({ onClose }: { onClose: () => void }) {
       </header>
 
       {connections.isPending && <p>Loading connections…</p>}
+      {/* A failed list read left the page blank: no loading line, no empty
+          state, no alert. It renders through the same describer as every
+          other failure here. */}
+      {connections.error && (
+        <p role="alert" className="error">
+          {describe(connections.error)}
+        </p>
+      )}
       {connections.data?.length === 0 && <p>No connections yet.</p>}
 
       <ul>
