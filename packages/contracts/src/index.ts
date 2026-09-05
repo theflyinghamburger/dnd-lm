@@ -461,6 +461,24 @@ export const HostConnection = z.object({
 });
 export type HostConnection = z.infer<typeof HostConnection>;
 
+/**
+ * The result of one *Test connection* press (M7.5). Five fields, each
+ * independently falsifiable: a rejected key fails `authenticated` alone, an
+ * endpoint that answers prose fails `structuredOutput` alone. `detail` carries
+ * an operator-facing reason for a failure the five booleans cannot express; it
+ * passes through M7.2's redaction and never holds key material.
+ */
+export const ConnectionTestResult = z.object({
+  reachable: z.boolean(),
+  authenticated: z.boolean(),
+  modelExists: z.boolean(),
+  structuredOutput: z.boolean(),
+  latencyMs: z.int().nonnegative(),
+  detail: z.string().nullable(),
+  at: z.iso.datetime(),
+});
+export type ConnectionTestResult = z.infer<typeof ConnectionTestResult>;
+
 export const AdminConnection = z.object({
   id: Id,
   label: z.string(),
@@ -470,6 +488,8 @@ export const AdminConnection = z.object({
   modelId: z.string(),
   maxTokens: z.number().int(),
   enabled: z.boolean(),
+  /** The last M7.5 test of this connection, or null if it was never tested. */
+  lastTest: ConnectionTestResult.nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });

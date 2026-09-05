@@ -50,6 +50,13 @@
       "when": 1788545131018,
       "tag": "0006_zippy_scarlet_witch",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1788600660297,
+      "tag": "0007_soft_blue_blade",
+      "breakpoints": true
     }
   ]
 }

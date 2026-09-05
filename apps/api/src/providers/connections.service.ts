@@ -11,13 +11,16 @@ import type {
   HostConnection,
   UpdateConnectionRequest,
 } from '@dnd-lm/contracts';
+import { ConnectionTestResult } from '@dnd-lm/contracts';
 import { eq, sql } from 'drizzle-orm';
 import { DB, type Db } from '../db/db.module';
 import { campaigns, providerConnections } from '../db/schema';
+import { buildDmProvider, type SourcedProvider } from '../dm/provider';
 import { BaseUrlService } from './base-url.service';
 import { ProviderSecrets } from './provider-secrets.service';
 
-type Row = typeof providerConnections.$inferSelect;
+export type ProviderConnectionRow = typeof providerConnections.$inferSelect;
+type Row = ProviderConnectionRow;
 
 function toAdmin(row: Row): AdminConnection {
   return {
@@ -29,9 +32,17 @@ function toAdmin(row: Row): AdminConnection {
     modelId: row.modelId,
     maxTokens: row.maxTokens,
     enabled: row.enabled,
+    // A row written before M7.5, or by a future shape this build does not
+    // know, reads as "never tested" rather than failing the whole list.
+    lastTest: parseLastTest(row.lastTestResult),
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
+}
+
+function parseLastTest(stored: unknown): AdminConnection['lastTest'] {
+  const parsed = ConnectionTestResult.safeParse(stored);
+  return parsed.success ? parsed.data : null;
 }
 
 /**
@@ -152,6 +163,28 @@ export class ProviderConnectionsService {
       .where(eq(providerConnections.id, id))
       .returning();
     if (!row) throw new NotFoundException({ code: 'CONNECTION_NOT_FOUND' });
+  }
+
+  /**
+   * Row -> the provider a DM turn would build from it (M7.7's path, extracted
+   * in M7.5 so the *Test connection* action exercises it rather than a second
+   * client of its own). Null means the row cannot be used: the URL is no
+   * longer permitted by the deployment's SSRF policy, which is state that
+   * moves after a row is written.
+   */
+  async sourceFromRow(row: Row): Promise<SourcedProvider | null> {
+    const verdict = await this.urls.validate(row.baseUrl);
+    if (!verdict.ok) return null;
+    const config = {
+      kind: row.kind,
+      // null here: a keyless endpoint (M7.3 local inference); the adapters
+      // treat an empty key as "send no credential of consequence".
+      apiKey: this.secrets.decrypt(row) ?? '',
+      baseUrl: row.baseUrl,
+      model: row.modelId,
+      maxTokens: row.maxTokens,
+    };
+    return { provider: buildDmProvider(config), config };
   }
 
   /** M7.2's re-encrypt under a fresh nonce; the row must exist first. */
