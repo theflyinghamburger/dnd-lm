@@ -1,13 +1,13 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import type { INestApplication } from '@nestjs/common';
+import { type INestApplication, Logger } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import cookieParser from 'cookie-parser';
 import type { CommandAck, EventEnvelope } from '@dnd-lm/contracts';
 import { eq } from 'drizzle-orm';
 import { type Socket, io } from 'socket.io-client';
 import request from 'supertest';
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AppModule } from '../src/app.module';
 import type { Db } from '../src/db/db.module';
 import { DB } from '../src/db/db.module';
@@ -428,5 +428,41 @@ describe.skipIf(!DATABASE_URL)('the langgraph DM', () => {
     expect(await status(main, table.sessionId)).toBe('WAITING_FOR_PLAYERS');
     const events = await main.db.select().from(sessionEvents);
     expect(events.filter((e) => e.type === 'DM_NARRATION')).toHaveLength(0);
+  });
+
+  it('never logs or sends a provider key that leaks into an SDK error (M7.2, NFR-305)', async () => {
+    const envKey = 'sk-redaction-check-9876543210';
+    vi.stubEnv('DM_PROVIDER_API_KEY', envKey);
+    const leaking: DmProvider = {
+      kind: 'leaking',
+      model: 'leaking-model',
+      generate: async () => {
+        // SDKs surface auth errors like this: the request's own header echoed back.
+        throw new Error(
+          `401 authentication_error: the x-api-key header ${envKey} was rejected by the provider`,
+        );
+      },
+    };
+    const app2 = await createDmApp({
+      get: () => ({ provider: leaking, config: { ...CONFIG, apiKey: envKey } }),
+    });
+    const errorSpy = vi.spyOn(Logger.prototype, 'error');
+    try {
+      const table = await stage(app2);
+      const host = await connect(app2, table.sessionId, table.host);
+      const failed = waitFor(host, 'DM_RESOLUTION_FAILED');
+      await say(host, table.sessionId, '@dm knock');
+      const event = await failed;
+
+      expect(JSON.stringify(event.payload)).not.toContain(envKey);
+      const logged = errorSpy.mock.calls.flat().map(String).join('\n');
+      expect(logged).not.toContain(envKey);
+      expect(logged).toContain('[REDACTED]');
+      expect(await status(app2, table.sessionId)).toBe('WAITING_FOR_PLAYERS');
+    } finally {
+      errorSpy.mockRestore();
+      vi.unstubAllEnvs();
+      await app2.app.close();
+    }
   });
 });

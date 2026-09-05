@@ -6,6 +6,7 @@ import { DbModule } from './db/db.module';
 import { DmModule } from './dm/dm.module';
 import { HealthController } from './health.controller';
 import { RouterModule } from './router/router.module';
+import { ProvidersModule } from './providers/providers.module';
 import { SessionModule } from './session/session.module';
 
 @Module({
@@ -16,6 +17,7 @@ import { SessionModule } from './session/session.module';
     RouterModule,
     CharactersModule,
     SessionModule,
+    ProvidersModule,
     DmModule,
   ],
   controllers: [HealthController],
