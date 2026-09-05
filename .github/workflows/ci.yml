@@ -68,3 +68,81 @@ jobs:
             git status --porcelain -- apps/api/drizzle
             exit 1
           fi
+
+  # --- sdlc gate ----------------------------------------------------------
+  # These live in this workflow rather than a separate one on purpose: every job
+  # in a run sees the same commit, so `needs:` IS the evidence contract. A review
+  # produced by another workflow could be about a different commit.
+  #
+  # Pull requests only - there is no PR to gate on a plain push.
+
+  scan:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/dependency-review-action@v4
+      # Secret scanning is a repository setting (push protection), not a job.
+      # See SDLC.md. Do not reimplement it here.
+
+  review:
+    if: github.event_name == 'pull_request'
+    needs: [check, scan] # do not spend a review on a broken build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # the reviewer cannot push to the branch it reviews
+      pull-requests: write # it can only comment
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - run: pip install pyyaml
+
+      # Any OpenAI-style /chat/completions host - set the two repo variables and
+      # the secret. The review procedure itself lives in
+      # .claude/skills/sdlc-review/SKILL.md; the script only carries it.
+      - name: Independent review
+        env:
+          REVIEW_BASE_URL: ${{ vars.REVIEW_BASE_URL }}
+          REVIEW_API_KEY: ${{ secrets.REVIEW_API_KEY }}
+          REVIEW_MODEL: ${{ vars.REVIEW_MODEL }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          git diff "$BASE...$HEAD" | python3 tools/sdlcreview.py
+
+      - name: Post findings
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          test -f review.md || exit 0
+          gh pr comment "$PR" --body-file review.md
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sdlc-review
+          path: review.json
+
+  sdlc:
+    if: github.event_name == 'pull_request'
+    needs: [check, scan, review]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: sdlc-review
+
+      - run: pip install pyyaml
+
+      - name: Gate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 tools/sdlcctl.py check --review review.json --json
