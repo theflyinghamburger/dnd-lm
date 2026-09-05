@@ -26,7 +26,7 @@ import {
   type ContextPackage,
   type DmReadOnly,
 } from './context';
-import { makeDeltaGate, parseDmOutput, type DmProvider, type DmUsage } from './provider';
+import { makeDeltaGate, parseDmOutput, type SourcedProvider, type DmUsage } from './provider';
 import {
   executeReadTool,
   type ReadToolName,
@@ -92,6 +92,8 @@ export const DmState = Annotation.Root({
   ),
   narration: Annotation<string>(hold(() => '')),
   usage: Annotation<DmUsage | null>(hold<DmUsage | null>(() => null)),
+  /** The model the turn ran on — cost estimation at commit, telemetry span. */
+  model: Annotation<string | null>(hold<string | null>(() => null)),
   failure: Annotation<DmFailure | null>(hold<DmFailure | null>(() => null)),
 });
 export type DmGraphState = typeof DmState.State;
@@ -99,9 +101,13 @@ export type DmGraphState = typeof DmState.State;
 export type DmStreamPayload = { resolutionId: string; delta?: string; reset?: boolean };
 
 export type DmGraphDeps = {
-  provider: DmProvider;
-  /** From the provider config; the prompt never grows past it (NFR-303). */
-  maxTokens: number;
+  /**
+   * Resolves the campaign's provider at call time (M7.7): one graph is shared
+   * by every campaign in the process, so the provider cannot be baked in at
+   * compile time. Null means the campaign has no usable connection — the
+   * typed NO_PROVIDER failure, not a crash.
+   */
+  provider: (campaignId: string) => Promise<SourcedProvider | null>;
   reader: DmReadOnly;
   emit: (payload: DmStreamPayload) => void;
 };
@@ -124,7 +130,7 @@ const toolRequests = (output: DmOutput) => {
 };
 
 export function buildDmGraph(deps: DmGraphDeps, checkpointer: BaseCheckpointSaver) {
-  const { provider, maxTokens, reader, emit } = deps;
+  const { provider, reader, emit } = deps;
 
   const entry = (_state: DmGraphState) => ({ system: buildDmSystem(TOOLS_DOC) });
 
@@ -147,6 +153,18 @@ export function buildDmGraph(deps: DmGraphDeps, checkpointer: BaseCheckpointSave
   const callDm = async (state: DmGraphState) => {
     const { trigger } = state;
     if (state.attempt > 0) emit({ resolutionId: trigger.resolutionId, reset: true });
+
+    const sourced = await provider(trigger.campaignId);
+    if (!sourced) {
+      // The orchestrator already gates the common case before the graph
+      // starts; this covers a connection disabled mid-turn.
+      return {
+        failure: {
+          reason: 'NO_PROVIDER' as const,
+          message: 'The campaign has no usable provider connection.',
+        },
+      };
+    }
 
     const parts: string[] = [state.messages];
     if (state.toolResults.length > 0) {
@@ -172,8 +190,8 @@ export function buildDmGraph(deps: DmGraphDeps, checkpointer: BaseCheckpointSave
     const gate = makeDeltaGate((chunk) =>
       emit({ resolutionId: trigger.resolutionId, delta: chunk }),
     );
-    const completion = await provider.generate(
-      { system: state.system, prompt: parts.join('\n\n'), maxTokens },
+    const completion = await sourced.provider.generate(
+      { system: state.system, prompt: parts.join('\n\n'), maxTokens: sourced.config.maxTokens },
       (chunk) => gate.push(chunk),
     );
     gate.end();
@@ -188,6 +206,7 @@ export function buildDmGraph(deps: DmGraphDeps, checkpointer: BaseCheckpointSave
     const base = {
       narration,
       usage: completion.usage,
+      model: sourced.config.model,
       attempt: state.attempt,
       validationErrors: null,
       rollRequest: null,

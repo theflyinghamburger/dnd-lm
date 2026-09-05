@@ -112,24 +112,8 @@ export type DmProviderConfig = {
   maxTokens: number;
 };
 
-/**
- * Runtime configuration (MVP.md §2: providers configured at runtime, M6 env,
- * M7 moves it to per-connection rows). An unset or unrecognized kind is not a
- * crash — it is the typed `NO_PROVIDER_CONFIGURED` failure a session sees.
- */
-export function readDmProviderConfig(): DmProviderConfig | null {
-  const kind = process.env.DM_PROVIDER_KIND;
-  if (kind !== 'anthropic' && kind !== 'openai_compatible') return null;
-  const apiKey = process.env.DM_PROVIDER_API_KEY;
-  if (!apiKey) return null;
-  return {
-    kind,
-    baseUrl: process.env.DM_PROVIDER_BASE_URL || null,
-    apiKey,
-    model: process.env.DM_PROVIDER_MODEL || (kind === 'anthropic' ? 'claude-opus-5' : 'gpt-4o'),
-    maxTokens: Number(process.env.DM_PROVIDER_MAX_TOKENS) || 4096,
-  };
-}
+/** A provider resolved for one campaign, with the config it was built from. */
+export type SourcedProvider = { provider: DmProvider; config: DmProviderConfig };
 
 export function buildDmProvider(config: DmProviderConfig): DmProvider {
   return config.kind === 'anthropic'

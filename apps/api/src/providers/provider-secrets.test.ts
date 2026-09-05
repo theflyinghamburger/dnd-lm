@@ -14,7 +14,6 @@ describe('ProviderSecrets (M7.2, NFR-305/301)', () => {
   });
   afterEach(() => {
     delete process.env[MASTER_KEY_ENV];
-    delete process.env.DM_PROVIDER_API_KEY;
   });
 
   it('refuses to boot without the master key, with a clear message', () => {
@@ -83,15 +82,14 @@ describe('ProviderSecrets (M7.2, NFR-305/301)', () => {
     expect(redactSecrets('nothing here', [])).toBe('nothing here');
   });
 
-  it('redacts the configured env key from provider error text', () => {
-    process.env.DM_PROVIDER_API_KEY = 'sk-env-leak-0000';
+  it('redacts the keys the caller passes — the connection key the turn ran on (M7.7)', () => {
     const secrets = new ProviderSecrets(db);
-    const error = '401 authentication_error: request key sk-env-leak-0000 rejected';
-    expect(secrets.redact(error)).toBe('401 authentication_error: request key [REDACTED] rejected');
-  });
-
-  it('redacts nothing when no key is configured', () => {
-    const secrets = new ProviderSecrets(db);
+    const key = 'sk-conn-leak-0000';
+    const error = '401 authentication_error: request key sk-conn-leak-0000 rejected';
+    expect(secrets.redact(error, [key])).toBe(
+      '401 authentication_error: request key [REDACTED] rejected',
+    );
+    // No second argument: nothing known, nothing to scrub.
     expect(secrets.redact('plain error')).toBe('plain error');
   });
 });

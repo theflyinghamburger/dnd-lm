@@ -1,6 +1,6 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { estimateUsd } from './telemetry';
-import { DM_JSON_MARKER, makeDeltaGate, parseDmOutput, readDmProviderConfig } from './provider';
+import { DM_JSON_MARKER, makeDeltaGate, parseDmOutput } from './provider';
 
 const block = (overrides: Record<string, unknown> = {}) =>
   `${DM_JSON_MARKER}\n${JSON.stringify({
@@ -71,47 +71,6 @@ describe('makeDeltaGate', () => {
     gate.push('plain prose only');
     gate.end();
     expect(seen.join('')).toBe('plain prose only');
-  });
-});
-
-describe('readDmProviderConfig', () => {
-  const saved = process.env;
-  afterEach(() => {
-    process.env = saved;
-  });
-
-  it('is null for an unset or unrecognized kind, or a missing key', () => {
-    process.env = { ...saved, DM_PROVIDER_KIND: undefined, DM_PROVIDER_API_KEY: 'k' };
-    expect(readDmProviderConfig()).toBeNull();
-    process.env = { ...saved, DM_PROVIDER_KIND: 'ollama' as never, DM_PROVIDER_API_KEY: 'k' };
-    expect(readDmProviderConfig()).toBeNull();
-    process.env = { ...saved, DM_PROVIDER_KIND: 'anthropic', DM_PROVIDER_API_KEY: undefined };
-    expect(readDmProviderConfig()).toBeNull();
-  });
-
-  it('reads the env config, with per-kind model defaults', () => {
-    process.env = {
-      ...saved,
-      DM_PROVIDER_KIND: 'anthropic',
-      DM_PROVIDER_API_KEY: 'secret',
-      DM_PROVIDER_MODEL: 'claude-opus-5',
-    };
-    const config = readDmProviderConfig();
-    expect(config).toMatchObject({ kind: 'anthropic', model: 'claude-opus-5', maxTokens: 4096 });
-
-    process.env = {
-      ...saved,
-      DM_PROVIDER_KIND: 'openai_compatible',
-      DM_PROVIDER_API_KEY: 'k2',
-      DM_PROVIDER_BASE_URL: 'http://localhost:11434/v1',
-      DM_PROVIDER_MAX_TOKENS: '1000',
-    };
-    expect(readDmProviderConfig()).toMatchObject({
-      kind: 'openai_compatible',
-      baseUrl: 'http://localhost:11434/v1',
-      model: 'gpt-4o',
-      maxTokens: 1000,
-    });
   });
 });
 

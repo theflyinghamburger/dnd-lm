@@ -99,11 +99,11 @@ export class ProviderSecrets {
 
   /**
    * The choke point (NFR-305): scrub every provider key in play before a
-   * provider-facing string is logged or sent anywhere. Today that is the
-   * env-configured key (M6's provider); M7.7 adds the resolved connection's.
+   * provider-facing string is logged or sent anywhere. M7.7: there is no
+   * env key anymore — the resolved connection's key is passed by the caller,
+   * the only place that knows which one was in play.
    */
-  redact(text: string): string {
-    const envKey = process.env.DM_PROVIDER_API_KEY;
-    return redactSecrets(text, envKey ? [envKey] : []);
+  redact(text: string, extraSecrets: string[] = []): string {
+    return redactSecrets(text, extraSecrets);
   }
 }

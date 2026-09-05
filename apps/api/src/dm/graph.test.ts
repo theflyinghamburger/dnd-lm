@@ -91,11 +91,25 @@ const makeTrigger = (
   ...over,
 });
 
+const testConfig = {
+  kind: 'openai_compatible' as const,
+  baseUrl: null,
+  apiKey: 'test-key',
+  model: 'test-model',
+  maxTokens: 1000,
+};
+
+/** The M7.7 shape: the graph resolves the campaign's provider at call time. */
+const sourcing = (provider: DmProvider) => async (_campaignId: string) => ({
+  provider,
+  config: testConfig,
+});
+
 async function run(steps: Step[], over: Partial<Omit<DmTriggerState, 'resolutionId'>> = {}) {
   const { provider, prompts } = scripted(steps);
   const emits: DmStreamPayload[] = [];
   const graph = buildDmGraph(
-    { provider, maxTokens: 1000, reader, emit: (payload) => emits.push(payload) },
+    { provider: sourcing(provider), reader, emit: (payload) => emits.push(payload) },
     new MemorySaver(),
   );
   const resolutionId = `res-${Math.random()}`;
@@ -119,6 +133,8 @@ describe('buildDmGraph', () => {
     expect(state.failure).toBeNull();
     expect(state.narration).toBe('The gate grinds open.');
     expect(state.system).toContain('Dungeon Master');
+    // Commit prices the turn on the model the graph actually called (M7.7).
+    expect(state.model).toBe('test-model');
     expect(prompts).toHaveLength(1);
     expect(prompts[0]).toContain('State version: 1.');
     // The stream is prose only: the control block never leaks out. The gate
@@ -157,6 +173,19 @@ describe('buildDmGraph', () => {
     expect(prompts).toHaveLength(2);
   });
 
+  it('fails NO_PROVIDER when the campaign has no usable connection, calling the model never', async () => {
+    const graph = buildDmGraph(
+      { provider: async () => null, reader, emit: () => undefined },
+      new MemorySaver(),
+    );
+    const state = (await graph.invoke(
+      { trigger: makeTrigger('no-provider-1') },
+      { configurable: { thread_id: 'no-provider-1' }, recursionLimit: GRAPH_RECURSION_LIMIT },
+    )) as DmGraphState;
+    expect(state.failure).toMatchObject({ reason: 'NO_PROVIDER' });
+    expect(state.proposal).toBeNull();
+  });
+
   it('returns the roll ask as an interrupt, and the checkpoint resume hands the roll back to the model', async () => {
     const rollStep: Step = {
       reply: answer({
@@ -171,7 +200,7 @@ describe('buildDmGraph', () => {
     const { provider, prompts } = scripted([rollStep, { reply: answer() }]);
     const emits: DmStreamPayload[] = [];
     const graph = buildDmGraph(
-      { provider, maxTokens: 1000, reader, emit: (payload) => emits.push(payload) },
+      { provider: sourcing(provider), reader, emit: (payload) => emits.push(payload) },
       new MemorySaver(),
     );
     const config = { configurable: { thread_id: 'park-1' }, recursionLimit: GRAPH_RECURSION_LIMIT };
@@ -248,7 +277,7 @@ describe('buildDmGraph', () => {
       },
     ]);
     const graph = buildDmGraph(
-      { provider, maxTokens: 1000, reader, emit: () => undefined },
+      { provider: sourcing(provider), reader, emit: () => undefined },
       new MemorySaver(),
     );
     await expect(
