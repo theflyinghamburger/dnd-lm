@@ -79,14 +79,14 @@ export async function checkBaseUrl(
     return { ok: true };
   }
 
-  // A literal IP needs no (and gets no) DNS.
+  // A literal IP is fully classified here — no (and never) DNS after it, so
+  // the verdict is deterministic even where resolvers refuse IP-literal
+  // lookups (the suite's public IP must pass offline). Only unclassified
+  // hostnames are resolved.
   const literal = forbiddenRangeOf(host);
-  if (literal === 'unrecognized') {
-    const resolve = opts.resolve ?? defaultResolve;
-    return verdictFor(await resolve(host));
-  }
-  if (literal !== null)
+  if (literal !== null && literal !== 'unrecognized')
     return { ok: false, reason: `base_url host is in the forbidden range ${literal}` };
+  if (literal === null) return { ok: true };
 
   const resolve = opts.resolve ?? defaultResolve;
   return verdictFor(await resolve(host));
