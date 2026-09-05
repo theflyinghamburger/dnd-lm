@@ -90,10 +90,15 @@ CI on every push/PR: build → typecheck → lint → format → migrate → tes
   through `runCommand` with a `null` `expected_state_version` (server-internal resolutions skip the
   client version gate; the optimistic lock still applies). `DM_RESOLUTION_FAILED.reason` is the
   `DmFailureReason` union from contracts.
-- **`DM_PROVIDER_SOURCE` is the DI seam for the provider** — a Symbol provider in `DmModule`,
-  overridable in tests (`.overrideProvider(DM_PROVIDER_SOURCE).useValue({ get: () => … })`).
-  `apps/api/test/dm.e2e.test.ts` builds its own app off the harness for this reason; the shared
-  `createTestApp` does not override it.
+- **`DM_PROVIDER_SOURCE` is the DI seam for the provider** — a Symbol provider in `DmModule`
+  binding `DmProviderSource`: per turn (M7.7) it resolves the campaign's selected
+  `provider_connections` row, decrypts the key, and builds the adapter — `get(campaignId)` is
+  `async` and returns `{ provider, config }` or `null` (the turn then fails `NO_PROVIDER`). The
+  row is re-read every turn, so a rekey or model change takes effect on the next turn, no
+  restart. Overridable in tests (`.overrideProvider(DM_PROVIDER_SOURCE).useValue({ get: async ()
+  => … })`). `apps/api/test/dm.e2e.test.ts` builds its own app off the harness for this reason;
+  the shared `createTestApp` does not override it — `apps/api/test/dm-connections.e2e.test.ts`
+  runs the real `DmProviderSource` end to end instead.
 - **Privacy is a `WHERE` predicate, including in replay.** A reconnecting bystander must never be
   *sent* a whisper to drop client-side. Whispers are hard-coded never-DM-visible — the strict
   FR-207 reading; the spec's open question on this is deliberately unanswered.
@@ -127,11 +132,15 @@ the schema no longer matches the committed migrations.
 
 ## LLM providers
 
-Two adapter kinds, chosen at runtime (MVP.md D-4): `anthropic` and `openai_compatible` (any
-host URL + API key). **M6 configures them via env** — `DM_PROVIDER_KIND`, `DM_PROVIDER_API_KEY`,
-`DM_PROVIDER_BASE_URL`, `DM_PROVIDER_MODEL`, `DM_PROVIDER_MAX_TOKENS` (plus `DM_PROMPT_BUDGET` for
-context assembly); **M7 moves this to per-connection rows with a UI** and makes keys write-only.
-Treat the provider host URL as an SSRF boundary and the key as never-logged, never-returned.
+Two adapter kinds, chosen per connection row (MVP.md D-4): `anthropic` and `openai_compatible`
+(any host URL + API key; the key may be absent for keyless local inference). **Since M7.7 all
+provider configuration lives on `provider_connections` rows** — a campaign selects one through
+`campaigns.settings.provider_connection_id` (FR-506) and the provider is rebuilt per turn — the
+`DM_PROVIDER_*` env vars are gone (`DM_PROMPT_BUDGET` stays, for context assembly). Rows are
+admin-managed (M7.4/7.6); the host-facing UI is M7.8. Treat the provider host URL as an SSRF
+boundary (the M7.3 wall: validate at write, re-check at fetch — `openai_compatible` fetches
+through a resolved-IP-pinned fetch, `anthropic` re-validates before each call) and the key as
+never-logged, never-returned.
 The DM tool channel is *structured output*, not native provider tool calls: one narrow
 `DmProvider` interface (not a LangChain `ChatModel`), prose plus a ```` ```dm-json ```` block parsed
 by `parseDmOutput`, streamed through a delta gate that never leaks the block.

@@ -9,6 +9,7 @@
  * suite, which is exactly the point of one (M7.5).
  */
 import OpenAI from 'openai';
+import { resolvedIpFetch } from '../providers/base-url';
 import {
   type DmCompletion,
   type DmProvider,
@@ -23,8 +24,13 @@ export class OpenAICompatibleProvider implements DmProvider {
 
   constructor(private readonly config: DmProviderConfig) {
     this.client = new OpenAI({
-      apiKey: config.apiKey,
+      // The SDK rejects a missing credential. A keyless local endpoint ignores
+      // auth entirely, so a placeholder is what crosses to it — never a secret.
+      apiKey: config.apiKey || 'keyless-local',
       baseURL: config.baseUrl ?? undefined,
+      // M7.7: the user-chosen host is fetched through the resolved-IP wall —
+      // the connect target is the address M7.3's check just approved.
+      ...(config.baseUrl ? { fetch: resolvedIpFetch() } : {}),
     });
   }
 

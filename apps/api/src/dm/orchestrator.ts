@@ -29,7 +29,14 @@ import {
 import { and, eq, isNotNull, inArray, lt } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import { DB, type Db } from '../db/db.module';
-import { campaigns, characters, pendingActions, rolls, sessions } from '../db/schema';
+import {
+  campaigns,
+  characters,
+  pendingActions,
+  providerConnections,
+  rolls,
+  sessions,
+} from '../db/schema';
 import {
   type EventDraft,
   type SessionRow,
@@ -37,6 +44,7 @@ import {
   type Tx,
 } from '../session/session.service';
 import { DmContextReader } from './context';
+import { BaseUrlService } from '../providers/base-url.service';
 import { ProviderSecrets } from '../providers/provider-secrets.service';
 import {
   buildDmGraph,
@@ -46,12 +54,7 @@ import {
   type RollAsk,
   type RollResult,
 } from './graph';
-import {
-  buildDmProvider,
-  readDmProviderConfig,
-  type DmProvider,
-  type DmProviderConfig,
-} from './provider';
+import { buildDmProvider, type SourcedProvider } from './provider';
 import { estimateUsd, withSpan } from './telemetry';
 
 export const DM_PROVIDER_SOURCE = Symbol('DM_PROVIDER_SOURCE');
@@ -59,16 +62,57 @@ export const DM_PROVIDER_SOURCE = Symbol('DM_PROVIDER_SOURCE');
 type DmCompiledGraph = ReturnType<typeof buildDmGraph>;
 
 /**
- * Where the provider comes from (M6 is env; M7 moves it to per-connection
- * rows with a UI). Overridable in tests, which keeps the e2e suite free of
- * API keys. A missing config is a valid state — one turn's worth of a typed
- * failure, not a crash.
+ * Where the provider comes from (M7.7: the campaign's selected connection).
+ * Overridable in tests, which keeps the e2e suite free of API keys and of a
+ * real endpoint. A campaign that selects nothing — or selects a connection
+ * that is disabled, keyless-stale, or URL-rejected — is a valid state: one
+ * turn's worth of the typed NO_PROVIDER failure, not a crash.
  */
 @Injectable()
 export class DmProviderSource {
-  get(): { provider: DmProvider; config: DmProviderConfig } | null {
-    const config = readDmProviderConfig();
-    return config ? { provider: buildDmProvider(config), config } : null;
+  constructor(
+    @Inject(DB) private readonly db: Db,
+    private readonly secrets: ProviderSecrets,
+    private readonly urls: BaseUrlService,
+  ) {}
+
+  /**
+   * Campaign -> its selected connection -> a validated, key-decrypted
+   * `SourcedProvider`. Re-validating the URL on every resolution (not just at
+   * admin write) is deliberate: the SSRF policy is deployment state, and a
+   * URL that stopped being allowed must stop being fetched.
+   */
+  async get(campaignId: string): Promise<SourcedProvider | null> {
+    const [campaign] = await this.db
+      .select({ settings: campaigns.settings })
+      .from(campaigns)
+      .where(eq(campaigns.id, campaignId))
+      .limit(1);
+    const connectionId = (campaign?.settings ?? null) as {
+      provider_connection_id?: unknown;
+    } | null;
+    if (typeof connectionId?.provider_connection_id !== 'string') return null;
+
+    const [row] = await this.db
+      .select()
+      .from(providerConnections)
+      .where(eq(providerConnections.id, connectionId.provider_connection_id))
+      .limit(1);
+    if (!row || !row.enabled) return null;
+
+    const verdict = await this.urls.validate(row.baseUrl);
+    if (!verdict.ok) return null;
+
+    const config = {
+      kind: row.kind,
+      baseUrl: row.baseUrl,
+      // null here: a keyless endpoint (M7.3 local inference); the adapters
+      // treat an empty key as "send no credential of consequence".
+      apiKey: this.secrets.decrypt(row) ?? '',
+      model: row.modelId,
+      maxTokens: row.maxTokens,
+    };
+    return { provider: buildDmProvider(config), config };
   }
 }
 
@@ -213,20 +257,17 @@ export class DmOrchestrator implements OnApplicationBootstrap {
     graph: NonNullable<DmCompiledGraph>;
     checkpointer: PostgresSaver;
   } | null> {
-    const sourced = this.providerSource.get();
     const url = process.env.DATABASE_URL;
-    if (!sourced || !url) return null;
+    if (!url) return null;
     if (this.graph && this.checkpointer)
       return { graph: this.graph, checkpointer: this.checkpointer };
-    // ponytail: the graph and checkpointer are process-lifetime; a provider
-    // reconfigured mid-run (an M7 case) keeps the first connection until
-    // restart. Fine while config is a process constant.
     this.checkpointer = await PostgresSaver.fromConnString(url);
     await this.checkpointer.setup();
     this.graph = buildDmGraph(
       {
-        provider: sourced.provider,
-        maxTokens: sourced.config.maxTokens,
+        // One process-lifetime graph serves every campaign; the provider is
+        // resolved per call (M7.7) so a rewired connection needs no restart.
+        provider: (campaignId) => this.providerSource.get(campaignId),
         reader: this.reader,
         emit: (payload) => this.streamHandlers.get(payload.resolutionId)?.(payload),
       },
@@ -271,7 +312,9 @@ export class DmOrchestrator implements OnApplicationBootstrap {
       'dm.resolution',
       { campaign_id: session.campaignId, session_id: sessionId, trigger: opts.definitionId },
       async (span) => {
-        const sourced = this.providerSource.get();
+        // M7.7: the gate is per-campaign now — a table whose campaign has no
+        // usable connection fails typed before the state moves.
+        const sourced = await this.providerSource.get(session.campaignId);
         if (!sourced) {
           await this.reportFailure(sessionId, null, 'NO_PROVIDER', opts.actorId, opts.callbacks);
           return;
@@ -353,6 +396,7 @@ export class DmOrchestrator implements OnApplicationBootstrap {
               this.logger.error(
                 `graph run failed: ${this.secrets.redact(
                   error instanceof Error ? (error.stack ?? error.message) : String(error),
+                  [sourced.config.apiKey],
                 )}`,
               );
               await this.reportFailure(
@@ -394,7 +438,6 @@ export class DmOrchestrator implements OnApplicationBootstrap {
             session,
             resolutionId,
             state,
-            sourced,
             opts.actorId,
             dmActor,
             opts.callbacks,
@@ -492,7 +535,7 @@ export class DmOrchestrator implements OnApplicationBootstrap {
       'dm.resolution.resume',
       { campaign_id: session.campaignId, session_id: sessionId, resolution_id: resolutionId },
       async (span) => {
-        const sourced = this.providerSource.get();
+        const sourced = await this.providerSource.get(session.campaignId);
         if (!sourced) {
           await this.reportFailure(sessionId, resolutionId, 'NO_PROVIDER', actorId, callbacks);
           return;
@@ -577,6 +620,7 @@ export class DmOrchestrator implements OnApplicationBootstrap {
               this.logger.error(
                 `graph resume failed: ${this.secrets.redact(
                   error instanceof Error ? (error.stack ?? error.message) : String(error),
+                  [sourced.config.apiKey],
                 )}`,
               );
               await this.reportFailure(sessionId, resolutionId, 'INTERNAL', actorId, callbacks);
@@ -612,7 +656,6 @@ export class DmOrchestrator implements OnApplicationBootstrap {
             session,
             resolutionId,
             state,
-            sourced,
             actorId,
             dmActor,
             callbacks,
@@ -638,7 +681,6 @@ export class DmOrchestrator implements OnApplicationBootstrap {
     session: SessionRow,
     resolutionId: string,
     state: DmGraphState,
-    sourced: { provider: DmProvider; config: DmProviderConfig },
     actorId: string,
     dmActor: { type: 'dm'; id: string },
     callbacks: DmTriggerCallbacks,
@@ -718,11 +760,15 @@ export class DmOrchestrator implements OnApplicationBootstrap {
               )
             : {}),
           ...(() => {
-            const cost = estimateUsd(sourced.provider.model, {
-              input: usage.inputTokens,
-              output: usage.outputTokens,
-              cacheRead: usage.cacheReadTokens,
-            });
+            // The model that actually ran the turn (M7.7); unknown models
+            // estimate to null and the attribute is simply omitted.
+            const cost = state.model
+              ? estimateUsd(state.model, {
+                  input: usage.inputTokens,
+                  output: usage.outputTokens,
+                  cacheRead: usage.cacheReadTokens,
+                })
+              : null;
             return cost === null ? {} : { 'dm.cost_usd': cost };
           })(),
         });

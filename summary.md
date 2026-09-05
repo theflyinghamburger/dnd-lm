@@ -2,7 +2,7 @@
 
 **Repo:** [theflyinghamburger/dnd-lm](https://github.com/theflyinghamburger/dnd-lm) (private)
 **As of:** 2026-09-05
-**Progress:** M0–M7.4. M5–M7.1 merged (#17, #18, #28); M7.2–M7.4 open as three stacked PRs (#29 → #30 → #31), all gates green, all tests passing on live Postgres. M7.5–M7.9, M8, M9 not started.
+**Progress:** M0–M7.7. M5–M7.1 merged (#17, #18, #28); M7.2–M7.4 open as three stacked PRs (#29 → #30 → #31); M7.7 open, stacked on #31, all gates green, all tests passing on live Postgres. M7.5, M7.6, M7.8, M7.9, M8, M9 not started.
 
 ---
 
@@ -21,11 +21,12 @@
 | M7.2 — Secret handling (AES-256-GCM, write-only keys) | [#20](https://github.com/theflyinghamburger/dnd-lm/issues/20) | PR open, branch `m7.2-secret-handling` | [#29](https://github.com/theflyinghamburger/dnd-lm/pull/29) |
 | M7.3 — Base URL validation (SSRF) | [#21](https://github.com/theflyinghamburger/dnd-lm/issues/21) | PR open, stacked on #29 | [#30](https://github.com/theflyinghamburger/dnd-lm/pull/30) |
 | M7.4 — Authorization: admin-managed connections | [#22](https://github.com/theflyinghamburger/dnd-lm/issues/22) | PR open, stacked on #30 | [#31](https://github.com/theflyinghamburger/dnd-lm/pull/31) |
-| M7.5–M7.9 — test connection, UI, adapter wiring, audit, failure behaviour | [#23–#27](https://github.com/theflyinghamburger/dnd-lm/issues/23) | not started | |
+| M7.7 — Adapter wiring from connections | [#25](https://github.com/theflyinghamburger/dnd-lm/issues/25) | PR open, stacked on #31 | [#32](https://github.com/theflyinghamburger/dnd-lm/pull/32) |
+| M7.5, M7.6, M7.8, M7.9 — test connection, row CRUD, host UI, audit + failure behaviour | [#23, #24, #26, #27](https://github.com/theflyinghamburger/dnd-lm/issues/23) | not started | |
 | M8 — Manual campaign notes and retrieval | [#9](https://github.com/theflyinghamburger/dnd-lm/issues/9) | not started | |
 | M9 — MVP acceptance | [#10](https://github.com/theflyinghamburger/dnd-lm/issues/10) | not started | |
 
-276 tests on the M7.4 branch (top of the stack): unit + integration, all of them run, locally and in CI. CI runs build → typecheck → lint → format → migrate → test → migration-drift on every push, against a real Postgres 16 service. The integration suite silently skips without `DATABASE_URL` in the environment — always `set -a; source .env; set +a` first.
+285 tests on the M7.7 branch (top of the stack): unit + integration, all of them run, locally and in CI. CI runs build → typecheck → lint → format → migrate → test → migration-drift on every push, against a real Postgres 16 service. The integration suite silently skips without `DATABASE_URL` in the environment — always `set -a; source .env; set +a` first.
 
 ### PR #12 is dead
 
@@ -77,28 +78,33 @@ pnpm --filter @dnd-lm/web dev          # :5173, proxies /api and /ws
 
 ---
 
-## 4. Start here: M7.1–M7.4 are done as three stacked PRs; M7.5–M7.9 remain
+## 4. Start here: M7.7 lands the adapters on the connections; M7.5, M7.6, M7.8, M7.9 remain
 
-M7 is half built. What is in place for the rest of it:
-
-- **Connections are admin-owned, encrypted rows, not env vars — yet the DM still reads env.**
-  `DmProviderSource.get()` still reads `DM_PROVIDER_KIND` / `DM_PROVIDER_API_KEY` /
-  `DM_PROVIDER_BASE_URL` / `DM_PROVIDER_MODEL` / `DM_PROVIDER_MAX_TOKENS` at turn start; no
-  provider configured is a clean `NO_PROVIDER` failure, not a crash. M7.7 swaps the *source*
-  to resolve the campaign's selected connection through the real adapters — the injection
-  point is one Symbol provider, `DM_PROVIDER_SOURCE`, so the swap touches one class, not
-  the graph. M7.5's "test connection" is blocked on that adapter by the issue's own
-  dependency note ("Depends on: M7.4, **M7.7**") — build M7.7 first, or decide in-thread.
+- **The DM runs on the campaign's selected connection (M7.7).**
+  `DmProviderSource.get(campaignId)` re-reads the row on *every* turn — decrypt the key,
+  build the adapter — so a rekey or model change takes effect on the next turn, no restart.
+  `openai_compatible` fetches through `resolvedIpFetch` (the M7.3 wall with the connect
+  pinned to the address the check just approved — the DNS TOCTOU is closed, the
+  request goes to the checked IP, SNI/Host stay the original host); a keyless row
+  crosses a placeholder, never a secret. The `DM_PROVIDER_*` env vars are gone
+  (`DM_PROMPT_BUDGET` stays, context assembly). No selection — or a disabled, or
+  invalid-URL — row is a clean typed `NO_PROVIDER` failure, and the state never moves.
+  E2E: `apps/api/test/dm-connections.e2e.test.ts` runs the *real* `DmProviderSource`
+  (no override) against local mock OpenAI-compatible SSE servers — the seam M7.5's
+  "test connection" reuses, per that issue's own dependency note.
 - **The key material lives in `ProviderSecrets` only** (`apps/api/src/providers/`):
   encrypt/decrypt/replace-key over node:crypto AES-256-GCM, fresh nonce per write, master key
   from `PROVIDER_KEY_ENCRYPTION_KEY` (64 hex, validated at startup). Keys are write-only at
   every seam; `redact` is the choke point every provider-facing string passes through (M6's
   orchestrator already calls it).
-- **The SSRF wall is `BaseUrlService.validate` + `guardedFetch`** (M7.3,
-  `apps/api/src/providers/base-url.ts`). Save-time validation runs in the admin
-  create/update; *request-time* it must be re-run by M7.7 (DNS is not cached on purpose —
-  a save-time pass proves nothing at fetch time), and M7.7's adapters must fetch through
-  `guardedFetch` so a redirect that crosses hosts is refused.
+- **The SSRF wall is `BaseUrlService.validate` + `guardedFetch` + `resolvedIpFetch`**
+  (M7.3, `apps/api/src/providers/base-url.ts`), and it is fully wired now (M7.7):
+  save-time validation in the admin create/update; at request time
+  `openai_compatible` goes through `resolvedIpFetch` (allowlist/loopback opt-in
+  connects by name, everything else by the approved address), and a redirect that
+  crosses hosts is refused before any second request; `anthropic` re-validates the
+  URL before each call — the SDK does its own DNS, so the residual TOCTOU is the
+  documented one, named at the call site.
 - **Authorization is done** (M7.4): platform admin = an `admin` membership in *any*
   campaign (option (a), zero new columns; decided as the in-thread default). `/api/admin/providers`
   is the admin CRUD surface; `GET /api/providers` returns the redacted enabled list whose

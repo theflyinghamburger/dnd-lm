@@ -12,7 +12,12 @@ import { AppModule } from '../src/app.module';
 import type { Db } from '../src/db/db.module';
 import { DB } from '../src/db/db.module';
 import { characters, pendingActions, rolls, sessionEvents, sessions } from '../src/db/schema';
-import { type DmProvider, type DmProviderConfig, type DmRequest } from '../src/dm/provider';
+import {
+  type DmProvider,
+  type DmProviderConfig,
+  type DmRequest,
+  type SourcedProvider,
+} from '../src/dm/provider';
 import { DM_PROVIDER_SOURCE } from '../src/dm/orchestrator';
 import { truncateAll, DATABASE_URL } from './app.harness';
 
@@ -90,7 +95,8 @@ const answer = (over: Record<string, unknown> = {}) =>
 
 type TestApp = { app: INestApplication; db: Db; port: number };
 
-type ProviderSource = { get: () => { provider: DmProvider; config: DmProviderConfig } | null };
+// M7.7: the source is per-campaign and async (a DB read and a key decrypt).
+type ProviderSource = { get: (campaignId: string) => Promise<SourcedProvider | null> };
 
 async function createDmApp(source: ProviderSource): Promise<TestApp> {
   const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
@@ -119,7 +125,7 @@ describe.skipIf(!DATABASE_URL)('the langgraph DM', () => {
   let counter = 0;
 
   beforeAll(async () => {
-    main = await createDmApp({ get: () => ({ provider: dm, config: CONFIG }) });
+    main = await createDmApp({ get: async () => ({ provider: dm, config: CONFIG }) });
   });
   afterAll(async () => {
     await main?.app.close();
@@ -337,7 +343,7 @@ describe.skipIf(!DATABASE_URL)('the langgraph DM', () => {
     // Postgres; a fresh process with a fresh provider resumes it.
     await main.app.close();
     const resumption = new ScriptedDm(() => answer({ narration: 'The tails of the coin.' }));
-    main = await createDmApp({ get: () => ({ provider: resumption, config: CONFIG }) });
+    main = await createDmApp({ get: async () => ({ provider: resumption, config: CONFIG }) });
     try {
       const host2 = await connect(main, table.sessionId, table.host);
       const narration = waitFor(host2, 'DM_NARRATION');
@@ -361,12 +367,12 @@ describe.skipIf(!DATABASE_URL)('the langgraph DM', () => {
       await main.app.close();
       // afterAll closes it again; close is idempotent enough, but leave a live
       // app so the next beforeEach does not hit a dead port.
-      main = await createDmApp({ get: () => ({ provider: dm, config: CONFIG }) });
+      main = await createDmApp({ get: async () => ({ provider: dm, config: CONFIG }) });
     }
   });
 
   it('fails NO_PROVIDER with no graph and a table-safe message (M6.7)', async () => {
-    const bare = await createDmApp({ get: () => null });
+    const bare = await createDmApp({ get: async () => null });
     try {
       const table = await stage(bare);
       const host = await connect(bare, table.sessionId, table.host);
@@ -431,8 +437,9 @@ describe.skipIf(!DATABASE_URL)('the langgraph DM', () => {
   });
 
   it('never logs or sends a provider key that leaks into an SDK error (M7.2, NFR-305)', async () => {
+    // M7.7: there is no env key anymore — the connection's own key (the
+    // config.apiKey below) is what the orchestrator scrubs out of the log.
     const envKey = 'sk-redaction-check-9876543210';
-    vi.stubEnv('DM_PROVIDER_API_KEY', envKey);
     const leaking: DmProvider = {
       kind: 'leaking',
       model: 'leaking-model',
@@ -444,7 +451,7 @@ describe.skipIf(!DATABASE_URL)('the langgraph DM', () => {
       },
     };
     const app2 = await createDmApp({
-      get: () => ({ provider: leaking, config: { ...CONFIG, apiKey: envKey } }),
+      get: async () => ({ provider: leaking, config: { ...CONFIG, apiKey: envKey } }),
     });
     const errorSpy = vi.spyOn(Logger.prototype, 'error');
     try {
@@ -461,7 +468,6 @@ describe.skipIf(!DATABASE_URL)('the langgraph DM', () => {
       expect(await status(app2, table.sessionId)).toBe('WAITING_FOR_PLAYERS');
     } finally {
       errorSpy.mockRestore();
-      vi.unstubAllEnvs();
       await app2.app.close();
     }
   });

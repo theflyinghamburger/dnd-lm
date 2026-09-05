@@ -2,8 +2,16 @@
  * M7.3 — base URL validation: the SSRF wall.
  * All DNS is faked; no network in unit tests.
  */
-import { describe, expect, it, vi } from 'vitest';
-import { FORBIDDEN_RANGES, checkBaseUrl, forbiddenRangeOf, guardedFetch } from './base-url';
+import { createServer, type Server } from 'node:http';
+import { type AddressInfo } from 'node:net';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  FORBIDDEN_RANGES,
+  checkBaseUrl,
+  forbiddenRangeOf,
+  guardedFetch,
+  resolvedIpFetch,
+} from './base-url';
 
 const resolvingTo = (addresses: string[]) => vi.fn(async () => addresses);
 
@@ -218,5 +226,101 @@ describe('guardedFetch — the redirect policy', () => {
     expect(res.status).toBe(200);
     expect(base).toHaveBeenCalledTimes(1);
     expect(base.mock.calls[0]?.[1]).toEqual({ redirect: 'manual' });
+  });
+});
+
+describe('resolvedIpFetch — the openai_compatible request path (M7.7)', () => {
+  let server: Server;
+  let port: number;
+  const seen: Array<{ host?: string; auth?: string; body?: unknown; method?: string }> = [];
+
+  const listen = (handler: Parameters<typeof createServer>[1] | undefined): Promise<void> =>
+    new Promise((resolve) => {
+      server = createServer(handler);
+      server.listen(0, '127.0.0.1', () => {
+        port = (server.address() as AddressInfo).port;
+        resolve();
+      });
+    });
+
+  const echoJson =
+    (record: (req: import('node:http').IncomingMessage, body: unknown) => void) =>
+    (req: import('node:http').IncomingMessage, res: import('node:http').ServerResponse) => {
+      let data = '';
+      req.on('data', (chunk) => (data += chunk));
+      req.on('end', () => {
+        const body = data ? (JSON.parse(data) as unknown) : {};
+        record(req, body);
+        res.writeHead(200, { 'content-type': 'application/json', 'x-served': 'yes' });
+        res.end(JSON.stringify({ ok: true }));
+      });
+    };
+
+  beforeEach(() => {
+    seen.length = 0;
+  });
+
+  afterEach(async () => {
+    vi.unstubAllEnvs();
+    await new Promise((resolve) => server.close(() => resolve(null)));
+  });
+
+  it('serves a local endpoint when ALLOW_LOCAL_PROVIDERS is on, preserving method, body and Host', async () => {
+    vi.stubEnv('ALLOW_LOCAL_PROVIDERS', 'true');
+    await listen(
+      echoJson((req, body) => seen.push({ host: req.headers.host, method: req.method, body })),
+    );
+    const res = await resolvedIpFetch()(`http://127.0.0.1:${port}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', authorization: 'Bearer key-a' },
+      body: JSON.stringify({ model: 'local', stream: true }),
+    });
+    expect(res.status).toBe(200);
+    expect(res.headers.get('x-served')).toBe('yes');
+    await res.text();
+    expect(seen[0]).toMatchObject({
+      host: `127.0.0.1:${port}`,
+      method: 'POST',
+      body: { model: 'local', stream: true },
+    });
+  });
+
+  it('refuses the same local URL without the opt-in flag', async () => {
+    await listen(echoJson((req) => seen.push({ method: req.method })));
+    await expect(
+      resolvedIpFetch()(`http://127.0.0.1:${port}/v1`, { method: 'GET' }),
+    ).rejects.toThrow(/provider fetch refused/);
+    expect(seen).toHaveLength(0);
+  });
+
+  it('refuses a private-range host that the check classifies as forbidden', async () => {
+    vi.stubEnv('ALLOW_LOCAL_PROVIDERS', 'true');
+    await listen(echoJson((req) => seen.push({ method: req.method })));
+    // 10.255.255.1 is in 10.0.0.0/8: the flag opens loopback only, never a
+    // private range, so the request dies before any socket goes out. https is
+    // used so this is the range check, not the plain-http check, that refuses.
+    await expect(
+      resolvedIpFetch()(`https://10.255.255.1:9999/v1`, { method: 'GET' }),
+    ).rejects.toThrow(/forbidden range 10\.0\.0\.0\/8/);
+  });
+
+  it('refuses a cross-host redirect and returns same-host 3xx as-is (no auto-follow)', async () => {
+    vi.stubEnv('ALLOW_LOCAL_PROVIDERS', 'true');
+    await listen((req, res) => {
+      const location = req.url === '/same' ? `/final` : `http://8.8.8.8:1/phish`;
+      res.writeHead(302, { location });
+      res.end();
+    });
+    const cross = await resolvedIpFetch()(`http://127.0.0.1:${port}/redirect`, {
+      method: 'GET',
+    });
+    expect(cross.status).toBe(403);
+    // Same-host: not followed (undici never follows), handed back as-is so the
+    // SDK treats the 3xx as the error it is.
+    const same = await resolvedIpFetch()(`http://127.0.0.1:${port}/same`, {
+      method: 'GET',
+    });
+    expect(same.status).toBe(302);
+    expect(same.headers.get('location')).toBe('/final');
   });
 });

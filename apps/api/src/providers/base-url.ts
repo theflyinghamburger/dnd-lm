@@ -7,6 +7,8 @@
  * of an SSRF attempt.
  */
 import { resolve4, resolve6 } from 'node:dns/promises';
+import { Readable } from 'node:stream';
+import { Agent, request as undiciRequest } from 'undici';
 
 /** Ranges the server must never be talked into fetching (MVP.md M7.3). */
 export const FORBIDDEN_RANGES: string[] = [
@@ -243,4 +245,102 @@ export function guardedFetch(base: typeof fetch = fetch): typeof fetch {
     }
     return first;
   };
+}
+
+/**
+ * The `openai_compatible` request path (M7.7) — M7.3's check re-run at request
+ * time, with the added guarantee the SDK's own fetch cannot give: the socket
+ * opens to the address the check *just classified*, with the configured
+ * hostname kept as TLS servername and `Host` so the certificate still
+ * verifies against the saved domain. DNS rebinding can only repoint a name we
+ * never look at; here the connect target is an address the check approved.
+ */
+export function resolvedIpFetch(): typeof fetch {
+  return async (input, init) => {
+    const url =
+      typeof input === 'string'
+        ? new URL(input)
+        : input instanceof URL
+          ? input
+          : new URL(input.url);
+    const host = url.hostname.toLowerCase().replace(/^\[(.*)\]$/, '$1');
+
+    // The check doubles as the resolver: whatever address list it classifies,
+    // we connect to — one lookup, approved at the same instant as it is used.
+    const approved: string[] = [];
+    const env = providerUrlEnv();
+    const verdict = await checkBaseUrl(url.href, {
+      ...env,
+      resolve: async (h) => {
+        const list = isIpv4Literal(h) || h.includes(':') ? [h] : await defaultResolve(h);
+        approved.push(...list);
+        return list;
+      },
+    });
+    if (!verdict.ok) throw new Error(`provider fetch refused: ${verdict.reason}`);
+
+    // Check short-circuits (allowlist, opt-in loopback) leave `approved`
+    // empty: connect via the name itself, letting the OS do its normal
+    // thing for a host the operator already pinned by name.
+    // ponytail: operator-allowlisted names still ride normal DNS; pinning
+    // them by IP is the upgrade if the allowlist ever must survive rebinding.
+    const target = approved[0] ?? host;
+
+    const port = url.port || (url.protocol === 'https:' ? '443' : '80');
+    const targetHost = target.includes(':') ? `[${target}]` : target;
+    const dispatcher = new Agent({ connect: { servername: host, timeout: 10_000 } });
+    try {
+      const { statusCode, headers, body } = await undiciRequest(
+        `${url.protocol}//${targetHost}:${port}${url.pathname + url.search}`,
+        {
+          method: (init?.method ?? 'GET').toUpperCase(),
+          // Host keeps the configured name (and its port) — the socket talks
+          // to `target`, the server sees the name it was configured with.
+          headers: { ...requestHeaders(init), host: url.host },
+          ...(init?.body !== undefined && init.body !== null
+            ? { body: init.body as string | Buffer }
+            : {}),
+          ...(init?.signal ? { signal: init.signal } : {}),
+          dispatcher,
+        },
+      );
+      // undici hands back a plain object whose values may be `string[]`.
+      const flat: Record<string, string> = {};
+      for (const [key, value] of Object.entries(headers)) {
+        if (value !== undefined) flat[key] = Array.isArray(value) ? value.join(', ') : value;
+      }
+      if (statusCode >= 300 && statusCode < 400) {
+        const to = flat.location ? new URL(flat.location, url.href).host : null;
+        if (to !== null && to !== url.host) {
+          // Swallow the destroy's error event; we are not reading this body.
+          body.on('error', () => undefined);
+          body.destroy();
+          return new Response(null, { status: 403, statusText: 'cross-host redirect refused' });
+        }
+        // undici does not follow redirects; a same-host 3xx goes back as-is
+        // and the SDK treats it as the error it is.
+      }
+      const stream: ReadableStream =
+        body instanceof Readable ? Readable.toWeb(body) : (body as ReadableStream);
+      return new Response(stream, { status: statusCode, headers: new Headers(flat) });
+    } finally {
+      await dispatcher.close();
+    }
+  };
+}
+
+function requestHeaders(init: RequestInit | undefined): Record<string, string> {
+  const headers = init?.headers;
+  const out: Record<string, string> = {};
+  if (!headers) return out;
+  if (headers instanceof Headers) {
+    headers.forEach((value, key) => {
+      out[key] = value;
+    });
+  } else if (Array.isArray(headers)) {
+    for (const [key, value] of headers) out[key] = value;
+  } else {
+    Object.assign(out, headers);
+  }
+  return out;
 }
