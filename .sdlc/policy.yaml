@@ -32,6 +32,7 @@ profiles:
   # Matching these does not lower anything - it only fails to raise the floor.
   # Listed for documentation; the floor starts at `fast` regardless.
   fast:
+    - 'apps/web/**'
     - 'docs/**'
     - '**/*.md'
 

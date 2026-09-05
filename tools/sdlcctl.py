@@ -125,6 +125,18 @@ class Forge:
     def changed_files(self) -> list[str]:
         pr = self.pr()
         if pr:
+            # `gh pr view --json files` caps its list. A truncated list computes
+            # a floor BELOW the change's real profile, so page the API instead
+            # of trusting the capped view.
+            try:
+                repo = json.loads(_run(["gh", "repo", "view", "--json", "nameWithOwner"], self.root))
+                out = _run(["gh", "api", "--paginate",
+                            f"repos/{repo['nameWithOwner']}/pulls/{pr['number']}/files",
+                            "--jq", ".[].filename"], self.root)
+                if out.strip():
+                    return out.splitlines()
+            except (RuntimeError, json.JSONDecodeError, KeyError):
+                pass  # fall back to the capped view rather than failing open
             return [f["path"] for f in pr.get("files", [])]
         base = self.default_branch()
         return [f for f in _run(

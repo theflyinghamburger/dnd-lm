@@ -79,6 +79,8 @@ jobs:
   scan:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: actions/dependency-review-action@v4
@@ -95,9 +97,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ github.head_ref }}
           fetch-depth: 0
 
-      - run: pip install pyyaml
+      - run: pip install pyyaml==6.0.2
+
+      - name: Reviewer self-check
+        run: python3 tools/sdlcreview.py --selftest
 
       # Any OpenAI-style /chat/completions host - set the two repo variables and
       # the secret. The review procedure itself lives in
@@ -135,12 +141,15 @@ jobs:
       pull-requests: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
 
       - uses: actions/download-artifact@v4
         with:
           name: sdlc-review
 
-      - run: pip install pyyaml
+      - run: pip install pyyaml==6.0.2
 
       - name: Gate
         env:
