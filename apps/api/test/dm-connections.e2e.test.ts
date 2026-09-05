@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { createServer, type Server } from 'node:http';
 import { type AddressInfo } from 'node:net';
 import { io, type Socket } from 'socket.io-client';
@@ -233,6 +233,11 @@ describe.skipIf(!DATABASE_URL)('DM adapter wiring from connections (M7.7)', () =
     const event = await narration;
 
     expect((event.payload as { narration: string }).narration).toBe('The gate grinds open.');
+    // M7.8: the committed narration names the connection and model that made it.
+    expect(event.payload).toMatchObject({
+      provider_connection_id: connId,
+      model_id: 'local-llama',
+    });
     expect(mock.recs).toHaveLength(1);
     expect(mock.recs[0]).toMatchObject({
       auth: 'Bearer sk-key-a',
@@ -315,12 +320,52 @@ describe.skipIf(!DATABASE_URL)('DM adapter wiring from connections (M7.7)', () =
       const hostA = await connect(app, a.sessionId, a.host);
       const narrationA = waitFor(hostA, 'DM_NARRATION');
       await say(hostA, a.sessionId, '@dm hello from A', 0);
-      await narrationA;
+      const eventA = await narrationA;
 
       const hostB = await connect(app, b.sessionId, b.host);
       const narrationB = waitFor(hostB, 'DM_NARRATION');
       await say(hostB, b.sessionId, '@dm hello from B', 0);
-      await narrationB;
+      const eventB = await narrationB;
+
+      // M7.8: each turn is attributed to its own connection, so a
+      // per-connection cost or failure rate is computable from the log.
+      expect(eventA.payload).toMatchObject({
+        provider_connection_id: connA,
+        model_id: 'model-a',
+      });
+      expect(eventB.payload).toMatchObject({
+        provider_connection_id: connB,
+        model_id: 'model-b',
+      });
+
+      // M7.8 AC-10: the per-connection roll-up the attribution exists for.
+      // Failure rate and token spend, keyed on the connection, from the event
+      // log alone — no join to a table the resolution did not write.
+      const rollup = await app.db.execute(sql`
+        SELECT payload->>'provider_connection_id' AS connection_id,
+               payload->>'model_id'               AS model_id,
+               count(*) FILTER (WHERE type = 'DM_RESOLUTION_FAILED') AS failures,
+               count(*) FILTER (WHERE type = 'DM_NARRATION')         AS resolutions,
+               COALESCE(SUM((payload->'usage'->>'input_tokens')::bigint), 0)  AS input_tokens,
+               COALESCE(SUM((payload->'usage'->>'output_tokens')::bigint), 0) AS output_tokens
+          FROM session_events
+         WHERE type IN ('DM_NARRATION', 'DM_RESOLUTION_FAILED')
+         GROUP BY 1, 2
+         ORDER BY connection_id
+      `);
+      expect(
+        [...rollup].map((r) => ({
+          connection_id: r.connection_id,
+          model_id: r.model_id,
+          resolutions: Number(r.resolutions),
+          input_tokens: Number(r.input_tokens),
+        })),
+      ).toEqual(
+        [
+          { connection_id: connA, model_id: 'model-a', resolutions: 1, input_tokens: 9 },
+          { connection_id: connB, model_id: 'model-b', resolutions: 1, input_tokens: 9 },
+        ].sort((x, y) => x.connection_id.localeCompare(y.connection_id)),
+      );
 
       expect(mock.recs).toEqual([
         { auth: 'Bearer sk-key-a', model: 'model-a', path: '/v1/chat/completions' },
@@ -348,7 +393,13 @@ describe.skipIf(!DATABASE_URL)('DM adapter wiring from connections (M7.7)', () =
     await say(host, table.sessionId, '@dm Aria picks the lock', 0);
     const event = await failed;
 
-    expect(event.payload).toMatchObject({ reason: 'NO_PROVIDER' });
+    // M7.8: a failure with no connection resolved reports null rather than
+    // guessing — that is what NO_PROVIDER means.
+    expect(event.payload).toMatchObject({
+      reason: 'NO_PROVIDER',
+      provider_connection_id: null,
+      model_id: null,
+    });
     expect(await status(app, table.sessionId)).toBe('WAITING_FOR_PLAYERS');
     const narrations = await app.db
       .select({ eventId: sessionEvents.eventId })

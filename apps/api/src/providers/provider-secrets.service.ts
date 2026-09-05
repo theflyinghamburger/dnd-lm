@@ -12,6 +12,7 @@ import { randomBytes, createCipheriv, createDecipheriv } from 'node:crypto';
 import { eq } from 'drizzle-orm';
 import { DB, type Db } from '../db/db.module';
 import { providerConnections } from '../db/schema';
+import type { Tx } from '../session/session.service';
 
 export const MASTER_KEY_ENV = 'PROVIDER_KEY_ENCRYPTION_KEY';
 /** The GCM auth tag is appended to the ciphertext; the schema has no slot for it. */
@@ -83,10 +84,17 @@ export class ProviderSecrets {
    * Replace key: re-encrypt under a fresh nonce and refresh `last4`; everything
    * else on the row is untouched. A fresh nonce means even the same key yields
    * different ciphertext, so old captures stay useless.
+   *
+   * `executor` lets the caller pass its own transaction, so the key change and
+   * the audit row that records it commit together or not at all (M7.8).
    */
-  async replaceKey(connectionId: string, newKey: string): Promise<void> {
+  async replaceKey(
+    connectionId: string,
+    newKey: string,
+    executor: Db | Tx = this.db,
+  ): Promise<void> {
     const next = this.encrypt(newKey);
-    await this.db
+    await executor
       .update(providerConnections)
       .set({
         apiKeyCiphertext: next.apiKeyCiphertext,

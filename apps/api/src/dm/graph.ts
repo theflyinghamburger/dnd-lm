@@ -94,6 +94,12 @@ export const DmState = Annotation.Root({
   usage: Annotation<DmUsage | null>(hold<DmUsage | null>(() => null)),
   /** The model the turn ran on — cost estimation at commit, telemetry span. */
   model: Annotation<string | null>(hold<string | null>(() => null)),
+  /**
+   * The connection row the turn ran on (M7.8). Carried beside `model` rather
+   * than looked up at commit: the resume-after-roll path then reports the same
+   * connection the turn actually used, with no second read to disagree with.
+   */
+  connectionId: Annotation<string | null>(hold<string | null>(() => null)),
   failure: Annotation<DmFailure | null>(hold<DmFailure | null>(() => null)),
 });
 export type DmGraphState = typeof DmState.State;
@@ -207,6 +213,7 @@ export function buildDmGraph(deps: DmGraphDeps, checkpointer: BaseCheckpointSave
       narration,
       usage: completion.usage,
       model: sourced.config.model,
+      connectionId: sourced.connectionId,
       attempt: state.attempt,
       validationErrors: null,
       rollRequest: null,
