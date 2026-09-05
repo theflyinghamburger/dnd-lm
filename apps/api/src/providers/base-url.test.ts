@@ -23,6 +23,14 @@ describe('checkBaseUrl — literals, no DNS', () => {
     expect(verdict).toEqual({ ok: true });
   });
 
+  it('accepts a public literal IP without any DNS lookup', async () => {
+    // CI resolvers refuse IP-literal lookups; a literal must settle here, never in DNS.
+    const resolve = resolvingTo([]);
+    const verdict = await checkBaseUrl('https://93.184.216.34/v1', { resolve });
+    expect(verdict).toEqual({ ok: true });
+    expect(resolve).not.toHaveBeenCalled();
+  });
+
   it('rejects the cloud metadata endpoint by name', async () => {
     const verdict = await checkBaseUrl('https://169.254.169.254/latest/meta-data/');
     expect(verdict).toEqual({
