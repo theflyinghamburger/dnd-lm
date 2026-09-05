@@ -9,7 +9,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import type { AdminConnection } from '@dnd-lm/contracts';
+import type { AdminConnection, ConnectionTestResult } from '@dnd-lm/contracts';
 import {
   CreateConnectionRequest,
   ReplaceKeyRequest,
@@ -18,6 +18,7 @@ import {
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { PublicUser } from '@dnd-lm/contracts';
 import { ZodValidationPipe } from '../common/zod-validation.pipe';
+import { ConnectionTestService } from '../providers/connection-test.service';
 import { ProviderConnectionsService } from '../providers/connections.service';
 import { AdminGuard } from './admin.guard';
 
@@ -29,7 +30,10 @@ import { AdminGuard } from './admin.guard';
 @Controller('admin/providers')
 @UseGuards(AdminGuard)
 export class AdminProviderConnectionsController {
-  constructor(private readonly connections: ProviderConnectionsService) {}
+  constructor(
+    private readonly connections: ProviderConnectionsService,
+    private readonly tests: ConnectionTestService,
+  ) {}
 
   @Get()
   list(): Promise<AdminConnection[]> {
@@ -65,6 +69,16 @@ export class AdminProviderConnectionsController {
     @Body(new ZodValidationPipe(ReplaceKeyRequest)) body: ReplaceKeyRequest,
   ): Promise<AdminConnection> {
     return this.connections.replaceKey(id, body.apiKey);
+  }
+
+  /**
+   * Test connection (M7.5) — one real minimal call through the real adapter.
+   * POST, not GET: it spends money, and nothing may fire it implicitly.
+   */
+  @Post(':id/test')
+  @HttpCode(200)
+  test(@Param('id') id: string): Promise<ConnectionTestResult> {
+    return this.tests.test(id);
   }
 
   @Delete(':id')
