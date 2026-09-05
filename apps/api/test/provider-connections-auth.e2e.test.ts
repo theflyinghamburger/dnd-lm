@@ -92,7 +92,7 @@ describe.skipIf(!DATABASE_URL)('provider connections authorization (M7.4)', () =
   });
 
   describe('admin surface — 403 for every non-admin, every method (M7 acceptance bullet)', () => {
-    it('refuses a plain host on all seven admin endpoints', async () => {
+    it('refuses a plain host on every admin endpoint', async () => {
       const host = await signUp('host@example.com');
       await createHostCampaign(host, 'Lost Mine');
 
@@ -114,6 +114,9 @@ describe.skipIf(!DATABASE_URL)('provider connections authorization (M7.4)', () =
         .set('Cookie', host)
         .send({ apiKey: 'sk-test-aaaa' })
         .expect(403);
+      // M7.5's test action is admin-only for the same reason the rest is: it
+      // spends the deployment's money against a URL only admins may set.
+      await api().post(`/api/admin/providers/${UUID}/test`).set('Cookie', host).expect(403);
     });
 
     it('a player is refused too, and the unauthenticated get 401, not 403', async () => {
@@ -158,6 +161,8 @@ describe.skipIf(!DATABASE_URL)('provider connections authorization (M7.4)', () =
         modelId: 'opus',
         maxTokens: 1024,
         enabled: true,
+        // Never tested yet (M7.5); the field is on the admin shape from creation.
+        lastTest: null,
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
       });

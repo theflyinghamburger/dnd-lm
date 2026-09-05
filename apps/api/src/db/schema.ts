@@ -387,6 +387,13 @@ export const providerConnections = pgTable('provider_connections', {
   modelId: text('model_id').notNull(),
   maxTokens: integer('max_tokens').notNull().default(1024),
   enabled: boolean('enabled').notNull().default(true),
+  /**
+   * The last M7.5 *Test connection* result (`ConnectionTestResult`), latest
+   * only — the timestamp lives inside the object, so there is one source of
+   * truth for when the connection was last tested. No history is kept: the
+   * admin list shows the latest verdict and nothing asks for more.
+   */
+  lastTestResult: jsonb('last_test_result'),
   createdBy: uuid('created_by')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),

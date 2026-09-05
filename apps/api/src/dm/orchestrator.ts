@@ -44,7 +44,7 @@ import {
   type Tx,
 } from '../session/session.service';
 import { DmContextReader } from './context';
-import { BaseUrlService } from '../providers/base-url.service';
+import { ProviderConnectionsService } from '../providers/connections.service';
 import { ProviderSecrets } from '../providers/provider-secrets.service';
 import {
   buildDmGraph,
@@ -54,7 +54,7 @@ import {
   type RollAsk,
   type RollResult,
 } from './graph';
-import { buildDmProvider, type SourcedProvider } from './provider';
+import { type SourcedProvider } from './provider';
 import { estimateUsd, withSpan } from './telemetry';
 
 export const DM_PROVIDER_SOURCE = Symbol('DM_PROVIDER_SOURCE');
@@ -72,8 +72,7 @@ type DmCompiledGraph = ReturnType<typeof buildDmGraph>;
 export class DmProviderSource {
   constructor(
     @Inject(DB) private readonly db: Db,
-    private readonly secrets: ProviderSecrets,
-    private readonly urls: BaseUrlService,
+    private readonly connections: ProviderConnectionsService,
   ) {}
 
   /**
@@ -100,19 +99,10 @@ export class DmProviderSource {
       .limit(1);
     if (!row || !row.enabled) return null;
 
-    const verdict = await this.urls.validate(row.baseUrl);
-    if (!verdict.ok) return null;
-
-    const config = {
-      kind: row.kind,
-      baseUrl: row.baseUrl,
-      // null here: a keyless endpoint (M7.3 local inference); the adapters
-      // treat an empty key as "send no credential of consequence".
-      apiKey: this.secrets.decrypt(row) ?? '',
-      model: row.modelId,
-      maxTokens: row.maxTokens,
-    };
-    return { provider: buildDmProvider(config), config };
+    // The URL re-check, the decrypt, and the adapter build are one shared
+    // path (M7.5): the connection an admin tested is built exactly the way a
+    // turn builds it, or the test reassures about the wrong code.
+    return this.connections.sourceFromRow(row);
   }
 }
 

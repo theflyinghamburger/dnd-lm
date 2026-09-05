@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { BaseUrlService } from './base-url.service';
+import { ConnectionTestService } from './connection-test.service';
 import { ProviderConnectionsService } from './connections.service';
 import { ProviderSecrets } from './provider-secrets.service';
 import { ProviderConnectionsController } from './providers.controller';
@@ -11,7 +12,7 @@ import { ProviderConnectionsController } from './providers.controller';
  */
 @Module({
   controllers: [ProviderConnectionsController],
-  providers: [ProviderSecrets, BaseUrlService, ProviderConnectionsService],
-  exports: [ProviderSecrets, BaseUrlService, ProviderConnectionsService],
+  providers: [ProviderSecrets, BaseUrlService, ProviderConnectionsService, ConnectionTestService],
+  exports: [ProviderSecrets, BaseUrlService, ProviderConnectionsService, ConnectionTestService],
 })
 export class ProvidersModule {}
