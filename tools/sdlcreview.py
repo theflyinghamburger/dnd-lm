@@ -37,7 +37,9 @@ SEVERITY_ORDER = ["blocking", "high", "medium", "low", "informational"]
 
 
 def env(name: str) -> str:
-    v = os.environ.get(name)
+    # .strip(): a key pasted with a stray leading space still passes Python's
+    # header validation, and the host then reports it as no credential at all.
+    v = (os.environ.get(name) or "").strip()
     if not v:
         raise SystemExit(f"{name} is not set")
     return v
