@@ -68,6 +68,15 @@ AC-7  The existing `check` job is unchanged: build, typecheck, lint, format,
 - **`enforce_admins: false`.** There is one maintainer and nobody can approve
   their own pull request; without the bypass nothing would ever merge. The
   consequence is stated in SDLC.md rather than hidden.
+- **The reviewer's self-check is `--selftest`, not pytest.** This is a pnpm
+  repository; adding a Python test framework and a CI step to cover two functions
+  costs more than it returns. The assertions run as a CI step before any review
+  is paid for, so they fail loudly if the logic breaks.
+- **Diff and work item are delimited as untrusted data.** They are interpolated
+  into the reviewer's prompt, so a pull request can address the reviewer
+  directly. The prompt marks that content as data and defines an embedded
+  directive as a `blocking` finding. Raised by the reviewer against an earlier
+  commit of this branch.
 - **CODEOWNERS names a single user, not a team.** Placeholder until there is a
   second maintainer; marked TODO in the file.
 
@@ -85,9 +94,9 @@ AC-7  The existing `check` job is unchanged: build, typecheck, lint, format,
 | AC | Verified by |
 |---|---|
 | AC-1 | `python3 tools/sdlcctl.py check-repo` — passes, no warning |
-| AC-2 | `sdlcctl.profile_floor` exercised over all seven path classes |
-| AC-3 | `sdlcreview.py` sets `review["sha"]` from `Forge.head_sha()`; end-to-end run against a stub server confirmed |
-| AC-4 | Stub server returned `verdict: pass` alongside a blocking finding; output was `blocked` |
-| AC-5 | `tests/test_sdlcreview.py::test_extract_json_refuses_junk`; empty-stdin path raises `SystemExit` |
+| AC-2 | `sdlcctl.profile_floor` exercised over all seven path classes; `apps/web/**` now named explicitly in `policy.yaml` rather than relying on the default |
+| AC-3 | `sdlcreview.py --selftest` asserts `apply_gate_rules` takes `sha` from git, not from the reply. CI runs it before any review is paid for |
+| AC-4 | `--selftest` feeds a reply claiming `verdict: pass` beside a blocking finding and asserts the result is `blocked` |
+| AC-5 | `--selftest` asserts `extract_json` rejects junk and truncated JSON; empty stdin raises `SystemExit` |
 | AC-6 | `.gitignore` `.claude/*` + `!.claude/skills/`; `git status --untracked-files=all` lists only the two SKILL.md files |
 | AC-7 | `ci.yml` diff touches no step inside `check`; the three new jobs are `if: github.event_name == 'pull_request'` |
