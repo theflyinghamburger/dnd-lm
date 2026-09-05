@@ -59,6 +59,11 @@ import { estimateUsd, withSpan } from './telemetry';
 
 export const DM_PROVIDER_SOURCE = Symbol('DM_PROVIDER_SOURCE');
 
+/** Which connection and model a resolution ran on (M7.8, NFR-502, FR-805). */
+export type DmAttribution = { connectionId: string | null; model: string | null };
+/** A failure with no connection resolved - NO_PROVIDER's own shape. */
+const NO_ATTRIBUTION: DmAttribution = { connectionId: null, model: null };
+
 type DmCompiledGraph = ReturnType<typeof buildDmGraph>;
 
 /**
@@ -310,6 +315,13 @@ export class DmOrchestrator implements OnApplicationBootstrap {
           return;
         }
         span.setAttribute('model', sourced.provider.model);
+        // Which connection served this turn (M7.8): on the span for cost, and
+        // on every event this resolution writes for the failure-rate query.
+        span.setAttribute('provider_connection_id', sourced.connectionId);
+        const attribution = {
+          connectionId: sourced.connectionId,
+          model: sourced.provider.model,
+        };
 
         const resolutionId = randomUUID();
         this.active.set(sessionId, resolutionId);
@@ -326,6 +338,7 @@ export class DmOrchestrator implements OnApplicationBootstrap {
               'INTERNAL',
               opts.actorId,
               opts.callbacks,
+              attribution,
             );
             return;
           }
@@ -381,6 +394,7 @@ export class DmOrchestrator implements OnApplicationBootstrap {
                 'RECURSION_LIMIT',
                 opts.actorId,
                 opts.callbacks,
+                attribution,
               );
             } else {
               this.logger.error(
@@ -395,6 +409,7 @@ export class DmOrchestrator implements OnApplicationBootstrap {
                 'INTERNAL',
                 opts.actorId,
                 opts.callbacks,
+                attribution,
               );
             }
             return;
@@ -420,6 +435,7 @@ export class DmOrchestrator implements OnApplicationBootstrap {
               state.failure.reason,
               opts.actorId,
               opts.callbacks,
+              attribution,
             );
             return;
           }
@@ -531,6 +547,11 @@ export class DmOrchestrator implements OnApplicationBootstrap {
           return;
         }
         span.setAttribute('model', sourced.provider.model);
+        span.setAttribute('provider_connection_id', sourced.connectionId);
+        const attribution = {
+          connectionId: sourced.connectionId,
+          model: sourced.provider.model,
+        };
 
         const [roll] = await this.db
           .select()
@@ -538,7 +559,14 @@ export class DmOrchestrator implements OnApplicationBootstrap {
           .where(eq(rolls.pendingActionId, actionId))
           .limit(1);
         if (!roll) {
-          await this.reportFailure(sessionId, resolutionId, 'INTERNAL', actorId, callbacks);
+          await this.reportFailure(
+            sessionId,
+            resolutionId,
+            'INTERNAL',
+            actorId,
+            callbacks,
+            attribution,
+          );
           return;
         }
         const [character] = roll.characterId
@@ -564,7 +592,14 @@ export class DmOrchestrator implements OnApplicationBootstrap {
         try {
           const infra = await this.ensureGraph();
           if (!infra) {
-            await this.reportFailure(sessionId, resolutionId, 'INTERNAL', actorId, callbacks);
+            await this.reportFailure(
+              sessionId,
+              resolutionId,
+              'INTERNAL',
+              actorId,
+              callbacks,
+              attribution,
+            );
             return;
           }
           const { graph } = infra;
@@ -605,6 +640,7 @@ export class DmOrchestrator implements OnApplicationBootstrap {
                 'RECURSION_LIMIT',
                 actorId,
                 callbacks,
+                attribution,
               );
             } else {
               this.logger.error(
@@ -613,7 +649,14 @@ export class DmOrchestrator implements OnApplicationBootstrap {
                   [sourced.config.apiKey],
                 )}`,
               );
-              await this.reportFailure(sessionId, resolutionId, 'INTERNAL', actorId, callbacks);
+              await this.reportFailure(
+                sessionId,
+                resolutionId,
+                'INTERNAL',
+                actorId,
+                callbacks,
+                attribution,
+              );
             }
             return;
           }
@@ -638,6 +681,7 @@ export class DmOrchestrator implements OnApplicationBootstrap {
               state.failure.reason,
               actorId,
               callbacks,
+              attribution,
             );
             return;
           }
@@ -708,6 +752,9 @@ export class DmOrchestrator implements OnApplicationBootstrap {
                 addressed_to: output.addressed_to,
                 proposed_state_changes: output.proposed_state_changes,
                 memory_candidates: output.memory_candidates,
+                // M7.8: which connection and model produced this narration.
+                provider_connection_id: state.connectionId,
+                model_id: state.model,
                 usage: usage
                   ? {
                       input_tokens: usage.inputTokens,
@@ -777,6 +824,7 @@ export class DmOrchestrator implements OnApplicationBootstrap {
         rejected ? 'MUTATION_REJECTED' : 'INTERNAL',
         actorId,
         callbacks,
+        { connectionId: state.connectionId, model: state.model },
       );
     }
   }
@@ -942,6 +990,7 @@ export class DmOrchestrator implements OnApplicationBootstrap {
     reason: DmFailureReason,
     actorId: string,
     callbacks: DmTriggerCallbacks,
+    attribution: DmAttribution = NO_ATTRIBUTION,
   ): Promise<void> {
     const session = await this.sessionService.find(sessionId);
     if (!session) return;
@@ -977,7 +1026,17 @@ export class DmOrchestrator implements OnApplicationBootstrap {
           const drafts: EventDraft[] = [
             {
               type: 'DM_RESOLUTION_FAILED',
-              payload: { resolution_id: resolutionId, reason, message: message[reason] },
+              payload: {
+                resolution_id: resolutionId,
+                reason,
+                message: message[reason],
+                // M7.8: failures carry the connection so a per-connection
+                // failure rate is computable from the event log alone. Null
+                // where no connection was resolved - that *is* the NO_PROVIDER
+                // case, and a null is the honest answer.
+                provider_connection_id: attribution.connectionId,
+                model_id: attribution.model,
+              },
               actor: dmActor,
               source,
             },

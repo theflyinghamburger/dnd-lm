@@ -27,6 +27,9 @@ const pregen = (file: string): { name: string; sheet: unknown } =>
     sheet: unknown;
   };
 
+/** The connection a scripted turn is attributed to (M7.8). */
+const CONNECTION_ID = '11111111-1111-4111-8111-111111111111';
+
 const CONFIG: DmProviderConfig = {
   kind: 'anthropic',
   baseUrl: null,
@@ -125,7 +128,9 @@ describe.skipIf(!DATABASE_URL)('the langgraph DM', () => {
   let counter = 0;
 
   beforeAll(async () => {
-    main = await createDmApp({ get: async () => ({ provider: dm, config: CONFIG }) });
+    main = await createDmApp({
+      get: async () => ({ provider: dm, config: CONFIG, connectionId: CONNECTION_ID }),
+    });
   });
   afterAll(async () => {
     await main?.app.close();
@@ -343,7 +348,9 @@ describe.skipIf(!DATABASE_URL)('the langgraph DM', () => {
     // Postgres; a fresh process with a fresh provider resumes it.
     await main.app.close();
     const resumption = new ScriptedDm(() => answer({ narration: 'The tails of the coin.' }));
-    main = await createDmApp({ get: async () => ({ provider: resumption, config: CONFIG }) });
+    main = await createDmApp({
+      get: async () => ({ provider: resumption, config: CONFIG, connectionId: CONNECTION_ID }),
+    });
     try {
       const host2 = await connect(main, table.sessionId, table.host);
       const narration = waitFor(host2, 'DM_NARRATION');
@@ -367,7 +374,9 @@ describe.skipIf(!DATABASE_URL)('the langgraph DM', () => {
       await main.app.close();
       // afterAll closes it again; close is idempotent enough, but leave a live
       // app so the next beforeEach does not hit a dead port.
-      main = await createDmApp({ get: async () => ({ provider: dm, config: CONFIG }) });
+      main = await createDmApp({
+        get: async () => ({ provider: dm, config: CONFIG, connectionId: CONNECTION_ID }),
+      });
     }
   });
 
@@ -451,7 +460,11 @@ describe.skipIf(!DATABASE_URL)('the langgraph DM', () => {
       },
     };
     const app2 = await createDmApp({
-      get: async () => ({ provider: leaking, config: { ...CONFIG, apiKey: envKey } }),
+      get: async () => ({
+        provider: leaking,
+        config: { ...CONFIG, apiKey: envKey },
+        connectionId: CONNECTION_ID,
+      }),
     });
     const errorSpy = vi.spyOn(Logger.prototype, 'error');
     try {

@@ -112,8 +112,17 @@ export type DmProviderConfig = {
   maxTokens: number;
 };
 
-/** A provider resolved for one campaign, with the config it was built from. */
-export type SourcedProvider = { provider: DmProvider; config: DmProviderConfig };
+/**
+ * A provider resolved for one campaign, with the config it was built from and
+ * the id of the row it came from — attribution (M7.8) needs to name the
+ * connection, not just the model, because two connections can serve the same
+ * model at different endpoints and cost.
+ */
+export type SourcedProvider = {
+  provider: DmProvider;
+  config: DmProviderConfig;
+  connectionId: string;
+};
 
 export function buildDmProvider(config: DmProviderConfig): DmProvider {
   return config.kind === 'anthropic'

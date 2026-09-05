@@ -55,20 +55,22 @@ export class AdminProviderConnectionsController {
 
   @Patch(':id')
   update(
+    @CurrentUser() user: PublicUser,
     @Param('id') id: string,
     @Body(new ZodValidationPipe(UpdateConnectionRequest)) body: UpdateConnectionRequest,
   ): Promise<AdminConnection> {
-    return this.connections.update(id, body);
+    return this.connections.update(id, user.id, body);
   }
 
   /** Replace key — M7.2's re-encrypt under a fresh nonce (NFR-305). */
   @Post(':id/key')
   @HttpCode(200)
   replaceKey(
+    @CurrentUser() user: PublicUser,
     @Param('id') id: string,
     @Body(new ZodValidationPipe(ReplaceKeyRequest)) body: ReplaceKeyRequest,
   ): Promise<AdminConnection> {
-    return this.connections.replaceKey(id, body.apiKey);
+    return this.connections.replaceKey(id, user.id, body.apiKey);
   }
 
   /**
@@ -83,7 +85,7 @@ export class AdminProviderConnectionsController {
 
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id') id: string): Promise<void> {
-    return this.connections.delete(id);
+  remove(@CurrentUser() user: PublicUser, @Param('id') id: string): Promise<void> {
+    return this.connections.delete(id, user.id);
   }
 }
