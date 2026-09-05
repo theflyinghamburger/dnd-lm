@@ -99,10 +99,14 @@ const testConfig = {
   maxTokens: 1000,
 };
 
+/** The row the turn is attributed to (M7.8). */
+const TEST_CONNECTION_ID = '11111111-1111-4111-8111-111111111111';
+
 /** The M7.7 shape: the graph resolves the campaign's provider at call time. */
 const sourcing = (provider: DmProvider) => async (_campaignId: string) => ({
   provider,
   config: testConfig,
+  connectionId: TEST_CONNECTION_ID,
 });
 
 async function run(steps: Step[], over: Partial<Omit<DmTriggerState, 'resolutionId'>> = {}) {

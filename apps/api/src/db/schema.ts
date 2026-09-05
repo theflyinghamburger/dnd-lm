@@ -375,6 +375,15 @@ const bytea = customType<{ data: Buffer; driverData: Buffer }>({
  * Campaigns point at one of these through
  * `campaigns.settings.provider_connection_id`.
  */
+export const providerConnectionAuditAction = pgEnum('provider_connection_audit_action', [
+  'created',
+  'updated',
+  'replaced_key',
+  'deleted',
+  'enabled',
+  'disabled',
+]);
+
 export const providerConnections = pgTable('provider_connections', {
   id: uuid('id').primaryKey().defaultRandom(),
   label: text('label').notNull(),
@@ -400,3 +409,29 @@ export const providerConnections = pgTable('provider_connections', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
+
+/**
+ * Who changed which provider setting (M7.8, FR-805, NFR-502). Field *names*
+ * only: `changed_fields` is a diff of the admin DTO against the stored row, so
+ * no value — and above all no key, ciphertext, or URL — can enter this table.
+ *
+ * There is deliberately no foreign key to `provider_connections`: an audit row
+ * has to outlive the row it audits, and `deleted` is one of the actions it
+ * records. `actor_user_id` keeps its key with `ON DELETE SET NULL`, which
+ * redacts the actor when a user is removed instead of destroying the history.
+ */
+export const providerConnectionAudit = pgTable(
+  'provider_connection_audit',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    connectionId: uuid('connection_id').notNull(),
+    actorUserId: uuid('actor_user_id').references(() => users.id, { onDelete: 'set null' }),
+    action: providerConnectionAuditAction('action').notNull(),
+    changedFields: text('changed_fields')
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    at: timestamp('at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('provider_connection_audit_connection_idx').on(t.connectionId, t.at)],
+);

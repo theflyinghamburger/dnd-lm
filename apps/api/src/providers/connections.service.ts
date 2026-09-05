@@ -14,8 +14,9 @@ import type {
 import { ConnectionTestResult } from '@dnd-lm/contracts';
 import { eq, sql } from 'drizzle-orm';
 import { DB, type Db } from '../db/db.module';
-import { campaigns, providerConnections } from '../db/schema';
+import { campaigns, providerConnectionAudit, providerConnections } from '../db/schema';
 import { buildDmProvider, type SourcedProvider } from '../dm/provider';
+import type { Tx } from '../session/session.service';
 import { BaseUrlService } from './base-url.service';
 import { ProviderSecrets } from './provider-secrets.service';
 
@@ -38,6 +39,35 @@ function toAdmin(row: Row): AdminConnection {
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
+}
+
+/** DTO field -> the column name the audit records it under. */
+const UPDATABLE = [
+  ['label', 'label'],
+  ['baseUrl', 'base_url'],
+  ['modelId', 'model_id'],
+  ['maxTokens', 'max_tokens'],
+  ['enabled', 'enabled'],
+] as const satisfies ReadonlyArray<readonly [keyof UpdateConnectionRequest & keyof Row, string]>;
+
+function createdFields(input: CreateConnectionRequest): string[] {
+  const fields = ['label', 'kind', 'base_url', 'model_id'];
+  if (input.maxTokens !== undefined) fields.push('max_tokens');
+  if (input.apiKey) fields.push('api_key');
+  return fields;
+}
+
+/**
+ * "Who turned this off" is the question the audit exists to answer, so an
+ * `enabled` flip is its own action rather than a generic `updated` whose
+ * changed fields have to be read to find out.
+ */
+function actionFor(
+  was: boolean,
+  next: boolean | undefined,
+): (typeof providerConnectionAudit.$inferInsert)['action'] {
+  if (next === undefined || next === was) return 'updated';
+  return next ? 'enabled' : 'disabled';
 }
 
 function parseLastTest(stored: unknown): AdminConnection['lastTest'] {
@@ -98,48 +128,73 @@ export class ProviderConnectionsService {
   async create(userId: string, input: CreateConnectionRequest): Promise<AdminConnection> {
     const verdict = await this.urls.validate(input.baseUrl);
     if (!verdict.ok) {
+      // Refused before the transaction opens, so a rejected URL leaves no
+      // audit row behind (M7.8): the log records changes, not attempts.
       throw new BadRequestException({ code: 'BASE_URL_REJECTED', reason: verdict.reason });
     }
     const key = input.apiKey ? this.secrets.encrypt(input.apiKey) : null;
-    const [row] = await this.db
-      .insert(providerConnections)
-      .values({
-        label: input.label,
-        kind: input.kind,
-        baseUrl: input.baseUrl,
-        modelId: input.modelId,
-        maxTokens: input.maxTokens ?? 1024,
-        createdBy: userId,
-        apiKeyCiphertext: key?.apiKeyCiphertext ?? null,
-        apiKeyNonce: key?.apiKeyNonce ?? null,
-        apiKeyLast4: key?.apiKeyLast4 ?? null,
-      })
-      .returning();
-    if (!row) throw new Error('connection insert returned no row');
-    return toAdmin(row);
+    return this.db.transaction(async (tx) => {
+      const [row] = await tx
+        .insert(providerConnections)
+        .values({
+          label: input.label,
+          kind: input.kind,
+          baseUrl: input.baseUrl,
+          modelId: input.modelId,
+          maxTokens: input.maxTokens ?? 1024,
+          createdBy: userId,
+          apiKeyCiphertext: key?.apiKeyCiphertext ?? null,
+          apiKeyNonce: key?.apiKeyNonce ?? null,
+          apiKeyLast4: key?.apiKeyLast4 ?? null,
+        })
+        .returning();
+      if (!row) throw new Error('connection insert returned no row');
+      await this.audit(tx, row.id, userId, 'created', createdFields(input));
+      return toAdmin(row);
+    });
   }
 
-  async update(id: string, input: UpdateConnectionRequest): Promise<AdminConnection> {
+  async update(
+    id: string,
+    userId: string,
+    input: UpdateConnectionRequest,
+  ): Promise<AdminConnection> {
     if (input.baseUrl !== undefined) {
       const verdict = await this.urls.validate(input.baseUrl);
       if (!verdict.ok) {
         throw new BadRequestException({ code: 'BASE_URL_REJECTED', reason: verdict.reason });
       }
     }
-    const set: Partial<Row> = { updatedAt: new Date() };
-    if (input.label !== undefined) set.label = input.label;
-    if (input.baseUrl !== undefined) set.baseUrl = input.baseUrl;
-    if (input.modelId !== undefined) set.modelId = input.modelId;
-    if (input.maxTokens !== undefined) set.maxTokens = input.maxTokens;
-    if (input.enabled !== undefined) set.enabled = input.enabled;
 
-    const [row] = await this.db
-      .update(providerConnections)
-      .set(set)
-      .where(eq(providerConnections.id, id))
-      .returning();
-    if (!row) throw new NotFoundException({ code: 'CONNECTION_NOT_FOUND' });
-    return toAdmin(row);
+    return this.db.transaction(async (tx) => {
+      const [before] = await tx
+        .select()
+        .from(providerConnections)
+        .where(eq(providerConnections.id, id))
+        .limit(1);
+      if (!before) throw new NotFoundException({ code: 'CONNECTION_NOT_FOUND' });
+
+      // The diff is against the stored row, not against the request's keys: a
+      // PATCH that re-sends the current label changed nothing, and the audit
+      // says so (M7.8).
+      const set: Partial<Row> = { updatedAt: new Date() };
+      const changed: string[] = [];
+      for (const [field, column] of UPDATABLE) {
+        const next = input[field];
+        if (next === undefined || next === before[field]) continue;
+        (set as Record<string, unknown>)[field] = next;
+        changed.push(column);
+      }
+
+      const [row] = await tx
+        .update(providerConnections)
+        .set(set)
+        .where(eq(providerConnections.id, id))
+        .returning();
+      if (!row) throw new NotFoundException({ code: 'CONNECTION_NOT_FOUND' });
+      await this.audit(tx, id, userId, actionFor(before.enabled, input.enabled), changed);
+      return toAdmin(row);
+    });
   }
 
   /**
@@ -147,22 +202,27 @@ export class ProviderConnectionsService {
    * at this connection (the MVP.md default, chosen over silently clearing the
    * reference: an admin delete should not quietly rewire a campaign's DM).
    */
-  async delete(id: string): Promise<void> {
-    const inUseBy = await this.db
-      .select({ id: campaigns.id, name: campaigns.name })
-      .from(campaigns)
-      .where(sql`${campaigns.settings}->>'provider_connection_id' = ${id}`);
-    if (inUseBy.length > 0) {
-      throw new ConflictException({
-        code: 'CONNECTION_IN_USE',
-        campaigns: inUseBy.map((c) => ({ id: c.id, name: c.name })),
-      });
-    }
-    const [row] = await this.db
-      .delete(providerConnections)
-      .where(eq(providerConnections.id, id))
-      .returning();
-    if (!row) throw new NotFoundException({ code: 'CONNECTION_NOT_FOUND' });
+  async delete(id: string, userId: string): Promise<void> {
+    await this.db.transaction(async (tx) => {
+      const inUseBy = await tx
+        .select({ id: campaigns.id, name: campaigns.name })
+        .from(campaigns)
+        .where(sql`${campaigns.settings}->>'provider_connection_id' = ${id}`);
+      if (inUseBy.length > 0) {
+        throw new ConflictException({
+          code: 'CONNECTION_IN_USE',
+          campaigns: inUseBy.map((c) => ({ id: c.id, name: c.name })),
+        });
+      }
+      const [row] = await tx
+        .delete(providerConnections)
+        .where(eq(providerConnections.id, id))
+        .returning();
+      if (!row) throw new NotFoundException({ code: 'CONNECTION_NOT_FOUND' });
+      // Written after the delete and kept afterwards: the audit table has no
+      // foreign key to the row it audits precisely so this survives (M7.8).
+      await this.audit(tx, id, userId, 'deleted', []);
+    });
   }
 
   /**
@@ -184,13 +244,45 @@ export class ProviderConnectionsService {
       model: row.modelId,
       maxTokens: row.maxTokens,
     };
-    return { provider: buildDmProvider(config), config };
+    return { provider: buildDmProvider(config), config, connectionId: row.id };
   }
 
   /** M7.2's re-encrypt under a fresh nonce; the row must exist first. */
-  async replaceKey(id: string, apiKey: string): Promise<AdminConnection> {
-    await this.getForAdmin(id);
-    await this.secrets.replaceKey(id, apiKey);
-    return this.getForAdmin(id);
+  async replaceKey(id: string, userId: string, apiKey: string): Promise<AdminConnection> {
+    return this.db.transaction(async (tx) => {
+      const [before] = await tx
+        .select({ id: providerConnections.id })
+        .from(providerConnections)
+        .where(eq(providerConnections.id, id))
+        .limit(1);
+      if (!before) throw new NotFoundException({ code: 'CONNECTION_NOT_FOUND' });
+      await this.secrets.replaceKey(id, apiKey, tx);
+      // The name of the field, never a fragment of its value (NFR-305).
+      await this.audit(tx, id, userId, 'replaced_key', ['api_key']);
+      const [row] = await tx
+        .select()
+        .from(providerConnections)
+        .where(eq(providerConnections.id, id))
+        .limit(1);
+      if (!row) throw new NotFoundException({ code: 'CONNECTION_NOT_FOUND' });
+      return toAdmin(row);
+    });
+  }
+
+  /**
+   * One row per successful mutation, in that mutation's own transaction. Field
+   * names only — a value in this table would be a second copy of a secret with
+   * none of the first one's protections (M7.8, FR-805).
+   */
+  private async audit(
+    tx: Tx,
+    connectionId: string,
+    actorUserId: string,
+    action: (typeof providerConnectionAudit.$inferInsert)['action'],
+    changedFields: string[],
+  ): Promise<void> {
+    await tx
+      .insert(providerConnectionAudit)
+      .values({ connectionId, actorUserId, action, changedFields });
   }
 }
