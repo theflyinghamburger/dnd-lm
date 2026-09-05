@@ -55,6 +55,9 @@ SECTIONS_BY_PROFILE = {
 ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 DOWNGRADE_LABEL = "sdlc-profile-downgrade"
+# Required beside every high-assurance work item, and one of the sibling kinds
+# `find_item` must not mistake for a work item of its own.
+THREAT_MODEL = "threat-model"
 
 ITEM_TEMPLATE = """---
 schema_version: 1
@@ -277,11 +280,29 @@ def required_docs(changed: list[str], policy: dict) -> list[str]:
 # check
 # --------------------------------------------------------------------------
 
+def sibling_doc_kinds(policy: dict) -> set[str]:
+    """The `<id>.<kind>.md` documents that live beside a work item rather than
+    being one: the policy's conditional documents, plus the threat model."""
+    return set(policy.get("requires") or {}) | {THREAT_MODEL}
+
+
 def find_item(root: Path, policy: dict, changed: list[str]) -> list[str]:
+    """The work items in a change, told apart from their sibling documents by
+    the sibling's kind - not by counting dots. An id may contain them
+    (`M7.5`, and `M3.2` in this repo's own SDLC.md example); a dot-counting
+    rule finds no work item at all for those, and the gate then reports that
+    as if none had been written."""
     base = policy.get("work_items", "docs/changes")
-    return [f for f in changed
-            if f.startswith(base + "/") and f.endswith(".md")
-            and Path(f).name.count(".") == 1]
+    kinds = sibling_doc_kinds(policy)
+    items = []
+    for f in changed:
+        if not (f.startswith(base + "/") and f.endswith(".md")):
+            continue
+        stem = Path(f).stem
+        if "." in stem and stem.rsplit(".", 1)[1] in kinds:
+            continue
+        items.append(f)
+    return items
 
 
 def do_check(root: Path, forge: Forge, review_file: Path | None) -> list[str]:
@@ -371,7 +392,7 @@ def do_check(root: Path, forge: Forge, review_file: Path | None) -> list[str]:
 
     docs = list(required_docs(changed, policy))
     if profile == "high-assurance":
-        docs.append("threat-model")
+        docs.append(THREAT_MODEL)
     for doc in sorted(set(docs)):
         side = path.with_name(f"{path.stem}.{doc}.md")
         if not side.exists() or not side.read_text(encoding="utf-8").strip():
