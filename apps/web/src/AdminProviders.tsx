@@ -1,7 +1,7 @@
 import type { AdminConnection, ConnectionTestResult, ProviderKind } from '@dnd-lm/contracts';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { type FormEvent, useState } from 'react';
-import { ApiError, api } from './api';
+import { api, describeApiError as describe } from './api';
 
 /**
  * Admin → Providers (M7.6, FR-805). Platform admins only; the guard is the
@@ -329,23 +329,4 @@ function ConnectionForm({
       )}
     </>
   );
-}
-
-/**
- * The server's own words. A refused URL explains itself (M7.3) and an in-use
- * delete names the campaigns (M7.4); re-deriving either rule on the client is
- * how the two answers drift apart.
- */
-function describe(error: unknown): string {
-  if (!(error instanceof ApiError)) return 'Something went wrong.';
-  const body = error.body ?? {};
-  if (typeof body.reason === 'string') return `${error.code}: ${body.reason}`;
-  if (Array.isArray(body.campaigns)) {
-    const names = body.campaigns
-      .map((entry) => (entry as { name?: string }).name)
-      .filter(Boolean)
-      .join(', ');
-    return `${error.code}: still used by ${names}`;
-  }
-  return error.code;
 }

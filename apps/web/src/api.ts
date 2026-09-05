@@ -48,6 +48,27 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * The server's own words, for any surface that shows a rejection (M7.6). A
+ * refused URL explains itself (M7.3), an in-use delete names the campaigns
+ * (M7.4) - re-deriving either rule on the client is how the two answers drift
+ * apart, and having two surfaces render errors by two policies is how one of
+ * them quietly stops explaining anything.
+ */
+export function describeApiError(error: unknown): string {
+  if (!(error instanceof ApiError)) return 'Something went wrong.';
+  const body = error.body ?? {};
+  if (typeof body.reason === 'string') return `${error.code}: ${body.reason}`;
+  if (Array.isArray(body.campaigns)) {
+    const names = body.campaigns
+      .map((entry) => (entry as { name?: string }).name)
+      .filter(Boolean)
+      .join(', ');
+    return `${error.code}: still used by ${names}`;
+  }
+  return error.code;
+}
+
 async function call<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`/api${path}`, {
     ...init,

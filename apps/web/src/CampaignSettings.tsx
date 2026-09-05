@@ -1,7 +1,7 @@
 import type { CampaignDmSettings, DmDifficulty, DmStyle, DmTone } from '@dnd-lm/contracts';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { ApiError, api } from './api';
+import { api, describeApiError } from './api';
 
 /**
  * Campaign → Settings (M7.6, FR-506). A host picks a provider from the
@@ -121,7 +121,7 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
       {saved && !failure && <p role="status">Saved.</p>}
       {failure && (
         <p role="alert" className="error">
-          {failure instanceof ApiError ? failure.code : 'Something went wrong.'}
+          {describeApiError(failure)}
         </p>
       )}
     </section>
