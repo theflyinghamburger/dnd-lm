@@ -98,7 +98,12 @@ def call(base_url: str, api_key: str, model: str, prompt: str) -> str:
         with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
             payload = json.load(r)
     except urllib.error.HTTPError as e:
-        raise SystemExit(f"{base_url}: HTTP {e.code} {e.read(2000).decode('utf-8', 'replace')}")
+        msg = f"{base_url}: HTTP {e.code} {e.read(2000).decode('utf-8', 'replace')}"
+        if e.code in (401, 403):
+            # Hosts report a key belonging to a different provider as if no key
+            # was sent at all. Check the key matches REVIEW_BASE_URL.
+            msg += f"\n  hint: is REVIEW_API_KEY a key for {base_url}?"
+        raise SystemExit(msg)
     except OSError as e:
         raise SystemExit(f"{base_url}: {e}")
 
