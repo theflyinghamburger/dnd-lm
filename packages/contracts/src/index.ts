@@ -441,3 +441,80 @@ export const RosterResponse = z.object({
   npcs: z.array(z.object({ id: Id, name: z.string(), aliases: z.array(z.string()) })),
 });
 export type RosterResponse = z.infer<typeof RosterResponse>;
+
+/**
+ * Provider connections (M7.4). The two response shapes are deliberately
+ * different objects: the host shape has no `baseUrl`, no ciphertext, no
+ * nonce, and not even `apiKeyLast4` — structurally unable to carry a URL or
+ * key. The admin shape adds the URL and `last4` (for `••••{last4}`) but never
+ * the key material.
+ */
+export const ProviderKind = z.enum(['anthropic', 'openai_compatible']);
+export type ProviderKind = z.infer<typeof ProviderKind>;
+
+export const HostConnection = z.object({
+  id: Id,
+  label: z.string(),
+  kind: ProviderKind,
+  modelId: z.string(),
+  enabled: z.boolean(),
+});
+export type HostConnection = z.infer<typeof HostConnection>;
+
+export const AdminConnection = z.object({
+  id: Id,
+  label: z.string(),
+  kind: ProviderKind,
+  baseUrl: z.string(),
+  apiKeyLast4: z.string().nullable(),
+  modelId: z.string(),
+  maxTokens: z.number().int(),
+  enabled: z.boolean(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+export type AdminConnection = z.infer<typeof AdminConnection>;
+
+export const CreateConnectionRequest = z.object({
+  label: z.string().min(1).max(128),
+  kind: ProviderKind,
+  baseUrl: z.string().min(1),
+  /** Optional: a keyless endpoint (e.g. local inference) has none. */
+  apiKey: z.string().min(1).max(2048).optional(),
+  modelId: z.string().min(1).max(256),
+  maxTokens: z.number().int().min(1).max(1_000_000).optional(),
+});
+export type CreateConnectionRequest = z.infer<typeof CreateConnectionRequest>;
+
+export const UpdateConnectionRequest = z
+  .object({
+    label: z.string().min(1).max(128).optional(),
+    baseUrl: z.string().min(1).optional(),
+    modelId: z.string().min(1).max(256).optional(),
+    maxTokens: z.number().int().min(1).max(1_000_000).optional(),
+    enabled: z.boolean().optional(),
+  })
+  .refine((v) => Object.values(v).some((v) => v !== undefined), {
+    message: 'at least one field must be provided',
+  });
+export type UpdateConnectionRequest = z.infer<typeof UpdateConnectionRequest>;
+
+export const ReplaceKeyRequest = z.object({
+  apiKey: z.string().min(1).max(2048),
+});
+export type ReplaceKeyRequest = z.infer<typeof ReplaceKeyRequest>;
+
+/**
+ * The campaign-settings write a host makes (FR-506): which provider
+ * connection the campaign's DM runs on, or `null` for none. Only enabled
+ * connections are selectable; the write is host-or-admin on that campaign.
+ */
+export const UpdateProviderRequest = z.object({
+  providerConnectionId: Id.nullable(),
+});
+export type UpdateProviderRequest = z.infer<typeof UpdateProviderRequest>;
+
+export const ProviderSettingsResponse = z.object({
+  providerConnectionId: Id.nullable(),
+});
+export type ProviderSettingsResponse = z.infer<typeof ProviderSettingsResponse>;
