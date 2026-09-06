@@ -3,8 +3,13 @@
 Six level-3 SRD 5.1 characters, one per common role, for MVP play and tests
 (M4.2, D-3 — there is no creation wizard in the MVP).
 
+The lobby's **Add character** chooser reads this directory directly (#61), so
+these six files are the six the app offers — one copy, no second set under
+`apps/web` to drift from these.
+
 Each file is the body of `POST /api/campaigns/:campaignId/characters/import`
-minus `campaignId`, which the route supplies:
+minus `campaignId`, which the route supplies. The chooser posts exactly this;
+the `curl` below is the same call, for a host scripting several seats:
 
 ```sh
 curl -X POST "$API/api/campaigns/$CAMPAIGN/characters/import" \

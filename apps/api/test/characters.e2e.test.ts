@@ -174,6 +174,42 @@ describe.skipIf(!DATABASE_URL)('characters and dice', () => {
       const stranger = await signUp('stranger@example.com', 'Stranger');
       await importPregen(table, stranger, 'brann-ironfell.json').expect(403);
     });
+
+    /**
+     * #61's lobby chooser posts here on the importer's own cookie, and the
+     * lobby offers only characters whose `ownerUserId` is the viewer. Both
+     * halves of that are the server's answer, so both are pinned here.
+     */
+    it('owns the character to the importer, not the host (#61)', async () => {
+      const table = await stage();
+      const mine = await importPregen(table, table.player, 'aria-sunhollow.json').expect(201);
+      const theirs = await importPregen(table, table.host, 'brann-ironfell.json').expect(201);
+
+      const me = await api()
+        .get(`/api/campaigns/${table.campaignId}/characters`)
+        .set('Cookie', table.player)
+        .expect(200);
+      const owners = Object.fromEntries(
+        (me.body as { id: string; ownerUserId: string }[]).map((c) => [c.id, c.ownerUserId]),
+      );
+      expect(owners[mine.body.id]).not.toBe(owners[theirs.body.id]);
+      // The player's own selectable set is the one the lobby filters to.
+      expect(
+        (me.body as { id: string; ownerUserId: string }[]).filter(
+          (c) => c.ownerUserId === owners[mine.body.id],
+        ),
+      ).toHaveLength(1);
+    });
+
+    it('gives two characters for the same pregen imported twice (#61)', async () => {
+      const table = await stage();
+      const first = await importPregen(table, table.player, 'aria-sunhollow.json').expect(201);
+      const second = await importPregen(table, table.player, 'aria-sunhollow.json').expect(201);
+
+      expect(second.body.id).not.toBe(first.body.id);
+      expect(second.body.ownerUserId).toBe(first.body.ownerUserId);
+      expect(second.body.name).toBe(first.body.name);
+    });
   });
 
   describe('rolling (M4.4, M4.5, FR-301, FR-302)', () => {
