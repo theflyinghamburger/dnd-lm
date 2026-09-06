@@ -124,3 +124,14 @@ aside td {
 aside[aria-busy='true'] {
   opacity: 0.7;
 }
+
+/* M7.6: the settings panel inside a campaign row. */
+.settings {
+  border-left: 2px solid currentColor;
+  margin: 0.5rem 0 1rem;
+  padding-left: 0.75rem;
+}
+
+.settings form {
+  margin: 0.75rem 0;
+}

@@ -2,11 +2,16 @@ import type { PublicUser } from '@dnd-lm/contracts';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { type FormEvent, useState } from 'react';
 import type { Seat } from './App';
+import { AdminProviders } from './AdminProviders';
+import { CampaignSettings } from './CampaignSettings';
 import { ApiError, api } from './api';
 
 export function Lobby({ user, onEnter }: { user: PublicUser; onEnter: (seat: Seat) => void }) {
   const queryClient = useQueryClient();
   const [invite, setInvite] = useState<string | null>(null);
+  /** Which campaign's DM settings are open, and whether the admin page is. */
+  const [openSettings, setOpenSettings] = useState<string | null>(null);
+  const [showProviders, setShowProviders] = useState(false);
   /** M1.4's "pick a character", now that M4 has characters to pick. */
   const [seats, setSeats] = useState<Record<string, string>>({});
 
@@ -47,12 +52,21 @@ export function Lobby({ user, onEnter }: { user: PublicUser; onEnter: (seat: Sea
     }
   }
 
+  /**
+   * Platform admin, the same way the API decides it (M7.4, option (a)): an
+   * `admin` membership in any campaign. The page is guarded server-side; not
+   * offering the button is courtesy, not the control.
+   */
+  const isPlatformAdmin = (campaigns.data ?? []).some((campaign) => campaign.role === 'admin');
+
   const failure = [
     createCampaign.error,
     acceptInvite.error,
     createInvite.error,
     enterSession.error,
   ].find(Boolean);
+
+  if (showProviders) return <AdminProviders onClose={() => setShowProviders(false)} />;
 
   return (
     <main>
@@ -62,7 +76,12 @@ export function Lobby({ user, onEnter }: { user: PublicUser; onEnter: (seat: Sea
           Signed in as {user.displayName} ({user.email}){' '}
           <button type="button" onClick={() => logout.mutate()}>
             Sign out
-          </button>
+          </button>{' '}
+          {isPlatformAdmin && (
+            <button type="button" onClick={() => setShowProviders(true)}>
+              Providers
+            </button>
+          )}
         </p>
       </header>
 
@@ -93,6 +112,15 @@ export function Lobby({ user, onEnter }: { user: PublicUser; onEnter: (seat: Sea
             >
               Enter session
             </button>
+            {(campaign.role === 'host' || campaign.role === 'admin') && (
+              <button
+                type="button"
+                onClick={() => setOpenSettings(openSettings === campaign.id ? null : campaign.id)}
+              >
+                {openSettings === campaign.id ? 'Close settings' : 'DM settings'}
+              </button>
+            )}
+            {openSettings === campaign.id && <CampaignSettings campaignId={campaign.id} />}
           </li>
         ))}
       </ul>

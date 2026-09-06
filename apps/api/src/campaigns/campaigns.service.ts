@@ -1,15 +1,22 @@
 import { randomBytes } from 'node:crypto';
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import {
+  type CampaignDmSettings,
   type CampaignSummary,
   type CampaignTriggersResponse,
   type CreateCampaignRequest,
   type CreateInviteRequest,
+  DmDifficulty,
+  DmStyle,
+  DmTone,
+  Id,
   type InviteResponse,
   TRIGGER_REGISTRY,
   type ProviderSettingsResponse,
+  type UpdateDmSettingsRequest,
   type UpdateTriggersRequest,
 } from '@dnd-lm/contracts';
+import { z } from 'zod';
 import { and, eq, isNull, sql } from 'drizzle-orm';
 import { DB, type Db } from '../db/db.module';
 import { campaigns, invites, memberships, providerConnections } from '../db/schema';
@@ -197,6 +204,59 @@ export class CampaignsService {
     if (!updated) throw new NotFoundException({ code: 'CAMPAIGN_NOT_FOUND' });
 
     return { providerConnectionId };
+  }
+
+  /**
+   * The campaign's DM settings in one read (M7.6): the selected provider plus
+   * the FR-506 knobs. Stored in the same `settings` jsonb as everything else
+   * on a campaign, under snake_case keys beside `provider_connection_id`.
+   */
+  async getDmSettings(campaignId: string): Promise<CampaignDmSettings> {
+    const [campaign] = await this.db
+      .select({ settings: campaigns.settings })
+      .from(campaigns)
+      .where(eq(campaigns.id, campaignId))
+      .limit(1);
+    if (!campaign) throw new NotFoundException({ code: 'CAMPAIGN_NOT_FOUND' });
+    const stored = (campaign.settings ?? {}) as Record<string, unknown>;
+    // Parsed, not cast: a value written by a older build (or by hand) that is
+    // no longer in the enum reads as "not set" rather than reaching a client
+    // that believes the type.
+    const pick = <T extends z.ZodType>(schema: T, value: unknown) => {
+      const parsed = schema.safeParse(value);
+      return parsed.success ? (parsed.data as z.infer<T>) : null;
+    };
+    return {
+      providerConnectionId: pick(Id, stored.provider_connection_id),
+      style: pick(DmStyle, stored.dm_style),
+      tone: pick(DmTone, stored.dm_tone),
+      difficulty: pick(DmDifficulty, stored.dm_difficulty),
+    };
+  }
+
+  /**
+   * The FR-506 knobs (M7.6). A field left out is untouched; a field set to
+   * `null` is cleared. Merged into the settings object rather than replacing
+   * it, the same way `setProvider` and `updateTriggers` do — three writers
+   * share one column and none of them may clobber the others.
+   */
+  async updateDmSettings(
+    campaignId: string,
+    input: UpdateDmSettingsRequest,
+  ): Promise<CampaignDmSettings> {
+    const columns: Record<string, unknown> = {};
+    if (input.style !== undefined) columns.dm_style = input.style;
+    if (input.tone !== undefined) columns.dm_tone = input.tone;
+    if (input.difficulty !== undefined) columns.dm_difficulty = input.difficulty;
+
+    const [updated] = await this.db
+      .update(campaigns)
+      .set({ settings: sql`${campaigns.settings} || ${JSON.stringify(columns)}::jsonb` })
+      .where(eq(campaigns.id, campaignId))
+      .returning({ id: campaigns.id });
+    if (!updated) throw new NotFoundException({ code: 'CAMPAIGN_NOT_FOUND' });
+
+    return this.getDmSettings(campaignId);
   }
 
   /**

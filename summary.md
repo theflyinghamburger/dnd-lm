@@ -2,7 +2,7 @@
 
 **Repo:** [theflyinghamburger/dnd-lm](https://github.com/theflyinghamburger/dnd-lm) (private)
 **As of:** 2026-09-05
-**Progress:** M0–M7.7. M5–M7.1 merged (#17, #18, #28); M7.2–M7.4 open as three stacked PRs (#29 → #30 → #31); M7.7 open, stacked on #31, all gates green, all tests passing on live Postgres. M7.5, M7.6, M7.8, M7.9, M8, M9 not started.
+**Progress:** M0–M7.9. M5–M7.7 merged (#17, #18, #28–#32). The rest of M7 is open as one stack: #35 (gate fix) → #34 (M7.5) → #36 (M7.8) → #37 (M7.9) → #38 (M7.6), all tests passing on live Postgres. M8 and M9 not started.
 
 ---
 
@@ -18,11 +18,15 @@
 | M5 — Session orchestrator | [#6](https://github.com/theflyinghamburger/dnd-lm/issues/6) | **merged** | [#17](https://github.com/theflyinghamburger/dnd-lm/pull/17) |
 | M6 — The LangGraph DM | [#7](https://github.com/theflyinghamburger/dnd-lm/issues/7) | **merged** | [#18](https://github.com/theflyinghamburger/dnd-lm/pull/18) |
 | M7.1 — Provider connections data model | [#19](https://github.com/theflyinghamburger/dnd-lm/issues/19) | **merged** | [#28](https://github.com/theflyinghamburger/dnd-lm/pull/28) |
-| M7.2 — Secret handling (AES-256-GCM, write-only keys) | [#20](https://github.com/theflyinghamburger/dnd-lm/issues/20) | PR open, branch `m7.2-secret-handling` | [#29](https://github.com/theflyinghamburger/dnd-lm/pull/29) |
-| M7.3 — Base URL validation (SSRF) | [#21](https://github.com/theflyinghamburger/dnd-lm/issues/21) | PR open, stacked on #29 | [#30](https://github.com/theflyinghamburger/dnd-lm/pull/30) |
-| M7.4 — Authorization: admin-managed connections | [#22](https://github.com/theflyinghamburger/dnd-lm/issues/22) | PR open, stacked on #30 | [#31](https://github.com/theflyinghamburger/dnd-lm/pull/31) |
-| M7.7 — Adapter wiring from connections | [#25](https://github.com/theflyinghamburger/dnd-lm/issues/25) | PR open, stacked on #31 | [#32](https://github.com/theflyinghamburger/dnd-lm/pull/32) |
-| M7.5, M7.6, M7.8, M7.9 — test connection, row CRUD, host UI, audit + failure behaviour | [#23, #24, #26, #27](https://github.com/theflyinghamburger/dnd-lm/issues/23) | not started | |
+| M7.2 — Secret handling (AES-256-GCM, write-only keys) | [#20](https://github.com/theflyinghamburger/dnd-lm/issues/20) | **merged** | [#29](https://github.com/theflyinghamburger/dnd-lm/pull/29) |
+| M7.3 — Base URL validation (SSRF) | [#21](https://github.com/theflyinghamburger/dnd-lm/issues/21) | **merged** | [#30](https://github.com/theflyinghamburger/dnd-lm/pull/30) |
+| M7.4 — Authorization: admin-managed connections | [#22](https://github.com/theflyinghamburger/dnd-lm/issues/22) | **merged** | [#31](https://github.com/theflyinghamburger/dnd-lm/pull/31) |
+| M7.7 — Adapter wiring from connections | [#25](https://github.com/theflyinghamburger/dnd-lm/issues/25) | **merged** | [#32](https://github.com/theflyinghamburger/dnd-lm/pull/32) |
+| M7.5 — Test connection | [#23](https://github.com/theflyinghamburger/dnd-lm/issues/23) | PR open, stacked on #35 | [#34](https://github.com/theflyinghamburger/dnd-lm/pull/34) |
+| M7.8 — Audit and attribution | [#26](https://github.com/theflyinghamburger/dnd-lm/issues/26) | PR open, stacked on #34 | [#36](https://github.com/theflyinghamburger/dnd-lm/pull/36) |
+| M7.9 — Provider failure behaviour | [#27](https://github.com/theflyinghamburger/dnd-lm/issues/27) | PR open, stacked on #36 | [#37](https://github.com/theflyinghamburger/dnd-lm/pull/37) |
+| M7.6 — Config UI | [#24](https://github.com/theflyinghamburger/dnd-lm/issues/24) | PR open, stacked on #37 | [#38](https://github.com/theflyinghamburger/dnd-lm/pull/38) |
+| The gate could not find a dotted work-item id (`M7.5.md`) | — | PR open, base of the stack | [#35](https://github.com/theflyinghamburger/dnd-lm/pull/35) |
 | M8 — Manual campaign notes and retrieval | [#9](https://github.com/theflyinghamburger/dnd-lm/issues/9) | not started | |
 | M9 — MVP acceptance | [#10](https://github.com/theflyinghamburger/dnd-lm/issues/10) | not started | |
 
@@ -161,6 +165,38 @@ endpoint does not also write DM style/tone/difficulty (FR-506's broader
 surface) — that shape is undefined and lands with the M7.6 config UI (#24).
 Said in PR #31, not silently skipped.
 
+### The rest of M7, in one stack
+
+Merge in order: **#35 → #34 → #36 → #37 → #38.** Each is based on the one
+before it, so merging out of order rebases the rest.
+
+- **#35 first, and it is not optional.** `find_item` accepted a work item only
+  if its filename had exactly one dot, so `docs/changes/M7.5.md` was invisible
+  and the gate reported "no work-item file" on a change whose work item was in
+  the diff. Every `M7.x` pull request fails the `sdlc` job until this lands.
+  The same bug is in the upstream suite and in every other install of it.
+- **M7.5 (#34)** — `POST /api/admin/providers/:id/test`: one real minimal call
+  through the *same* row→provider path a turn uses, reported as five
+  independently falsifiable fields. `DmProviderSource` now builds through
+  `ProviderConnectionsService.sourceFromRow`, so the test cannot drift from the
+  path a turn takes. `classifyProviderError` lands here and M7.9 reuses it.
+- **M7.8 (#36)** — `provider_connection_audit`, one row per mutation in that
+  mutation's transaction, field *names* only. No foreign key to
+  `provider_connections` on purpose: an audit row outlives the row it audits.
+  Resolution events carry `provider_connection_id` and `model_id`, and the
+  per-connection failure/cost roll-up query runs in the e2e suite.
+- **M7.9 (#37)** — provider failures are classified in `callDm` (a 401 used to
+  escape the graph and be reported as `INTERNAL`), and every failed resolution
+  writes one greppable operator line: reason, class, resolution, session,
+  connection, model, redacted detail. Three ad-hoc failure logs were removed in
+  favour of it. No fallback chain, asserted.
+- **M7.6 (#38)** — the two screens. Admin → Providers (list, test, edit,
+  replace key, delete) and Campaign → Settings (provider dropdown over the
+  redacted list, plus the FR-506 knobs). The knobs' vocabulary was undefined
+  anywhere and is now three enums; they are inert until someone wires them into
+  the prompt. The write-only key rule is asserted by a source scan over
+  `apps/web/src`, not a DOM test.
+
 ## 5. Environment caveats
 
 **Docker works now** (Docker Desktop WSL integration), so all 64 integration tests run locally: `docker compose up -d`, then `pnpm db:migrate && pnpm test`. Before that, CI was their only execution — and it caught three real bugs unit tests could not.
@@ -183,7 +219,7 @@ Said in PR #31, not silently skipped.
 |---|---|
 | `@npc <name>` always answers "no NPC here is called that" — the roster's NPC list is empty until campaign notes exist. Alias and ambiguity logic is unit-tested against a populated roster. | M8 (#9) |
 | A pending action is closed by character, not by the requested expression. The resumed turn is told the roll result as data; it never re-validates the expression. | product decision (M5 ponytail, kept) |
-| Provider config is env vars; nothing stores, selects, or displays credentials in the UI yet. | M7 (#8) |
+| The FR-506 DM knobs (style, tone, difficulty) are stored and displayed but do not reach the DM's prompt. Deliberate: host-chosen values entering the system prompt need invariant-7 treatment, and #24 did not ask for it. | a later change |
 | No host-control UI. Pause/resume/end/force and `REQUEST_ROLL` are server-side only; M5 has no UI subtask. | M9 (#10) |
 | Whispers are hard-coded never DM-visible — the strictest reading of FR-207, and spec-doc.md §16's open question is untouched. | product decision |
 
