@@ -61,6 +61,24 @@ describe('provider keys are write-only in the web app (M7.6, NFR-305)', () => {
     expect(admin).not.toMatch(/show(Key|Secret|Password)/i);
   });
 
+  /**
+   * M7-FU2 (#45). Not a rendering claim -- there is still no DOM library here,
+   * by M7.6's decision. This is the narrower structural one the scan can make:
+   * a failed read has somewhere to be shown on both surfaces. What it cannot
+   * check is that the element renders, which is stated plainly in the change
+   * doc rather than implied by a green test.
+   */
+  it('gives a failed query somewhere to surface, on both surfaces', () => {
+    for (const name of ['AdminProviders.tsx', 'CampaignSettings.tsx']) {
+      const text = files.find((f) => f.path.endsWith(name))!.text;
+      expect({ name, renders: /connections\.error/.test(text) }).toEqual({ name, renders: true });
+    }
+    // The empty-state hint must not double as the error state: gating it on a
+    // length check alone makes a failed read look like an empty list.
+    const settings = files.find((f) => f.path.endsWith('CampaignSettings.tsx'))!.text;
+    expect(settings).toContain('connections.isSuccess');
+  });
+
   it('sends a key only to the two write endpoints that take one', () => {
     for (const file of files) {
       if (file.path.endsWith('api.ts')) continue;

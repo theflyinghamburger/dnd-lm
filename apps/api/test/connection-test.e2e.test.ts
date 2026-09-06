@@ -34,6 +34,21 @@ describe.skipIf(!DATABASE_URL)('test connection (M7.5)', () => {
     '\n```';
 
   let mode: Mode = 'dm-json';
+  /**
+   * Holds the mock's reply open so a write can commit while a test is still in
+   * flight -- the interleaving AC-4 is about.
+   */
+  let hold: { announce: () => void; held: Promise<void> } | null = null;
+
+  function holdNext(): { arrived: Promise<void>; release: () => void } {
+    let announce!: () => void;
+    let release!: () => void;
+    const arrived = new Promise<void>((resolve) => (announce = resolve));
+    const held = new Promise<void>((resolve) => (release = resolve));
+    hold = { announce, held };
+    return { arrived, release };
+  }
+
   /** Makes the mock's error body enormous, the way a hostile endpoint would. */
   let long = false;
   let calls = 0;
@@ -63,8 +78,14 @@ describe.skipIf(!DATABASE_URL)('test connection (M7.5)', () => {
     server = createServer((req, res) => {
       let body = '';
       req.on('data', (c) => (body += c));
-      req.on('end', () => {
+      req.on('end', async () => {
         calls += 1;
+        if (hold) {
+          const gate = hold;
+          hold = null;
+          gate.announce();
+          await gate.held;
+        }
         if (mode === 'unauthorized') {
           res.writeHead(401, { 'content-type': 'application/json' });
           // Real providers quote the credential they rejected. That is exactly
@@ -108,6 +129,7 @@ describe.skipIf(!DATABASE_URL)('test connection (M7.5)', () => {
     await truncateAll(app.db);
     mode = 'dm-json';
     calls = 0;
+    hold = null;
   });
 
   const api = () => request(app.app.getHttpServer());
@@ -203,6 +225,10 @@ describe.skipIf(!DATABASE_URL)('test connection (M7.5)', () => {
 
     expect(result.reachable).toBe(true);
     expect(result.authenticated).toBe(false);
+    // The call never got past the credential, so it demonstrated nothing about
+    // the model either. This is the field "claims nothing more than was
+    // learned" actually turns on.
+    expect(result.modelExists).toBe(false);
     expect(result.structuredOutput).toBe(false);
     // The provider quoted the key back; the stored detail must not (NFR-305).
     expect(result.detail).not.toContain(API_KEY);
@@ -352,6 +378,66 @@ describe.skipIf(!DATABASE_URL)('test connection (M7.5)', () => {
       .send({ modelId: 'another-model' })
       .expect(200);
     expect(remodelled.body.lastTest).toBeNull();
+
+    // Moving the endpoint does too: `reachable` was about that host.
+    await api()
+      .patch(`/api/admin/providers/${connection.id}`)
+      .set('Cookie', admin)
+      .send({ modelId: 'local-model' })
+      .expect(200);
+    await test(admin, connection.id);
+    const moved = await api()
+      .patch(`/api/admin/providers/${connection.id}`)
+      .set('Cookie', admin)
+      .send({ baseUrl: `${base}/` })
+      .expect(200);
+    expect(moved.body.lastTest).toBeNull();
+
+    // Enabling or disabling changes nothing the verdict measured, so it stands.
+    await api()
+      .patch(`/api/admin/providers/${connection.id}`)
+      .set('Cookie', admin)
+      .send({ baseUrl: base })
+      .expect(200);
+    await test(admin, connection.id);
+    const disabled = await api()
+      .patch(`/api/admin/providers/${connection.id}`)
+      .set('Cookie', admin)
+      .send({ enabled: false })
+      .expect(200);
+    expect(disabled.body.lastTest).not.toBeNull();
+  });
+
+  it('drops a verdict whose configuration changed while the test ran (AC-4)', async () => {
+    const admin = await makeAdmin('admin@example.com');
+    const connection = await connect(admin);
+    await test(admin, connection.id);
+    const before = await api()
+      .get(`/api/admin/providers/${connection.id}`)
+      .set('Cookie', admin)
+      .expect(200);
+    expect(before.body.lastTest).not.toBeNull();
+
+    // Hold the endpoint mid-reply and rotate the key underneath the probe. The
+    // clearing #39 added runs, and then the in-flight verdict -- computed
+    // against the *old* credential -- arrives to be written.
+    const gate = holdNext();
+    const inFlight = test(admin, connection.id);
+    await gate.arrived;
+    await api()
+      .post(`/api/admin/providers/${connection.id}/key`)
+      .set('Cookie', admin)
+      .send({ apiKey: 'sk-test-rotated-0000' })
+      .expect(200);
+    gate.release();
+    expect((await inFlight).authenticated).toBe(true);
+
+    // It attests a key the row no longer has, so it is dropped, not stored.
+    const after = await api()
+      .get(`/api/admin/providers/${connection.id}`)
+      .set('Cookie', admin)
+      .expect(200);
+    expect(after.body.lastTest).toBeNull();
   });
 
   it('tests a keyless endpoint — an empty key redacts nothing and hides nothing', async () => {
@@ -374,10 +460,17 @@ describe.skipIf(!DATABASE_URL)('test connection (M7.5)', () => {
 
   it('a test against an id that does not exist is a 404, not a rate-limit entry', async () => {
     const admin = await makeAdmin('admin@example.com');
-    await api()
-      .post('/api/admin/providers/00000000-0000-0000-0000-000000000000/test')
-      .set('Cookie', admin)
-      .expect(404);
+    // Pressed past the per-connection limit on purpose. One press cannot tell
+    // the orders apart -- it is 404 with no provider call either way. Only the
+    // presses beyond the limit can: if the token were taken before the row was
+    // read, a nonexistent id would mint a bucket nothing evicts and these would
+    // start answering 429 instead of 404.
+    for (let i = 0; i < 8; i += 1) {
+      await api()
+        .post('/api/admin/providers/00000000-0000-0000-0000-000000000000/test')
+        .set('Cookie', admin)
+        .expect(404);
+    }
     expect(calls).toBe(0);
   });
 

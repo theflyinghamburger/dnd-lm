@@ -2,7 +2,13 @@ import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { asc, eq } from 'drizzle-orm';
-import { campaigns, memberships, providerConnectionAudit, users } from '../src/db/schema';
+import {
+  campaigns,
+  memberships,
+  providerConnectionAudit,
+  providerConnections,
+  users,
+} from '../src/db/schema';
 import type { Db } from '../src/db/db.module';
 import { DATABASE_URL, createTestApp, truncateAll } from './app.harness';
 
@@ -109,6 +115,60 @@ describe.skipIf(!DATABASE_URL)('provider connection audit (M7.8)', () => {
     expect(rows).toHaveLength(2);
     expect(rows[1]).toMatchObject({ action: 'updated', actorUserId: adminId });
     expect(rows[1]!.changedFields).toEqual(['model_id']);
+  });
+
+  it('diffs against a locked row, so the audit cannot invent a change (AC-5)', async () => {
+    const id = await create();
+
+    // `update` records what a PATCH moved by diffing the request against a row
+    // it read earlier in the same transaction. Unlocked, that read sees a
+    // snapshot a concurrent writer can invalidate before the write lands: the
+    // UPDATE blocks and is therefore never lost, but the *diff* is stale, and
+    // the audit row is the only record of what happened.
+    //
+    // The competitor below renames the row while a PATCH sending that same new
+    // name is already in flight. The PATCH then changes nothing at all -- and
+    // must say so.
+    let commit!: () => void;
+    let acquired!: () => void;
+    const proceed = new Promise<void>((resolve) => (commit = resolve));
+    const locked = new Promise<void>((resolve) => (acquired = resolve));
+    const competitor = db.transaction(async (tx) => {
+      await tx
+        .select()
+        .from(providerConnections)
+        .where(eq(providerConnections.id, id))
+        .for('update');
+      acquired();
+      await proceed;
+      await tx
+        .update(providerConnections)
+        .set({ label: 'Renamed' })
+        .where(eq(providerConnections.id, id));
+    });
+    await locked;
+
+    // `.then` rather than a bare builder: supertest does not dispatch until the
+    // request is awaited, and this one has to already be in flight.
+    const patch = api()
+      .patch(`/api/admin/providers/${id}`)
+      .set('Cookie', admin)
+      .send({ label: 'Renamed' })
+      .then((res) => res);
+
+    // Long enough that an unlocked diff read has certainly happened and the
+    // request is parked on the UPDATE instead. A locked one is still waiting to
+    // read at all, which is the whole difference.
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    commit();
+    await competitor;
+    expect((await patch).status).toBe(200);
+
+    // The label was already 'Renamed' by the time this PATCH could act, so it
+    // moved nothing. An audit row claiming it changed the label is a record of
+    // an event that did not occur.
+    const rows = await trail(id);
+    expect(rows.at(-1)).toMatchObject({ action: 'updated', changedFields: [] });
   });
 
   it('an enabled flip is its own action, in both directions', async () => {
