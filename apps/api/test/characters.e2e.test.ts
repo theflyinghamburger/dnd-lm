@@ -185,20 +185,25 @@ describe.skipIf(!DATABASE_URL)('characters and dice', () => {
       const mine = await importPregen(table, table.player, 'aria-sunhollow.json').expect(201);
       const theirs = await importPregen(table, table.host, 'brann-ironfell.json').expect(201);
 
-      const me = await api()
+      // The id the lobby filters by, from the same place the lobby gets it.
+      const player = await api().get('/api/auth/me').set('Cookie', table.player).expect(200);
+      const playerId = player.body.id as string;
+
+      expect(mine.body.ownerUserId).toBe(playerId);
+      expect(theirs.body.ownerUserId).not.toBe(playerId);
+
+      const listed = await api()
         .get(`/api/campaigns/${table.campaignId}/characters`)
         .set('Cookie', table.player)
         .expect(200);
-      const owners = Object.fromEntries(
-        (me.body as { id: string; ownerUserId: string }[]).map((c) => [c.id, c.ownerUserId]),
+      const visible = listed.body as { id: string; ownerUserId: string }[];
+      // Both are listed; only one is the caller's, which is what the lobby offers.
+      expect(visible.map((c) => c.id).sort()).toEqual(
+        [mine.body.id as string, theirs.body.id as string].sort(),
       );
-      expect(owners[mine.body.id]).not.toBe(owners[theirs.body.id]);
-      // The player's own selectable set is the one the lobby filters to.
-      expect(
-        (me.body as { id: string; ownerUserId: string }[]).filter(
-          (c) => c.ownerUserId === owners[mine.body.id],
-        ),
-      ).toHaveLength(1);
+      expect(visible.filter((c) => c.ownerUserId === playerId).map((c) => c.id)).toEqual([
+        mine.body.id,
+      ]);
     });
 
     it('gives two characters for the same pregen imported twice (#61)', async () => {

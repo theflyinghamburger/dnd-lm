@@ -25,6 +25,10 @@ const modules = import.meta.glob('../../../fixtures/pregens/*.json', { eager: tr
  * This is not a second validation policy — the import is re-validated
  * server-side, and that answer is the one the UI shows on rejection.
  */
+/** Exported so the test orders by the same rule the UI does, not by `Array.sort`'s. */
+export const byName = (a: ImportCharacterRequest, b: ImportCharacterRequest): number =>
+  a.name.localeCompare(b.name);
+
 export const PREGENS: ImportCharacterRequest[] = Object.values(modules)
   .map((module) => ImportCharacterRequest.parse(module.default))
-  .sort((a, b) => a.name.localeCompare(b.name));
+  .sort(byName);

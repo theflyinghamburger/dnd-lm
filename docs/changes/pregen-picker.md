@@ -112,7 +112,7 @@ Baseline before the change: 354 tests green against live Postgres. After: 359
 | AC | Covered by |
 |---|---|
 | AC-1 | `api.importCharacter`, typechecked against `ImportCharacterRequest` from contracts |
-| AC-2 | **Not automated** — see below |
+| AC-2 | Driven by hand in headless Chromium against `pnpm dev` — see § Corrections |
 | AC-3 | `pregens.test.ts` "is every fixture on disk, and not an empty glob" + "parses each one as the request body the API accepts" |
 | AC-4 | `pnpm build` green, then `grep "Aria Sunhollow" apps/web/dist/assets/*.js` → 1 hit, and `Sable Quickfoot` found |
 | AC-5 | `describeApiError(importCharacter.error)` in a `role="alert"`, the same path `AdminProviders` uses |
@@ -126,13 +126,11 @@ turns "is every fixture on disk, and not an empty glob" red — verified locally
 and reverted. That test exists because the failure mode here is silence, not an
 error.
 
-**Not covered.** AC-2 is the rendering, and the web app has no DOM testing
-library (M7.6 decided not to add one, D-5). The chooser's markup, the disabled
-state while the mutation is in flight, and the seat dropdown gaining the
-character after invalidation were not exercised — by a test or by hand in a
-browser. What *is* pinned is everything under the render: the data it lists, the
-call it makes, the ownership the server enforces, and that the fixtures reach
-the bundle at all.
+**Not covered by an automated test.** AC-2 is the rendering, and the web app has
+no DOM testing library (M7.6 decided not to add one, D-5). It was instead driven
+by hand — see § Corrections, D-9 — which is a one-off, not a regression guard.
+A future change to the chooser's markup or its invalidation wiring has nothing
+watching it.
 
 ## Corrections
 
@@ -143,3 +141,49 @@ the bundle at all.
   the lobby line to README step 5** — it currently reads as though `curl` is the
   only way in. Flagged in both PR descriptions rather than fixed by a
   speculative merge.
+
+- **D-8 — The ownership test now grounds `ownerUserId` to the importer's id**
+  (review of `31c12b26f087`, medium). It previously asserted only that the two
+  imports had *different* owners and then filtered by the imported character's
+  own owner — so ownership assigned to the wrong member, differing per caller,
+  would have passed, and the comment claiming it mirrored the lobby's
+  `user.id` filter overclaimed. The id now comes from `GET /api/auth/me` on the
+  player's cookie, the same place the lobby gets it. Resolving that id from the
+  host's cookie instead turns the test red — measured, then reverted.
+- **D-9 — AC-2 was driven by hand, and it found a bug no check here could.**
+  Both reviewers raised the same high finding: the change's user-facing
+  deliverable was verified by nothing. Driving it in headless Chromium against
+  `pnpm --filter @dnd-lm/web dev` reproduced all four steps — and the app did
+  not load at all.
+
+  `pregens.ts` is the web app's **first value import** from `@dnd-lm/contracts`;
+  every other import there is `import type`, erased before it reaches a runtime.
+  Contracts builds to CommonJS (apps/api is a CJS Nest app), vite does not
+  pre-bundle a linked workspace package, and `cjs-module-lexer` does not see
+  through `dist/index.js`'s transitive `export *`. The dev server therefore
+  threw `SyntaxError: … does not provide an export named 'ImportCharacterRequest'`
+  at module evaluation, and the whole app failed to load — while `pnpm build`,
+  `pnpm typecheck`, `pnpm lint` and all 361 tests stayed green. `vite build`
+  resolves the interop itself (the production bundle was confirmed to load), and
+  vitest aliases contracts to source, so no check in this repo could see it.
+
+  Fixed with `optimizeDeps: { include: ['@dnd-lm/contracts'] }` in
+  `apps/web/vite.config.ts`, and pinned by a source scan in `pregens.test.ts` —
+  the same technique `key-handling.test.ts` uses, and the only kind of check
+  that can observe a dev-server-only failure.
+
+  Verified after the fix, in the browser: the chooser renders where
+  `no character` does and offers all six by name; picking one and pressing
+  **Add character** makes the seat dropdown gain it (`Watch only`,
+  `Nimbeth Vale`) with a `window` marker set before the click still intact, so
+  nothing reloaded; a second import leaves the chooser in place and the dropdown
+  at three options; and deleting the membership out from under the page makes
+  the next import render `NOT_A_MEMBER` — the server's own code, through
+  `describeApiError`, in the `role="alert"`.
+- **D-10 — Two low findings taken, one deliberately not.** The fixture count is
+  now `toHaveLength(6)` rather than a floor of 4, and the ordering test uses the
+  exported `byName` comparator instead of `Array.sort`'s UTF-16 order. The
+  informational finding about `ImportCharacterRequest.parse` at module scope
+  taking down the whole app rather than the chooser is **accepted as-is**: it is
+  the same blast radius the reviewer noted, CI validates every fixture, and
+  wrapping it would trade a loud failure for a quiet one.
