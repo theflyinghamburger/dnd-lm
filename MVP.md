@@ -356,9 +356,11 @@ Host URL and API key are entered by a human in a web form, so this is a credenti
 
 Automated ingestion is Phase 4. The MVP gets hand-written notes so the DM has something grounded to narrate from.
 
-- **M8.1 — Notes storage.** `campaign_notes(id, campaign_id, slug, type, title, body_md, frontmatter JSONB, spoiler_level, tsv tsvector GENERATED)`. Frontmatter follows the architecture.md §9 shape so Phase 4 ingestion can write into the same table without a migration. NPC notes are also the resolution source for the `@npc` trigger (§4.3 rule 4).
-- **M8.2 — Retrieval.** Postgres FTS with a GIN index on `tsv`. **Hard filters run first** — `campaign_id` and `spoiler_level` are SQL `WHERE` predicates, not a post-ranking filter. This is the structural habit that keeps Phase 4's spoiler guarantees honest; getting it backwards now means rewriting it later. Return top-N chunks with title and slug as citations, under a token cap.
-- **M8.3 — Notes editor.** Markdown editor in the host UI, with a spoiler-level selector per note.
+- **M8.1 — Notes storage.** `campaign_notes(id, campaign_id, slug, type, title, body_md, frontmatter JSONB, spoiler_level, chapter, tsv tsvector GENERATED)`. Frontmatter follows the architecture.md §9 shape so Phase 4 ingestion can write into the same table without a migration. `spoiler_level` is an ordered enum (`player` < `dm`); `chapter` is the progression gate, compared against `campaigns.settings.progression.chapter` — the party's current progression, host-set, in the JSONB that already exists.
+- **M8.2 — Retrieval.** Postgres FTS with a GIN index on `tsv`. **Hard filters run first** — `campaign_id`, `spoiler_level`, and `chapter` are SQL `WHERE` predicates, not a post-ranking filter. This is the structural habit that keeps Phase 4's spoiler guarantees honest; getting it backwards now means rewriting it later. Return top-N notes with title and slug as citations, under a token cap.
+- **M8.3 — Notes in the DM context layer.** The retrieval replaces M6's `settings.notes` shim as the source of the notes layer, keyed on the turn's trigger text and wrapped in the existing untrusted-data block (invariant 7).
+- **M8.4 — NPC roster from notes.** `type = 'npc'` notes are the resolution source for the `@npc` trigger (§4.3 rule 4), under the same hard filters: an NPC above the party's progression is not addressable and reads as an unknown NPC.
+- **M8.5 — Notes API and host editor.** Host-and-admin CRUD over campaign notes, and a Markdown editor in the host UI with type, spoiler-level, and chapter selectors per note.
 
 **Acceptance:** a note marked above the party's current progression is never returned by retrieval, asserted at the query layer. A note from campaign A never appears in campaign B's retrieval.
 
@@ -366,10 +368,11 @@ Automated ingestion is Phase 4. The MVP gets hand-written notes so the DM has so
 
 ### M9 — MVP acceptance
 
-- **M9.1 — Scenario suite.** Every applicable scenario from spec-doc.md §13: cross-player chat produces no DM call; the DM requests and resumes a roll; two simultaneous actions stay ordered; a retry duplicates nothing; the validator rejects an invented item; a prompt injection in a note is ignored; the session resumes after a backend restart.
-- **M9.2 — Live playtest.** A real four-to-six-player, three-hour one-shot. Record: prompt size per turn, p95 DM latency, cost per session, trigger frequency by type, and every state conflict.
+- **M9.1 — Scenario suite.** Every applicable scenario from spec-doc.md §13: cross-player chat produces no DM call; the DM requests and resumes a roll; two simultaneous actions stay ordered; a retry duplicates nothing; the validator rejects an invented item; a prompt injection in a note is ignored; future-chapter content is excluded; a summary contradicts live state and live state wins; the session resumes after a backend restart. One table maps each scenario to the test that proves it, and every row runs in CI.
+- **M9.2 — Live playtest.** A session report built from what the system already records — per-layer token counts, provider usage, the event log — then a real four-to-six-player, three-hour one-shot run through it. Record: prompt size per turn, p95 DM latency, cost per session, trigger frequency by type, and every state conflict.
 - **M9.3 — Restart drill.** Kill the API mid-resolution during live play, including once while a run is parked at `WAITING_FOR_ROLL`. Clients reconnect, replay, and continue. No manual database repair.
 - **M9.4 — Accessibility pass.** Keyboard-only play through a full turn (NFR-401); roll results and state changes announced to a screen reader via a live region (NFR-402).
+- **M9.5 — Release-gate evidence pack.** One row per bullet of §6, spec-doc.md §17, and spec-doc.md §14, each naming the test, artefact, or playtest section that proves it. A bullet without evidence becomes its own issue, never a softened row.
 
 ---
 
