@@ -49,9 +49,17 @@ const TRANSPORT_CODES = new Set([
   'UND_ERR_SOCKET',
 ]);
 
-/** A model id the endpoint does not serve, phrased a dozen ways in the wild. */
+/**
+ * A model id the endpoint does not serve, phrased a dozen ways in the wild.
+ *
+ * The gap between `model` and the failure phrase stops at a sentence boundary,
+ * so an unrelated later sentence cannot be read as a verdict about the model —
+ * but a dot *inside* a token is not a boundary, because dotted model ids
+ * (`llama-3.1-8b`, `gpt-4.1`) are the naming convention of the field, not an
+ * edge case.
+ */
 const MODEL_MISSING =
-  /model[^.]{0,40}(not\s*found|does\s*not\s*exist|not\s*exist|unknown|invalid|unavailable)|(unknown|invalid|unsupported)\s*model|no\s*such\s*model/i;
+  /model(?:[^.]|\.(?!\s|$)){0,40}(not\s*found|does\s*not\s*exist|not\s*exist|unknown|invalid|unavailable)|(unknown|invalid|unsupported)\s*model|no\s*such\s*model/i;
 
 function chain(error: unknown): unknown[] {
   const seen: unknown[] = [];
@@ -73,6 +81,22 @@ function statusOf(error: unknown): number | null {
   return null;
 }
 
+/**
+ * Both SDKs wrap a round trip that never completed in their own error class and
+ * give it this one message. Matching the name keeps this file duck-typed (see
+ * the header); the message is the fallback for a throw that lost its class.
+ */
+const CONNECTION_ERROR_NAMES = new Set(['APIConnectionError', 'APIConnectionTimeoutError']);
+
+function isSdkConnectionError(error: unknown): boolean {
+  return chain(error).some((link) => {
+    const name = (link as { constructor?: { name?: unknown } }).constructor?.name;
+    if (typeof name === 'string' && CONNECTION_ERROR_NAMES.has(name)) return true;
+    const message = (link as { message?: unknown }).message;
+    return typeof message === 'string' && message.trim() === 'Connection error.';
+  });
+}
+
 function isTransport(error: unknown): boolean {
   return chain(error).some((link) => {
     const code = (link as { code?: unknown }).code;
@@ -89,7 +113,10 @@ export function classifyProviderError(error: unknown): ClassifiedProviderError {
   const status = statusOf(error);
   const detail = detailOf(error);
 
-  if (status === null && isTransport(error)) {
+  // Nothing answered. Only two things prove that: a transport code, or the
+  // SDKs' own connection error. Everything else that lacks a status merely
+  // failed *somewhere*, which is a different claim (see the return below).
+  if (status === null && (isTransport(error) || isSdkConnectionError(error))) {
     return { class: 'unreachable', status: null, detail };
   }
   if (status === 401 || status === 403) {
@@ -100,10 +127,12 @@ export function classifyProviderError(error: unknown): ClassifiedProviderError {
   if (status === 404 || (status !== null && status < 500 && MODEL_MISSING.test(detail))) {
     return { class: 'model_not_found', status, detail };
   }
-  // No status and no transport code: the SDK wrapped something it could not
-  // reach either ("Connection error."), which is still nothing answering.
-  if (status === null) {
-    return { class: 'unreachable', status: null, detail };
-  }
+  // Everything left over: a status with no rule, or a throw carrying no status
+  // at all — a success body the SDK could not assemble, a mid-stream decode
+  // failure, an adapter bug, a non-Error throw. None of those is evidence that
+  // nothing answered, and reporting `unreachable` for an endpoint that did
+  // answer is the most misleading verdict an operator can be handed. So they
+  // land here, where `reachable` and `authenticated` keep standing and the
+  // detail is the whole of what is known (M7-FU2, #43).
   return { class: 'provider_error', status, detail };
 }
