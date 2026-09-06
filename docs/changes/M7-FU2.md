@@ -4,7 +4,7 @@ id: M7-FU2
 title: Act on the surviving independent-review findings across the M7 pull requests
 type: bug
 profile: standard
-state: implementing
+state: reviewing
 source: 'github-actions review comments on #34, #36, #37, #38, #39, #40, #41; triaged
   in #42; subtasks #43, #44, #45'
 intent:
