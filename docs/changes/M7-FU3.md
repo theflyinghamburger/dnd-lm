@@ -5,7 +5,7 @@ title: Restore the classifier test coverage M7-FU2 deleted, and correct three cl
   in its record
 type: bug
 profile: fast
-state: implementing
+state: reviewing
 source: 'github-actions review comments on #46'
 intent:
   objective: clear
