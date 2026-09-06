@@ -4,7 +4,7 @@ import { type AddressInfo } from 'node:net';
 import { io, type Socket } from 'socket.io-client';
 import request from 'supertest';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { type EventEnvelope } from '@dnd-lm/contracts';
 import { campaigns, memberships, sessions, users } from '../src/db/schema';
 import { DATABASE_URL, createTestApp, truncateAll, type TestApp } from './app.harness';
@@ -389,6 +389,35 @@ describe.skipIf(!DATABASE_URL)('DM provider failure behaviour (M7.9)', () => {
     });
   });
 
+  it('the per-connection rollup counts a real failure, not a constant zero (AC-11)', async () => {
+    const table = await stage();
+    const connectionId = await createConnection();
+    primary.mode = 'unauthorized';
+    await pick(table.host, table.campaignId, connectionId);
+
+    await failedTurn(table);
+
+    // M7.8's AC-10 query. It is asserted elsewhere against two successful
+    // turns, where `failures` is 0 -- which a predicate matching nothing also
+    // produces. Running it where a failure actually happened is the only way
+    // the FILTER can be shown to work at all.
+    const rollup = await app.db.execute(sql`
+      SELECT payload->>'provider_connection_id' AS connection_id,
+             count(*) FILTER (WHERE type = 'DM_RESOLUTION_FAILED') AS failures,
+             count(*) FILTER (WHERE type = 'DM_NARRATION')         AS resolutions
+        FROM session_events
+       WHERE type IN ('DM_NARRATION', 'DM_RESOLUTION_FAILED')
+       GROUP BY 1
+    `);
+    expect(
+      [...rollup].map((r) => ({
+        connection_id: r.connection_id,
+        failures: Number(r.failures),
+        resolutions: Number(r.resolutions),
+      })),
+    ).toEqual([{ connection_id: connectionId, failures: 1, resolutions: 0 }]);
+  });
+
   it('redacts the key out of the operator line, even when the provider echoes it (AC-4)', async () => {
     const table = await stage();
     const connectionId = await createConnection();
@@ -438,7 +467,10 @@ describe.skipIf(!DATABASE_URL)('DM provider failure behaviour (M7.9)', () => {
       expect(event.payload).toMatchObject({ reason: 'PROVIDER_ERROR' });
       // The turn is retried once against the same endpoint (M6.7) — and never
       // against the other one.
-      expect(primary.calls).toBeGreaterThanOrEqual(1);
+      // Exactly twice: the bounded retry ran and stopped. `>= 1` would pass
+      // whether the rejected credential was retried or not, and "a rejected
+      // credential is still retried once" is a written decision.
+      expect(primary.calls).toBe(2);
       expect(spare.calls).toBe(0);
       // The selection is untouched: no silent rewiring of the campaign.
       const [row] = await app.db

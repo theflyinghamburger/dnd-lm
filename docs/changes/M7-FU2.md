@@ -191,3 +191,36 @@ Three bounded tasks, one commit each, each ending at a runnable check.
    locally, confirming red, and restoring — that verification *is* the
    deliverable for AC-7 through AC-11, so it is recorded per criterion.
    *Check:* the full suite against live Postgres, plus typecheck / lint / format.
+
+## Traceability
+
+Not required at `standard`, but AC-7 through AC-11 are repairs to tests that
+passed while the thing they named was broken, so "there is a test" is not the
+deliverable — "the test fails when the property does" is. Each was verified by
+reverting its production line, observing red, and restoring it.
+
+| AC | Covered by | Verified failing-if-broken by |
+|---|---|---|
+| AC-1 | `provider-error.test.ts` — "an endpoint that answered is never reported unreachable" (3 cases) | Red before the fix: all three returned `unreachable`. |
+| AC-2 | same file — transport code, SDK class name, SDK message | Green before and after; the guard against over-correcting AC-1. Plus `connection-test.e2e` AC-5 (port 1) unchanged. |
+| AC-3 | same file — dotted id, dot-free id, sentence boundary | Red before the fix on the dotted case. |
+| AC-4 | `connection-test.e2e.test.ts` — "drops a verdict whose configuration changed while the test ran" | Red before the fix: the superseded verdict was stored. |
+| AC-5 | `provider-audit.e2e.test.ts` — "diffs against a locked row" | Red before `.for('update')`: audit claimed `['label']` for a PATCH that moved nothing. |
+| AC-6 | `dm-failures.e2e.test.ts` — "reports the failure even when the diagnostic read itself fails" | Red before the guard: timed out — no event was ever emitted. |
+| AC-7 | `connection-test.e2e.test.ts` — the 404 test, now pressed past the limit | Reverted the row-read-before-token order → **red**. The single-press version stayed green. |
+| AC-8 | `connection-test.e2e.test.ts` — the invalidation test, now five branches | Deleted `changed.includes('base_url')` → **red**. |
+| AC-9 | `connection-test.e2e.test.ts` — the rejected-key test | Set `FIELDS.unauthenticated.modelExists = true` → **red**. |
+| AC-10 | `dm-failures.e2e.test.ts` — the no-fallback test | Removed the bounded retry in `graph.ts` → **red**. `>= 1` had stayed green. |
+| AC-11 | `dm-failures.e2e.test.ts` — "the rollup counts a real failure" | Typo'd the FILTER's event type → **red**. The zero-failure assertion in `dm-connections.e2e.test.ts` stayed green, which is the point. |
+| AC-12 | `key-handling.test.ts` — "gives a failed query somewhere to surface" | Structural only. See below. |
+| AC-13 | Not covered by a test. See below. | — |
+| AC-14 | `pnpm test` 347 passed / 34 files against live Postgres; `db:check` clean; typecheck, lint, format green. | — |
+
+**Not covered by tests, stated plainly.** AC-12's scan asserts that both
+components reference `connections.error` and that the campaign screen gates its
+empty state on `isSuccess` — it cannot assert that either element renders, or
+what it says. AC-13 has no automated cover at all: that the replace-key input
+survives a rejected replace is a behaviour of a mutation callback, and this app
+still has no DOM library by M7.6's decision. Both were confirmed by reading the
+diff, which is a review step, not a test. Reopening the DOM-library decision is
+its own change; it is not smuggled into a corrective one.

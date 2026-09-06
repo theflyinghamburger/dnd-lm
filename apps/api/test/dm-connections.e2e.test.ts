@@ -382,9 +382,10 @@ describe.skipIf(!DATABASE_URL)('DM adapter wiring from connections (M7.7)', () =
           },
         ].sort((x, y) => x.connection_id.localeCompare(y.connection_id)),
       );
-      // The failure half of the query is exercised where failures happen:
-      // `dm-failures.e2e.test.ts` attributes each failed turn to its own
-      // connection, which is the same payload field this groups on.
+      // Zero failures is the honest expectation here -- both turns succeeded.
+      // The FILTER itself is exercised against a non-zero count in
+      // `dm-failures.e2e.test.ts`, which runs this same query after a failed
+      // turn; without that, a predicate matching nothing would pass this too.
 
       expect(mock.recs).toEqual([
         { auth: 'Bearer sk-key-a', model: 'model-a', path: '/v1/chat/completions' },

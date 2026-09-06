@@ -311,8 +311,15 @@ function ConnectionForm({
             event.preventDefault();
             const field = event.currentTarget.elements.namedItem('replacement');
             if (field instanceof HTMLInputElement && field.value.trim()) {
-              replaceKey.mutate(field.value.trim());
-              field.value = '';
+              // Cleared on success only. Clearing it inline made a rejected
+              // replace cost the admin the one value on this page that is
+              // painful to retype -- while the form beside it keeps its
+              // contents on failure by explicit requirement.
+              replaceKey.mutate(field.value.trim(), {
+                onSuccess: () => {
+                  field.value = '';
+                },
+              });
             }
           }}
         >

@@ -75,7 +75,16 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
           </option>
         ))}
       </select>
-      {connections.data?.length === 0 && (
+      {/* A failed providers read left this panel blank: the dropdown had nothing
+          in it and the hint below was gated on `data.length === 0`, which is
+          false when `data` is undefined. "None configured" and "the read
+          failed" are different things and now look different. */}
+      {connections.error && (
+        <p role="alert" className="error">
+          {describeApiError(connections.error)}
+        </p>
+      )}
+      {connections.isSuccess && connections.data.length === 0 && (
         <p className="role">No enabled connections yet — ask a platform admin.</p>
       )}
 

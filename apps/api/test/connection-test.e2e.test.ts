@@ -225,6 +225,10 @@ describe.skipIf(!DATABASE_URL)('test connection (M7.5)', () => {
 
     expect(result.reachable).toBe(true);
     expect(result.authenticated).toBe(false);
+    // The call never got past the credential, so it demonstrated nothing about
+    // the model either. This is the field "claims nothing more than was
+    // learned" actually turns on.
+    expect(result.modelExists).toBe(false);
     expect(result.structuredOutput).toBe(false);
     // The provider quoted the key back; the stored detail must not (NFR-305).
     expect(result.detail).not.toContain(API_KEY);
@@ -374,6 +378,34 @@ describe.skipIf(!DATABASE_URL)('test connection (M7.5)', () => {
       .send({ modelId: 'another-model' })
       .expect(200);
     expect(remodelled.body.lastTest).toBeNull();
+
+    // Moving the endpoint does too: `reachable` was about that host.
+    await api()
+      .patch(`/api/admin/providers/${connection.id}`)
+      .set('Cookie', admin)
+      .send({ modelId: 'local-model' })
+      .expect(200);
+    await test(admin, connection.id);
+    const moved = await api()
+      .patch(`/api/admin/providers/${connection.id}`)
+      .set('Cookie', admin)
+      .send({ baseUrl: `${base}/` })
+      .expect(200);
+    expect(moved.body.lastTest).toBeNull();
+
+    // Enabling or disabling changes nothing the verdict measured, so it stands.
+    await api()
+      .patch(`/api/admin/providers/${connection.id}`)
+      .set('Cookie', admin)
+      .send({ baseUrl: base })
+      .expect(200);
+    await test(admin, connection.id);
+    const disabled = await api()
+      .patch(`/api/admin/providers/${connection.id}`)
+      .set('Cookie', admin)
+      .send({ enabled: false })
+      .expect(200);
+    expect(disabled.body.lastTest).not.toBeNull();
   });
 
   it('drops a verdict whose configuration changed while the test ran (AC-4)', async () => {
@@ -428,10 +460,17 @@ describe.skipIf(!DATABASE_URL)('test connection (M7.5)', () => {
 
   it('a test against an id that does not exist is a 404, not a rate-limit entry', async () => {
     const admin = await makeAdmin('admin@example.com');
-    await api()
-      .post('/api/admin/providers/00000000-0000-0000-0000-000000000000/test')
-      .set('Cookie', admin)
-      .expect(404);
+    // Pressed past the per-connection limit on purpose. One press cannot tell
+    // the orders apart -- it is 404 with no provider call either way. Only the
+    // presses beyond the limit can: if the token were taken before the row was
+    // read, a nonexistent id would mint a bucket nothing evicts and these would
+    // start answering 429 instead of 404.
+    for (let i = 0; i < 8; i += 1) {
+      await api()
+        .post('/api/admin/providers/00000000-0000-0000-0000-000000000000/test')
+        .set('Cookie', admin)
+        .expect(404);
+    }
     expect(calls).toBe(0);
   });
 
