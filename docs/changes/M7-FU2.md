@@ -35,8 +35,8 @@ value, and the untested span attribute), because the column is `NOT NULL DEFAULT
 as accepted residual in M7.8. A finding raised three times is not thereby true.
 
 **A classifier that is confident in the wrong direction.** `classifyProviderError`
-turns two SDKs' error types plus undici's into the four classes that M7.5's
-verdict card and M7.9's operator line both read, and its last rule is `status === null` ⇒
+turns three SDKs' error types into the four classes that M7.5's verdict card and
+M7.9's operator line both read, and its last rule is `status === null` ⇒
 `unreachable`. It cannot tell *nothing answered* from *something answered and we
 could not handle the reply*, so a malformed body, a mid-stream decode failure,
 an adapter bug and a non-`Error` throw all report `reachable: false` about an
@@ -75,10 +75,7 @@ passes it forever, and the comment claiming another file covers it names a file
 that never runs the query. On the web side, a failed `GET /api/providers` leaves
 the campaign settings panel blank, because `connections.error` is unrendered and
 the empty-state hint is gated on `data?.length === 0`, which is false when `data`
-is `undefined`. [Corrected post-merge by M7-FU3: this paragraph originally said
-"two screens that render nothing when a read fails". Only one does. The admin
-list already renders its error — that was fixed during #38's own review round —
-and the scan added here asserts both, which is why it passed.]
+is `undefined`.
 
 ## Specification
 
@@ -89,13 +86,9 @@ AC-2   A transport-coded failure, and each SDK's own connection-error wrapper,
        M7.5's AC-5 covers (FR-507).
 AC-3   `MODEL_MISSING` matches when a dotted model id sits between `model` and
        the failure phrase; a sentence boundary still breaks the match (FR-507).
-AC-4   A test verdict is stored only if the key nonce, `base_url` and
-       `model_id` are unchanged since the test began — the configuration the
-       verdict is a statement about. A verdict about a superseded configuration
-       is dropped, not written. A label-only PATCH landing mid-test does not
-       drop it, because it changed nothing the verdict claims (NFR-502).
-       [Reworded post-merge by M7-FU3: the original said "the row has not been
-       mutated", which is broader than what D-2 shipped.]
+AC-4   A test verdict is stored only if the row has not been mutated since the
+       test began. A verdict about a superseded configuration is dropped, not
+       written (NFR-502).
 AC-5   `update()`'s before-read and its write observe the same row version, so a
        concurrent PATCH cannot produce an audit row that under-reports what it
        changed (FR-805).
