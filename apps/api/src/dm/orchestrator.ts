@@ -49,6 +49,7 @@ import { ProviderSecrets } from '../providers/provider-secrets.service';
 import {
   buildDmGraph,
   GRAPH_RECURSION_LIMIT,
+  type DmFailure,
   type DmGraphState,
   type DmStreamPayload,
   type RollAsk,
@@ -59,10 +60,39 @@ import { estimateUsd, withSpan } from './telemetry';
 
 export const DM_PROVIDER_SOURCE = Symbol('DM_PROVIDER_SOURCE');
 
-/** Which connection and model a resolution ran on (M7.8, NFR-502, FR-805). */
-export type DmAttribution = { connectionId: string | null; model: string | null };
+/**
+ * Which connection and model a resolution ran on (M7.8, NFR-502, FR-805), and
+ * — for a failure — the fine-grained class and detail the operator line
+ * reports (M7.9). The class and detail never reach the table: the event's
+ * message is the static per-reason sentence, and that is the whole split.
+ */
+export type DmAttribution = {
+  connectionId: string | null;
+  model: string | null;
+  failureClass?: string;
+  detail?: string | null;
+};
 /** A failure with no connection resolved - NO_PROVIDER's own shape. */
 const NO_ATTRIBUTION: DmAttribution = { connectionId: null, model: null };
+
+/**
+ * A log field that cannot become two. Anything outside a model id's plausible
+ * charset collapses to `_`, so no space, quote or `=` from admin-typed text
+ * can forge a field on a line whose whole value is being greppable (M7.9).
+ */
+const safeField = (value: string | null): string =>
+  value === null || value === '' ? '-' : value.replace(/[^\w.:/@-]+/g, '_').slice(0, 128);
+
+/**
+ * What the graph knew about its own failure (M7.9): the fine-grained class it
+ * classified, and the detail it already redacted. `graph` covers the failures
+ * the graph raises itself — an unreadable control block, a refused proposal —
+ * where there is no provider class to report.
+ */
+const classOf = (failure: DmFailure): Pick<DmAttribution, 'failureClass' | 'detail'> => ({
+  failureClass: failure.providerClass ?? 'graph',
+  detail: failure.message,
+});
 
 type DmCompiledGraph = ReturnType<typeof buildDmGraph>;
 
@@ -309,9 +339,18 @@ export class DmOrchestrator implements OnApplicationBootstrap {
       async (span) => {
         // M7.7: the gate is per-campaign now — a table whose campaign has no
         // usable connection fails typed before the state moves.
+        //
+        // M7.9: this is the only place a connection is chosen, and there is no
+        // second choice. A failed connection is never retried on another one,
+        // in this turn or a later turn of the same resolution — a silent model
+        // switch mid-session is a continuity bug, not resilience (MVP.md M7.9).
         const sourced = await this.providerSource.get(session.campaignId);
         if (!sourced) {
-          await this.reportFailure(sessionId, null, 'NO_PROVIDER', opts.actorId, opts.callbacks);
+          await this.reportFailure(sessionId, null, 'NO_PROVIDER', opts.actorId, opts.callbacks, {
+            connectionId: null,
+            model: null,
+            failureClass: await this.explainNoProvider(session.campaignId),
+          });
           return;
         }
         span.setAttribute('model', sourced.provider.model);
@@ -338,7 +377,7 @@ export class DmOrchestrator implements OnApplicationBootstrap {
               'INTERNAL',
               opts.actorId,
               opts.callbacks,
-              attribution,
+              { ...attribution, failureClass: 'graph_unavailable' },
             );
             return;
           }
@@ -394,22 +433,23 @@ export class DmOrchestrator implements OnApplicationBootstrap {
                 'RECURSION_LIMIT',
                 opts.actorId,
                 opts.callbacks,
-                attribution,
+                { ...attribution, failureClass: 'recursion_limit' },
               );
             } else {
-              this.logger.error(
-                `graph run failed: ${this.secrets.redact(
-                  error instanceof Error ? (error.stack ?? error.message) : String(error),
-                  [sourced.config.apiKey],
-                )}`,
-              );
               await this.reportFailure(
                 sessionId,
                 resolutionId,
                 'INTERNAL',
                 opts.actorId,
                 opts.callbacks,
-                attribution,
+                {
+                  ...attribution,
+                  failureClass: 'graph_threw',
+                  detail: this.secrets.redact(
+                    error instanceof Error ? (error.stack ?? error.message) : String(error),
+                    [sourced.config.apiKey],
+                  ),
+                },
               );
             }
             return;
@@ -435,7 +475,7 @@ export class DmOrchestrator implements OnApplicationBootstrap {
               state.failure.reason,
               opts.actorId,
               opts.callbacks,
-              attribution,
+              { ...attribution, ...classOf(state.failure) },
             );
             return;
           }
@@ -543,7 +583,11 @@ export class DmOrchestrator implements OnApplicationBootstrap {
       async (span) => {
         const sourced = await this.providerSource.get(session.campaignId);
         if (!sourced) {
-          await this.reportFailure(sessionId, resolutionId, 'NO_PROVIDER', actorId, callbacks);
+          await this.reportFailure(sessionId, resolutionId, 'NO_PROVIDER', actorId, callbacks, {
+            connectionId: null,
+            model: null,
+            failureClass: await this.explainNoProvider(session.campaignId),
+          });
           return;
         }
         span.setAttribute('model', sourced.provider.model);
@@ -559,14 +603,10 @@ export class DmOrchestrator implements OnApplicationBootstrap {
           .where(eq(rolls.pendingActionId, actionId))
           .limit(1);
         if (!roll) {
-          await this.reportFailure(
-            sessionId,
-            resolutionId,
-            'INTERNAL',
-            actorId,
-            callbacks,
-            attribution,
-          );
+          await this.reportFailure(sessionId, resolutionId, 'INTERNAL', actorId, callbacks, {
+            ...attribution,
+            failureClass: 'roll_missing',
+          });
           return;
         }
         const [character] = roll.characterId
@@ -592,14 +632,10 @@ export class DmOrchestrator implements OnApplicationBootstrap {
         try {
           const infra = await this.ensureGraph();
           if (!infra) {
-            await this.reportFailure(
-              sessionId,
-              resolutionId,
-              'INTERNAL',
-              actorId,
-              callbacks,
-              attribution,
-            );
+            await this.reportFailure(sessionId, resolutionId, 'INTERNAL', actorId, callbacks, {
+              ...attribution,
+              failureClass: 'graph_unavailable',
+            });
             return;
           }
           const { graph } = infra;
@@ -640,23 +676,17 @@ export class DmOrchestrator implements OnApplicationBootstrap {
                 'RECURSION_LIMIT',
                 actorId,
                 callbacks,
-                attribution,
+                { ...attribution, failureClass: 'recursion_limit' },
               );
             } else {
-              this.logger.error(
-                `graph resume failed: ${this.secrets.redact(
+              await this.reportFailure(sessionId, resolutionId, 'INTERNAL', actorId, callbacks, {
+                ...attribution,
+                failureClass: 'graph_threw',
+                detail: this.secrets.redact(
                   error instanceof Error ? (error.stack ?? error.message) : String(error),
                   [sourced.config.apiKey],
-                )}`,
-              );
-              await this.reportFailure(
-                sessionId,
-                resolutionId,
-                'INTERNAL',
-                actorId,
-                callbacks,
-                attribution,
-              );
+                ),
+              });
             }
             return;
           }
@@ -681,7 +711,7 @@ export class DmOrchestrator implements OnApplicationBootstrap {
               state.failure.reason,
               actorId,
               callbacks,
-              attribution,
+              { ...attribution, ...classOf(state.failure) },
             );
             return;
           }
@@ -813,18 +843,18 @@ export class DmOrchestrator implements OnApplicationBootstrap {
       callbacks.events(events);
     } catch (error) {
       const rejected = error instanceof ConflictException;
-      this.logger.warn(
-        `resolution ${resolutionId} not committed: ${this.secrets.redact(
-          error instanceof Error ? error.message : String(error),
-        )}`,
-      );
       await this.reportFailure(
         sessionId,
         resolutionId,
         rejected ? 'MUTATION_REJECTED' : 'INTERNAL',
         actorId,
         callbacks,
-        { connectionId: state.connectionId, model: state.model },
+        {
+          connectionId: state.connectionId,
+          model: state.model,
+          failureClass: rejected ? 'mutation_rejected' : 'commit_failed',
+          detail: this.secrets.redact(error instanceof Error ? error.message : String(error)),
+        },
       );
     }
   }
@@ -980,6 +1010,64 @@ export class DmOrchestrator implements OnApplicationBootstrap {
   }
 
   /**
+   * The operator channel for the MVP (M7.9): one line per failed resolution,
+   * one format, greppable. Everything the ad-hoc `logger.error` calls used to
+   * say goes through here instead — two formats would make a per-class count
+   * wrong, and the class is the point.
+   *
+   * `detail` arrives already redacted (M7.2). None of this goes near the table.
+   */
+  private logResolutionFailure(
+    sessionId: string,
+    resolutionId: string | null,
+    reason: DmFailureReason,
+    attribution: DmAttribution,
+  ): void {
+    const fields = [
+      `reason=${reason}`,
+      `class=${attribution.failureClass ?? 'unspecified'}`,
+      `resolution=${resolutionId ?? '-'}`,
+      `session=${sessionId}`,
+      `connection=${attribution.connectionId ?? '-'}`,
+      // Every other field is system-generated; a model id is admin-typed free
+      // text. Quoting it would keep a parser safe but still let a `class=` hide
+      // inside the quotes for a grep, so it is reduced to a charset that cannot
+      // open a field at all. The connection id above is the authoritative key
+      // if a mangled model id ever needs resolving.
+      `model=${safeField(attribution.model)}`,
+    ];
+    const detail = attribution.detail?.replace(/\s+/g, ' ').trim();
+    if (detail) fields.push(`detail=${JSON.stringify(detail)}`);
+    this.logger.error(`dm.resolution.failed ${fields.join(' ')}`);
+  }
+
+  /**
+   * Why `DmProviderSource.get` returned null (M7.9). Diagnostic only: it runs
+   * after the decision to fail has been made and never influences control
+   * flow. Keeping it here rather than in the source's return type leaves the
+   * DI seam every DM test overrides untouched.
+   */
+  private async explainNoProvider(campaignId: string): Promise<string> {
+    const [campaign] = await this.db
+      .select({ settings: campaigns.settings })
+      .from(campaigns)
+      .where(eq(campaigns.id, campaignId))
+      .limit(1);
+    const selected = (campaign?.settings ?? null) as { provider_connection_id?: unknown } | null;
+    if (typeof selected?.provider_connection_id !== 'string') return 'no_selection';
+
+    const [row] = await this.db
+      .select({ enabled: providerConnections.enabled })
+      .from(providerConnections)
+      .where(eq(providerConnections.id, selected.provider_connection_id))
+      .limit(1);
+    if (!row) return 'connection_missing';
+    if (!row.enabled) return 'disabled';
+    // The row is there and enabled, so the SSRF wall refused its URL (M7.3).
+    return 'url_rejected';
+  }
+
+  /**
    * A resolution that ends without a commit. The message on the event is
    * static per reason — provider error text can carry URLs and identifiers
    * that are not for the table — while the raw detail goes to the log.
@@ -992,6 +1080,10 @@ export class DmOrchestrator implements OnApplicationBootstrap {
     callbacks: DmTriggerCallbacks,
     attribution: DmAttribution = NO_ATTRIBUTION,
   ): Promise<void> {
+    // One line per failed resolution, before anything can go wrong recording
+    // it: a failure that could not be written must still be greppable.
+    this.logResolutionFailure(sessionId, resolutionId, reason, attribution);
+
     const session = await this.sessionService.find(sessionId);
     if (!session) return;
     const message: Record<DmFailureReason, string> = {
