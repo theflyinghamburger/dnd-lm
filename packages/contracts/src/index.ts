@@ -525,6 +525,50 @@ export const ReplaceKeyRequest = z.object({
 export type ReplaceKeyRequest = z.infer<typeof ReplaceKeyRequest>;
 
 /**
+ * The DM knobs a host sets per campaign (FR-506, M7.6). Closed sets rather
+ * than free text: a fixed vocabulary is testable, renders as a `select`, and
+ * — when these eventually reach the DM prompt — is host input that cannot
+ * carry instructions (invariant 7). `null` means "not set".
+ *
+ * They are stored and displayed in M7.6 and do **not** yet influence the DM's
+ * prompt; wiring them in is its own change, with its own untrusted-data
+ * treatment.
+ */
+export const DmStyle = z.enum(['gritty', 'heroic', 'comedic', 'mysterious']);
+export type DmStyle = z.infer<typeof DmStyle>;
+
+export const DmTone = z.enum(['light', 'balanced', 'dark']);
+export type DmTone = z.infer<typeof DmTone>;
+
+export const DmDifficulty = z.enum(['easy', 'standard', 'hard', 'deadly']);
+export type DmDifficulty = z.infer<typeof DmDifficulty>;
+
+/** Everything the campaign settings screen reads in one call (M7.6). */
+export const CampaignDmSettings = z.object({
+  providerConnectionId: Id.nullable(),
+  style: DmStyle.nullable(),
+  tone: DmTone.nullable(),
+  difficulty: DmDifficulty.nullable(),
+});
+export type CampaignDmSettings = z.infer<typeof CampaignDmSettings>;
+
+/**
+ * The knobs only. Selecting a provider keeps its own endpoint (M7.4), because
+ * that write is validated against the enabled connections and this one has
+ * nothing to validate against.
+ */
+export const UpdateDmSettingsRequest = z
+  .object({
+    style: DmStyle.nullable().optional(),
+    tone: DmTone.nullable().optional(),
+    difficulty: DmDifficulty.nullable().optional(),
+  })
+  .refine((v) => Object.values(v).some((value) => value !== undefined), {
+    message: 'at least one field must be provided',
+  });
+export type UpdateDmSettingsRequest = z.infer<typeof UpdateDmSettingsRequest>;
+
+/**
  * The campaign-settings write a host makes (FR-506): which provider
  * connection the campaign's DM runs on, or `null` for none. Only enabled
  * connections are selectable; the write is host-or-admin on that campaign.

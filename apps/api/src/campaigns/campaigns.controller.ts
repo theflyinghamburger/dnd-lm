@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import {
+  type CampaignDmSettings,
   type CampaignSummary,
   type CampaignTriggersResponse,
   CreateCampaignRequest,
@@ -8,6 +9,7 @@ import {
   type PublicUser,
   type ProviderSettingsResponse,
   type RosterResponse,
+  UpdateDmSettingsRequest,
   UpdateProviderRequest,
   UpdateTriggersRequest,
 } from '@dnd-lm/contracts';
@@ -77,6 +79,27 @@ export class CampaignsController {
     @Body(new ZodValidationPipe(UpdateTriggersRequest)) body: UpdateTriggersRequest,
   ): Promise<CampaignTriggersResponse> {
     return this.campaigns.updateTriggers(campaignId, body);
+  }
+
+  /**
+   * The campaign's DM settings (M7.6): the selected provider plus the FR-506
+   * knobs. Readable by any member — a player may see how the table is set up;
+   * only a host or admin may write.
+   */
+  @Get(':campaignId/dm-settings')
+  @UseGuards(CampaignMemberGuard)
+  dmSettings(@Param('campaignId') campaignId: string): Promise<CampaignDmSettings> {
+    return this.campaigns.getDmSettings(campaignId);
+  }
+
+  @Patch(':campaignId/dm-settings')
+  @UseGuards(CampaignMemberGuard)
+  @CampaignRoles('host', 'admin')
+  updateDmSettings(
+    @Param('campaignId') campaignId: string,
+    @Body(new ZodValidationPipe(UpdateDmSettingsRequest)) body: UpdateDmSettingsRequest,
+  ): Promise<CampaignDmSettings> {
+    return this.campaigns.updateDmSettings(campaignId, body);
   }
 
   /**
