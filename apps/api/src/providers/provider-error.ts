@@ -87,13 +87,15 @@ function statusOf(error: unknown): number | null {
  * the header); the message is the fallback for a throw that lost its class.
  */
 const CONNECTION_ERROR_NAMES = new Set(['APIConnectionError', 'APIConnectionTimeoutError']);
+/** The same two, by the message they carry, for a throw that lost its class. */
+const CONNECTION_ERROR_MESSAGES = new Set(['Connection error.', 'Request timed out.']);
 
 function isSdkConnectionError(error: unknown): boolean {
   return chain(error).some((link) => {
     const name = (link as { constructor?: { name?: unknown } }).constructor?.name;
     if (typeof name === 'string' && CONNECTION_ERROR_NAMES.has(name)) return true;
     const message = (link as { message?: unknown }).message;
-    return typeof message === 'string' && message.trim() === 'Connection error.';
+    return typeof message === 'string' && CONNECTION_ERROR_MESSAGES.has(message.trim());
   });
 }
 
