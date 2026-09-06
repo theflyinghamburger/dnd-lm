@@ -117,15 +117,19 @@ AC-14  `pnpm test` green against live Postgres, `pnpm db:check` clean,
   the round-one corrective change, which ran `standard` over the same surface.
   Inspection did not turn up risk the paths understate: the secret-handling and
   SSRF code is read, not modified.
-- **D-2 — `updated_at` is the row-version token for AC-4.** All three mutating
-  paths already bump it: `update()` sets it in every `set`, and
-  `provider-secrets.service.ts:103` sets it on a key replacement. So one
-  condition on `updated_at` covers key, base URL, model id and everything else,
-  instead of a three-column comparison that would still miss the key. The cost
-  is that a *no-op* PATCH also bumps it, so a no-op landing mid-test drops a
-  verdict that was in fact still valid. That is a false negative costing one
-  button press, and it fails in the direction AC-4 is about: never storing a
-  verdict we cannot prove is current.
+- **D-2 — AC-4's write asserts the columns the verdict attests, not a row
+  version.** The plan said `updated_at`, on the reasoning that every mutating
+  path bumps it. Implementation contradicted it: Postgres stores the column at
+  microsecond precision and Drizzle reads it back as a millisecond `Date`, so
+  `eq(updatedAt, row.updatedAt)` never matches a freshly created row and *no*
+  verdict was stored at all. The write now compares `base_url`, `model_id` and
+  the key's nonce — the three things a verdict is a statement about — which is
+  exact, binds through Drizzle's own column types, and is strictly better than
+  the plan: a no-op PATCH no longer drops a valid verdict. `kind` is absent
+  because it is not in `UPDATABLE`; it is fixed at create, which also closes the
+  reviewer's open question about switching protocol under a stored verdict. The
+  nonce is null exactly when there is no key, so the keyless M7.3 row compares
+  with `IS NULL` rather than an equality that can never hold.
 - **D-3 — No status scraping from error text.** The obvious extra for AC-1
   would be to read a leading `401` out of the message, which would classify the
   `dm.e2e.test.ts:454` fixture as `unauthenticated` rather than merely
@@ -145,6 +149,17 @@ AC-14  `pnpm test` green against live Postgres, `pnpm db:check` clean,
   rather than papered over.
 - **D-6 — The fifteen dismissed findings are recorded in #42, not here.** Each
   carries its reason there. This document covers what is being changed.
+- **D-7 — AC-5's defect is over-reporting, not the under-reporting the finding
+  described.** The review said the loser of two concurrent PATCHes "moves a
+  field while its audit row records `changed_fields` computed against the
+  pre-write row — including the empty array for a write that actually changed
+  something". Tested, that cannot happen: `update` puts a field in its `set`
+  only when the diff says it moved, so a diff reading "unchanged" also writes
+  nothing, and the UPDATE takes the row lock regardless, so no write is lost.
+  What the stale diff really produces is the mirror image — an audit row
+  claiming a change that the concurrent winner had already made. The lock is
+  still the right fix and AC-5 still holds; the criterion is worded to the defect
+  that exists rather than the one that was reported.
 
 ## Plan
 

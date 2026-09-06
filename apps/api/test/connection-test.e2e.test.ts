@@ -34,6 +34,21 @@ describe.skipIf(!DATABASE_URL)('test connection (M7.5)', () => {
     '\n```';
 
   let mode: Mode = 'dm-json';
+  /**
+   * Holds the mock's reply open so a write can commit while a test is still in
+   * flight -- the interleaving AC-4 is about.
+   */
+  let hold: { announce: () => void; held: Promise<void> } | null = null;
+
+  function holdNext(): { arrived: Promise<void>; release: () => void } {
+    let announce!: () => void;
+    let release!: () => void;
+    const arrived = new Promise<void>((resolve) => (announce = resolve));
+    const held = new Promise<void>((resolve) => (release = resolve));
+    hold = { announce, held };
+    return { arrived, release };
+  }
+
   /** Makes the mock's error body enormous, the way a hostile endpoint would. */
   let long = false;
   let calls = 0;
@@ -63,8 +78,14 @@ describe.skipIf(!DATABASE_URL)('test connection (M7.5)', () => {
     server = createServer((req, res) => {
       let body = '';
       req.on('data', (c) => (body += c));
-      req.on('end', () => {
+      req.on('end', async () => {
         calls += 1;
+        if (hold) {
+          const gate = hold;
+          hold = null;
+          gate.announce();
+          await gate.held;
+        }
         if (mode === 'unauthorized') {
           res.writeHead(401, { 'content-type': 'application/json' });
           // Real providers quote the credential they rejected. That is exactly
@@ -108,6 +129,7 @@ describe.skipIf(!DATABASE_URL)('test connection (M7.5)', () => {
     await truncateAll(app.db);
     mode = 'dm-json';
     calls = 0;
+    hold = null;
   });
 
   const api = () => request(app.app.getHttpServer());
@@ -352,6 +374,38 @@ describe.skipIf(!DATABASE_URL)('test connection (M7.5)', () => {
       .send({ modelId: 'another-model' })
       .expect(200);
     expect(remodelled.body.lastTest).toBeNull();
+  });
+
+  it('drops a verdict whose configuration changed while the test ran (AC-4)', async () => {
+    const admin = await makeAdmin('admin@example.com');
+    const connection = await connect(admin);
+    await test(admin, connection.id);
+    const before = await api()
+      .get(`/api/admin/providers/${connection.id}`)
+      .set('Cookie', admin)
+      .expect(200);
+    expect(before.body.lastTest).not.toBeNull();
+
+    // Hold the endpoint mid-reply and rotate the key underneath the probe. The
+    // clearing #39 added runs, and then the in-flight verdict -- computed
+    // against the *old* credential -- arrives to be written.
+    const gate = holdNext();
+    const inFlight = test(admin, connection.id);
+    await gate.arrived;
+    await api()
+      .post(`/api/admin/providers/${connection.id}/key`)
+      .set('Cookie', admin)
+      .send({ apiKey: 'sk-test-rotated-0000' })
+      .expect(200);
+    gate.release();
+    expect((await inFlight).authenticated).toBe(true);
+
+    // It attests a key the row no longer has, so it is dropped, not stored.
+    const after = await api()
+      .get(`/api/admin/providers/${connection.id}`)
+      .set('Cookie', admin)
+      .expect(200);
+    expect(after.body.lastTest).toBeNull();
   });
 
   it('tests a keyless endpoint — an empty key redacts nothing and hides nothing', async () => {

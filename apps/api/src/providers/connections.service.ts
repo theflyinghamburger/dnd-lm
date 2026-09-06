@@ -167,10 +167,18 @@ export class ProviderConnectionsService {
     }
 
     return this.db.transaction(async (tx) => {
+      // Locked, not merely read. The UPDATE below takes the row lock anyway, so
+      // a concurrent write is never lost -- but an unlocked diff read sees a
+      // snapshot that writer can invalidate before the write lands, and the
+      // audit row is computed from the diff. Two PATCHes renaming a row to the
+      // same value would each record having changed the label, when only the
+      // first one did. The audit is the record of what happened; it does not get
+      // to describe an event that did not (M7-FU2, #44).
       const [before] = await tx
         .select()
         .from(providerConnections)
         .where(eq(providerConnections.id, id))
+        .for('update')
         .limit(1);
       if (!before) throw new NotFoundException({ code: 'CONNECTION_NOT_FOUND' });
 

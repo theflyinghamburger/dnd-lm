@@ -14,7 +14,7 @@
  */
 import { HttpException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import type { ConnectionTestResult } from '@dnd-lm/contracts';
-import { eq } from 'drizzle-orm';
+import { and, eq, isNull } from 'drizzle-orm';
 import { DB, type Db } from '../db/db.module';
 import { providerConnections } from '../db/schema';
 import { parseDmOutput } from '../dm/provider';
@@ -112,10 +112,31 @@ export class ConnectionTestService {
     }
 
     const result = await this.run(row);
+    // The verdict describes one key, one endpoint and one model id -- the row as
+    // it was when the probe started. If any of the three moved while the call
+    // was in flight, storing the verdict would put back exactly the stale
+    // `authenticated: true` the invalidation removed, through the one
+    // interleaving that invalidation cannot see. So the write asserts the
+    // configuration it tested, and a superseded verdict is dropped: the admin
+    // still has it in their response, and re-establishing it is one button
+    // press. `kind` is absent because it is not in `UPDATABLE` -- it is fixed at
+    // create, so the protocol a verdict attests cannot change under it.
+    // The nonce is the key's version: `ProviderSecrets` draws a fresh one on
+    // every encryption, and it is null exactly when there is no key at all
+    // (M7-FU2, #44).
     await this.db
       .update(providerConnections)
       .set({ lastTestResult: result })
-      .where(eq(providerConnections.id, id));
+      .where(
+        and(
+          eq(providerConnections.id, id),
+          eq(providerConnections.baseUrl, row.baseUrl),
+          eq(providerConnections.modelId, row.modelId),
+          row.apiKeyNonce
+            ? eq(providerConnections.apiKeyNonce, row.apiKeyNonce)
+            : isNull(providerConnections.apiKeyNonce),
+        ),
+      );
     return result;
   }
 

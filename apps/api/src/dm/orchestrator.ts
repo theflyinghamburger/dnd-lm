@@ -1046,8 +1046,28 @@ export class DmOrchestrator implements OnApplicationBootstrap {
    * after the decision to fail has been made and never influences control
    * flow. Keeping it here rather than in the source's return type leaves the
    * DI seam every DM test overrides untouched.
+   *
+   * It is awaited as an argument to `reportFailure`, so a throw here would take
+   * the whole report with it -- no event for the table, no operator line, no
+   * failure record -- and it reads the database at exactly the moment a partial
+   * outage is most likely. A diagnostic must not be able to suppress the thing
+   * it annotates, so it never throws: a failed lookup costs the *reason* and
+   * nothing else (M7-FU2, #44).
    */
   private async explainNoProvider(campaignId: string): Promise<string> {
+    try {
+      return await this.readNoProviderReason(campaignId);
+    } catch (error) {
+      this.logger.warn(
+        `dm.resolution.explain_failed campaign=${campaignId} detail=${JSON.stringify(
+          error instanceof Error ? error.message : String(error),
+        )}`,
+      );
+      return 'unspecified';
+    }
+  }
+
+  private async readNoProviderReason(campaignId: string): Promise<string> {
     const [campaign] = await this.db
       .select({ settings: campaigns.settings })
       .from(campaigns)

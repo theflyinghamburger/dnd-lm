@@ -334,6 +334,44 @@ describe.skipIf(!DATABASE_URL)('DM provider failure behaviour (M7.9)', () => {
     expect(primary.calls).toBe(0);
   });
 
+  it('reports the failure even when the diagnostic read itself fails (AC-6)', async () => {
+    const table = await stage();
+    const connectionId = await createConnection();
+    await pick(table.host, table.campaignId, connectionId);
+    await api()
+      .patch(`/api/admin/providers/${connectionId}`)
+      .set('Cookie', admin)
+      .send({ enabled: false })
+      .expect(200);
+
+    // `explainNoProvider` reads the row's `enabled` flag to say *why* there is
+    // no provider. That read is a diagnostic: a DB blip in exactly this window
+    // -- pool exhaustion, a statement timeout, the conditions that cause
+    // provider failures in the first place -- must cost the operator the
+    // explanation, never the report. The projection below is unique to that
+    // read, which is how this targets it and nothing else.
+    const passthrough = app.db.select.bind(app.db);
+    const select = vi
+      .spyOn(app.db, 'select')
+      .mockImplementation((projection?: Record<string, unknown>) => {
+        if (projection && 'enabled' in projection) throw new Error('pool exhausted');
+        return passthrough(projection as never) as never;
+      });
+
+    try {
+      const event = await failedTurn(table);
+
+      expect(event.payload).toMatchObject({ reason: 'NO_PROVIDER' });
+      expectNoLeak(event);
+      // The class is the only thing the failed read costs us, and it says so
+      // rather than guessing a reason it could not look up.
+      expect(operatorLines()[0]).toContain('class=unspecified');
+      expect(operatorLines()[0]).toContain(`session=${table.sessionId}`);
+    } finally {
+      select.mockRestore();
+    }
+  });
+
   it('tells the table nothing about the infrastructure that failed (AC-2)', async () => {
     const table = await stage();
     const connectionId = await createConnection();
