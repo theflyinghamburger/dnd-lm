@@ -5,7 +5,7 @@ title: Restore the 429 pin M7-FU3 dropped, and tie the SDK message literals to t
   source
 type: bug
 profile: fast
-state: implementing
+state: reviewing
 source: 'github-actions review comments on #47 (verdict blocked, merged over)'
 intent:
   objective: clear
