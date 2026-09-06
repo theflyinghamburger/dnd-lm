@@ -42,6 +42,15 @@ describe('classifyProviderError (M7.5)', () => {
     );
   });
 
+  it('reads a rate limit as a provider error, not a credential or model verdict', () => {
+    // 429 answered, took the credential, and said nothing about the model. It
+    // must not drift into `unauthenticated` (it is not a rejected key) or
+    // `model_not_found` (nothing was learned about the model).
+    const classified = classifyProviderError(apiError(429, 'rate limited, slow down'));
+    expect(classified.class).toBe('provider_error');
+    expect(classified.status).toBe(429);
+  });
+
   it('does not read a 500 as a missing model, whatever the body says', () => {
     const classified = classifyProviderError(apiError(500, 'model not found in shard'));
     expect(classified.class).toBe('provider_error');
@@ -105,6 +114,20 @@ describe('classifyProviderError (M7.5)', () => {
         class: 'unreachable',
         status: null,
       });
+    });
+
+    // The message set is a copy of two string literals the SDKs own. Nothing
+    // else notices if their wording drifts: every stock error also matches by
+    // class, so the set would quietly go dead and a class-less connection
+    // failure would fall through to `provider_error`. This is the only
+    // assertion tying the literals to their source.
+    it('holds the wording the SDKs actually use', () => {
+      expect(new APIConnectionError({}).message).toBe('Connection error.');
+      expect(new APIConnectionTimeoutError({}).message).toBe('Request timed out.');
+      for (const error of [new APIConnectionError({}), new APIConnectionTimeoutError({})]) {
+        // Stripped of its class, the message alone must still carry it.
+        expect(classifyProviderError(new Error(error.message)).class).toBe('unreachable');
+      }
     });
 
     // ...and here the message arrives on a plain Error, the class having been
