@@ -4,7 +4,7 @@ id: pregen-picker
 title: "Pregen character picker in the lobby \u2014 a seat without curl"
 type: feature
 profile: standard
-state: verifying
+state: reviewing
 source: 'github:#61 (blocks #54)'
 intent:
   objective: clear
