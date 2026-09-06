@@ -4,7 +4,7 @@ id: admin-bootstrap
 title: "Platform admin bootstrap \u2014 first admin without hand-written SQL"
 type: feature
 profile: standard
-state: verifying
+state: reviewing
 source: 'github:#60 (blocks #54)'
 intent:
   objective: clear
