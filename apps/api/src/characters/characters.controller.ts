@@ -75,10 +75,12 @@ export class CharactersController {
     if (!file) {
       throw new BadRequestException({ code: 'NO_FILE', message: 'Attach a PDF as `file`.' });
     }
-    const confirmed = confirmLevel === undefined ? undefined : Number.parseInt(confirmLevel, 10);
-    if (confirmed !== undefined && !Number.isInteger(confirmed)) {
+    // Strict: `parseInt` would read "3abc" as 3, and the whole point of the echo
+    // is that it is the number the refusal named, exactly.
+    if (confirmLevel !== undefined && !/^\d{1,2}$/.test(confirmLevel)) {
       throw new BadRequestException({ code: 'BAD_CONFIRM_LEVEL' });
     }
+    const confirmed = confirmLevel === undefined ? undefined : Number.parseInt(confirmLevel, 10);
     const fields = await readPdfFormFields(new Uint8Array(file.buffer));
     const { request, ignored } = mapWotcCharacterSheet(fields, confirmed);
     return { character: await this.characters.import(user.id, campaignId, request), ignored };

@@ -5,9 +5,12 @@ import { CharacterSheet, deriveSheet } from '@dnd-lm/contracts';
 import type { PdfFormField } from './pdf-form';
 import { mapWotcCharacterSheet, parseClassLine } from './wotc-sheet';
 
-// vitest runs from the workspace root. The fixture is the form-field dump of a
-// real D&D Beyond export (a multiclass Artificer 5 / Wizard 2 with 95 spells),
-// with the published rules prose elided — every field the mapping reads is real.
+// vitest runs from the workspace root. The fixture is a form-field dump from a
+// real D&D Beyond export — a multiclass Artificer 5 / Wizard 2 — with the
+// published rules prose elided and the spell list thinned to a spread across all
+// three banners on both pages. Every name, value and rectangle in it came out of
+// the PDF; nothing is invented, and it is small enough to read in review, which
+// is the only way anyone can tell those two things apart.
 const FIELDS = JSON.parse(
   readFileSync(join(process.cwd(), 'fixtures/character-sheets/wotc-form-fields.json'), 'utf8'),
 ) as PdfFormField[];
@@ -102,12 +105,12 @@ describe('mapWotcCharacterSheet', () => {
    * it sits on the page. This is the assertion that pins that reading.
    */
   it('groups every spell under the banner above it', () => {
-    expect(sheet.spells).toHaveLength(95);
+    expect(sheet.spells).toHaveLength(14);
     const byLevel = sheet.spells.reduce<Record<number, number>>((counts, spell) => {
       counts[spell.level] = (counts[spell.level] ?? 0) + 1;
       return counts;
     }, {});
-    expect(byLevel).toEqual({ 0: 5, 1: 45, 2: 45 });
+    expect(byLevel).toEqual({ 0: 3, 1: 6, 2: 5 });
 
     const level = (name: string) => sheet.spells.find((spell) => spell.name === name)?.level;
     expect(level('Fire Bolt')).toBe(0); // first cantrip, top of page 6
@@ -189,6 +192,28 @@ describe('mapWotcCharacterSheet caps and markers', () => {
     const long = `Reliquary ${'of the Seventh Dawn '.repeat(12)}`;
     const { ignored } = mapWotcCharacterSheet(replacing('Eq Name0', long));
     expect(ignored.join(' | ')).toMatch(/item name shortened to 120 characters/);
+  });
+
+  /**
+   * The list caps discard overflow. Deleting the `overflow.push` lines used to
+   * pass every test in the suite, which is the definition of an unpinned claim.
+   */
+  it('reports rows discarded by the list caps', () => {
+    const spellRows: PdfFormField[] = [];
+    for (let i = 0; i < 420; i += 1) {
+      spellRows.push({ name: `spellName${i}`, value: `Filler ${i}`, page: 6, x: 42, y: 600 - i });
+    }
+    const { request, ignored } = mapWotcCharacterSheet(
+      FIELDS.filter((f) => !/^spellName\d+$/.test(f.name)).concat(spellRows),
+    );
+    expect(request.sheet.spells).toHaveLength(400);
+    expect(ignored.join(' | ')).toMatch(/20 spells past the 400 the sheet holds/);
+  });
+
+  it('reports an inventory quantity it had to clamp', () => {
+    const { request, ignored } = mapWotcCharacterSheet(replacing('Eq Qty0', '0'));
+    expect(request.sheet.inventory[0]?.quantity).toBe(1);
+    expect(ignored.join(' | ')).toMatch(/adjusted from 0 to 1/);
   });
 
   it('says nothing about shortening when nothing was shortened', () => {

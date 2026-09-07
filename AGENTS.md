@@ -14,6 +14,8 @@ socket.io, LangGraphJS bounded inside the DM turn.
 - `architecture.md` — stack, module responsibilities, data model, context design, trust boundaries.
 - `SDLC.md` — the change workflow and CI gate. Read it before starting a change; the
   procedure itself is `.claude/skills/sdlc-change/SKILL.md`.
+- `docs/campaign-pdf-ingestion.md` — design for uploading a campaign PDF and extracting
+  notes, NPCs and quests from it. The first Phase 4 slice, built on M8; issues `P4.1*`.
 
 Cite the requirement ID a change satisfies (`FR-206`, `NFR-202`) in comments and commits — that is
 the codebase's convention. Contradictions between the docs are real bugs: flag them, don't silently

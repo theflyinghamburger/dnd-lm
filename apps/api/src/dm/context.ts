@@ -401,7 +401,12 @@ export async function buildContextPackage(args: {
     if (estimateTokens(block) > LAYER_BUDGET.state) block = `## Current state\n${render('core')}`;
     const ceiling = LAYER_BUDGET.state * CHARS_PER_TOKEN;
     if (block.length > ceiling) {
-      block = `${block.slice(0, ceiling - TRUNCATION_NOTE.length)}${TRUNCATION_NOTE}`;
+      let cut = ceiling - TRUNCATION_NOTE.length;
+      // Never split a surrogate pair: a lone half is a replacement character in
+      // the prompt, at exactly the boundary where the layer is largest.
+      const last = block.charCodeAt(cut - 1);
+      if (last >= 0xd800 && last <= 0xdbff) cut -= 1;
+      block = `${block.slice(0, cut)}${TRUNCATION_NOTE}`;
     }
     // Recorded and pushed are the same string, heading included — the whole
     // point, since the old code recorded one thing and sent another.

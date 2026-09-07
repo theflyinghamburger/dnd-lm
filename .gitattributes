@@ -1,6 +1,0 @@
-# The character-sheet fixture is a machine-extracted dump of ~1200 PDF form
-# fields, regenerated from the source PDF rather than hand-edited. Diffing it
-# line by line tells a reviewer nothing and costs 137 KB of every diff — enough,
-# on this repo's review budget, to be the difference between a review and no
-# review at all. Kept in the tree and readable; simply not diffed.
-fixtures/character-sheets/*.json -diff

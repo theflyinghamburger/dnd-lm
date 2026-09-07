@@ -5,7 +5,7 @@ import { eq, sql } from 'drizzle-orm';
 import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Db } from '../src/db/db.module';
-import { characters, pendingActions, rolls, sessions } from '../src/db/schema';
+import { characters, memberships, pendingActions, rolls, sessions } from '../src/db/schema';
 import { DATABASE_URL, createTestApp, truncateAll } from './app.harness';
 
 const pregen = JSON.parse(
@@ -200,6 +200,29 @@ describe.skipIf(!DATABASE_URL)('character lifecycle (M4.7 follow-ups)', () => {
       await api()
         .delete(`/api/campaigns/${campaignId}/characters/${characterId}`)
         .set('Cookie', host.cookie)
+        .expect(204);
+    });
+
+    /** AC-11 names admin alongside host; an authority in the code and not the spec is the bug. */
+    it('lets a campaign admin delete a player character', async () => {
+      const host = await signUp('host@example.com');
+      const player = await signUp('player@example.com');
+      const admin = await signUp('admin@example.com');
+      const campaignId = await campaignFor(host.cookie);
+      await join(campaignId, host.cookie, player.cookie, 'player');
+      // An `admin` membership is deliberately not invitable — `CreateInviteRequest`
+      // excludes the role — so it is inserted the way the bootstrap creates it.
+      await db.insert(memberships).values({ campaignId, userId: admin.id, role: 'admin' });
+
+      const created = await api()
+        .post(`/api/campaigns/${campaignId}/characters/import`)
+        .set('Cookie', player.cookie)
+        .send(pregen)
+        .expect(201);
+
+      await api()
+        .delete(`/api/campaigns/${campaignId}/characters/${created.body.id}`)
+        .set('Cookie', admin.cookie)
         .expect(204);
     });
 

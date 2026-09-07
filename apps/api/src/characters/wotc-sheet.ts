@@ -274,9 +274,16 @@ export function mapWotcCharacterSheet(
   for (let index = 0; index < MAX_EQUIPMENT_ROWS; index += 1) {
     const itemName = get(`Eq Name${index}`);
     if (itemName === undefined) continue;
+    const rawQty = leadingInt(get(`Eq Qty${index}`));
+    const quantity = Math.min(Math.max(rawQty ?? 1, 1), 9999);
+    if (rawQty !== undefined && rawQty !== quantity) {
+      shortened.push(
+        `quantity of "${itemName.slice(0, 40)}" adjusted from ${rawQty} to ${quantity}`,
+      );
+    }
     inventory.push({
       name: shortOr(itemName, 120, '', 'item name', onTruncate),
-      quantity: Math.min(Math.max(leadingInt(get(`Eq Qty${index}`)) ?? 1, 1), 9999),
+      quantity,
       // The sheet has no equipped column; assuming "yes" would arm the character.
       equipped: false,
     });
