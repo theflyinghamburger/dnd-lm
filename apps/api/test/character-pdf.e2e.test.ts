@@ -209,7 +209,14 @@ describe.skipIf(!DATABASE_URL)('character import from PDF (M4.7)', () => {
       .set('Cookie', host)
       .attach('file', LYING_LEVEL, { filename: 'sheet.pdf', contentType: 'application/pdf' })
       .expect(422);
-    expect(refusal.body).toMatchObject({ parsedLevel: 3, statedBonus: 5, derivedBonus: 2 });
+    // The override button reads `code` and `parsedLevel` off this body
+    // (`ApiError.code` comes from `body.code`), so their names are a contract.
+    expect(refusal.body).toMatchObject({
+      code: 'LEVEL_MISMATCH',
+      parsedLevel: 3,
+      statedBonus: 5,
+      derivedBonus: 2,
+    });
 
     const confirmed = await api()
       .post(`/api/campaigns/${campaignId}/characters/import-pdf?confirmLevel=3`)
@@ -257,6 +264,26 @@ describe.skipIf(!DATABASE_URL)('character import from PDF (M4.7)', () => {
       .set('Cookie', host)
       .expect(200);
     expect(list.body).toHaveLength(0);
+  });
+
+  /**
+   * Past the magic bytes but not a readable document. This was the only refusal
+   * on the route with no test behind it, and it covers both catch layers —
+   * `getDocumentProxy` and the page loop.
+   */
+  it('refuses a file that starts like a PDF but is not one', async () => {
+    const host = await signUp('host@example.com');
+    const campaignId = await campaignFor(host);
+
+    const res = await api()
+      .post(`/api/campaigns/${campaignId}/characters/import-pdf`)
+      .set('Cookie', host)
+      .attach('file', Buffer.from('%PDF-1.7\nnot actually a document at all\n'), {
+        filename: 'sheet.pdf',
+        contentType: 'application/pdf',
+      })
+      .expect(422);
+    expect(res.body.code).toBe('PDF_UNREADABLE');
   });
 
   it('requires a file', async () => {
