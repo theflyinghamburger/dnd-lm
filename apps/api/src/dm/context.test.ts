@@ -134,7 +134,7 @@ describe('state layer budget', () => {
   const stateBlock = (prompt: string) => {
     const start = prompt.indexOf('## Current state');
     const next = prompt.indexOf('\n## ', start + 1);
-    return prompt.slice(start, next === -1 ? undefined : next);
+    return prompt.slice(start, next === -1 ? undefined : next).trimEnd();
   };
 
   it('shows attacks and prepared spells when they fit', async () => {
@@ -186,5 +186,42 @@ describe('state layer budget', () => {
     expect(pkg.prompt).toContain('Caster 0 — Wizard 7');
     expect(pkg.prompt).toContain('HP 26/32');
     expect(pkg.prompt).not.toContain('Irresistible');
+  });
+});
+
+/**
+ * The tier fallback handles a big character; this is the case behind it — a
+ * table whose *core* rendering alone exceeds the budget. Without the hard
+ * ceiling the fallback would push an untruncated string and record a capped
+ * count, which is the original defect at a higher threshold.
+ */
+describe('state layer budget, past the tier fallback', () => {
+  it('never pushes more than it records, even when core does not fit', async () => {
+    const hoarder: CharacterSheet = {
+      ...sheet,
+      inventory: Array.from({ length: 200 }, (_, i) => ({
+        name: `Ornate Reliquary of the Seventh Dawn, item number ${i}`,
+        quantity: 1,
+        equipped: false,
+      })),
+    };
+    const table = Array.from({ length: 6 }, (_, i) => ({
+      id: `c${i}`,
+      name: `Hoarder ${i}`,
+      sheet: hoarder,
+    }));
+
+    const pkg = await buildContextPackage(
+      arg({ reader: { ...reader, characters: async () => table } }),
+    );
+    const start = pkg.prompt.indexOf('## Current state');
+    const next = pkg.prompt.indexOf('\n## ', start + 1);
+    const block = pkg.prompt.slice(start, next === -1 ? undefined : next).trimEnd();
+
+    expect(estimateTokens(block)).toBeLessThanOrEqual(LAYER_BUDGET.state);
+    expect(pkg.layerTokens.state).toBeLessThanOrEqual(LAYER_BUDGET.state);
+    // The recorded count must describe the text that was actually sent.
+    expect(pkg.layerTokens.state).toBeGreaterThanOrEqual(estimateTokens(block) - 1);
+    expect(block).toContain('state truncated to its budget');
   });
 });

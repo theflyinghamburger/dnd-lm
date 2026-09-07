@@ -82,8 +82,16 @@ function reject(code: string, message: string): never {
 
 /** Trimmed and capped, or absent — an empty or placeholder field is not a value. */
 function short(value: string | undefined, max: number): string | undefined {
-  const trimmed = value?.trim();
+  // Runs of whitespace collapse to one space: these fields are single-line by
+  // nature, and a newline would let a value carry prompt-shaped text into the
+  // state layer, which is not wrapped in the untrusted-data markers.
+  const trimmed = value?.replace(/\s+/g, ' ').trim();
   return trimmed && trimmed !== '--' ? trimmed.slice(0, max) : undefined;
+}
+
+/** Same, but for a value that must exist. */
+function shortOr(value: string | undefined, max: number, fallback: string): string {
+  return short(value, max) ?? fallback;
 }
 
 const sign = (n: number): string => `${n >= 0 ? '+' : ''}${n}`;
@@ -112,7 +120,11 @@ export function parseClassLine(line: string): CharacterClass[] {
         `Could not read "${line}" as a class and level. Expected something like "Fighter 3" or "Artificer 5 / Wizard 2".`,
       );
     }
-    classes.push({ name: match[1] as string, level: Number.parseInt(match[2] as string, 10) });
+    classes.push({
+      // 40 is the schema's cap and real subclass names reach past it.
+      name: (match[1] as string).replace(/\s+/g, ' ').trim().slice(0, 40),
+      level: Number.parseInt(match[2] as string, 10),
+    });
   }
   if (classes.length === 0) reject('UNREADABLE_CLASS_LINE', 'The sheet names no class or level.');
   return classes;
@@ -157,21 +169,20 @@ function collectSpells(fields: PdfFormField[]): ImportCharacterRequest['sheet'][
     }
     const index = /^spellName(\d+)$/.exec(field.name)?.[1];
     const attributes = index ? byIndex.get(index) : undefined;
-    const optional = (key: string): string | undefined => {
-      const raw = attributes?.get(key)?.trim();
-      return raw && raw !== '--' ? raw : undefined;
-    };
+    // Each cap is the schema's own, applied here so an over-long field is
+    // trimmed rather than thrown at the uploader as a validation failure.
+    const optional = (key: string, max: number) => short(attributes?.get(key), max);
     spells.push({
-      name: field.value,
+      name: shortOr(field.value, 80, field.value.slice(0, 80)),
       level,
       // "P" is prepared; "O" is known but unprepared, which every cantrip is.
       prepared: attributes?.get('Prepared') === 'P',
-      source: optional('Source'),
-      castingTime: optional('CastingTime'),
-      range: optional('Range'),
-      components: optional('Components'),
-      duration: optional('Duration'),
-      notes: optional('Notes'),
+      source: optional('Source', 40),
+      castingTime: optional('CastingTime', 40),
+      range: optional('Range', 40),
+      components: optional('Components', 40),
+      duration: optional('Duration', 40),
+      notes: optional('Notes', 200),
     });
   }
   return spells;
@@ -219,7 +230,7 @@ export function mapWotcCharacterSheet(
     const itemName = get(`Eq Name${index}`);
     if (itemName === undefined) continue;
     inventory.push({
-      name: itemName.slice(0, 120),
+      name: shortOr(itemName, 120, itemName.slice(0, 120)),
       quantity: Math.min(Math.max(leadingInt(get(`Eq Qty${index}`)) ?? 1, 1), 9999),
       // The sheet has no equipped column; assuming "yes" would arm the character.
       equipped: false,
@@ -231,13 +242,11 @@ export function mapWotcCharacterSheet(
     // The first row is "Wpn Name"; the rest are "Wpn Name 2", "Wpn Name 3"…
     const attackName = get(slot === 1 ? 'Wpn Name' : `Wpn Name ${slot}`);
     if (!attackName) continue;
-    const damage = get(`Wpn${slot} Damage`);
-    const notes = get(`Wpn Notes ${slot}`);
     attacks.push({
-      name: attackName.slice(0, 60),
+      name: shortOr(attackName, 60, attackName.slice(0, 60)),
       attackBonus: leadingInt(get(`Wpn${slot} AtkBonus`)),
-      damage: damage?.slice(0, 60),
-      notes: notes?.slice(0, 160),
+      damage: short(get(`Wpn${slot} Damage`), 60),
+      notes: short(get(`Wpn Notes ${slot}`), 160),
     });
   }
 
@@ -246,8 +255,16 @@ export function mapWotcCharacterSheet(
   const armorClass = leadingInt(get('AC'));
   if (armorClass === undefined) reject('MISSING_AC', 'The sheet has no armour class.');
 
-  const request = ImportCharacterRequest.parse({
-    name: name.slice(0, 80),
+  const allSpells = collectSpells(fields);
+  const overflow: string[] = [];
+  const capped = <T>(list: T[], max: number, label: string): T[] => {
+    if (list.length > max)
+      overflow.push(`${list.length - max} ${label} past the ${max} the sheet holds`);
+    return list.slice(0, max);
+  };
+
+  const draft = {
+    name: shortOr(name, 80, name.slice(0, 80)),
     sheet: {
       classes,
       race: short(get('RACE'), 40),
@@ -260,17 +277,30 @@ export function mapWotcCharacterSheet(
       maxHp,
       armorClass,
       speed: leadingInt(get('Speed')) ?? 30,
-      inventory: inventory.slice(0, 200),
+      inventory: capped(inventory, 200, 'inventory rows'),
       currency: {
         cp: leadingInt(get('CP')) ?? 0,
         sp: leadingInt(get('SP')) ?? 0,
         gp: leadingInt(get('GP')) ?? 0,
         pp: leadingInt(get('PP')) ?? 0,
       },
-      attacks: attacks.slice(0, 40),
-      spells: collectSpells(fields).slice(0, 400),
+      attacks: capped(attacks, 40, 'attacks'),
+      spells: capped(allSpells, 400, 'spells'),
     },
-  });
+  };
+
+  // The schema is the same one the JSON route crosses, so a value the mapper
+  // failed to bring inside its bounds is a mapper bug — but the uploader should
+  // learn *which field*, not receive an opaque 500 from an escaping ZodError.
+  const parsed = ImportCharacterRequest.safeParse(draft);
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0];
+    reject(
+      'UNMAPPABLE_SHEET',
+      `The sheet has a value this schema cannot hold at \`${issue?.path.join('.') || 'sheet'}\`: ${issue?.message ?? 'invalid'}.`,
+    );
+  }
+  const request = parsed.data;
 
   // The file's own proficiency bonus is the one derived number worth reading: it
   // is a function of level alone, so disagreeing with it means the class line was
@@ -291,7 +321,7 @@ export function mapWotcCharacterSheet(
     });
   }
 
-  return { request, ignored: describeIgnored(values, request) };
+  return { request, ignored: [...overflow, ...describeIgnored(values, request)] };
 }
 
 /** Everything the schema has no room for, named so the player can see the gap. */
@@ -316,6 +346,18 @@ function describeIgnored(values: Map<string, string>, request: ImportCharacterRe
   if ([...values.keys()].some((key) => key.startsWith('Actions'))) ignored.push('actions');
   if (values.get('PersonalityTraits') || values.get('Ideals') || values.get('Bonds'))
     ignored.push('personality, ideals, bonds and flaws');
+
+  // The rest of what the sheet carries and this schema has no column for. Listed
+  // by name because "anything that did not come across is named" is the contract
+  // (AC-6), and a category missing from here reads as a category that survived.
+  const has = (prefix: string) => [...values.keys()].some((key) => key.startsWith(prefix));
+  if (has('Attuned')) ignored.push('attuned items');
+  note('alignment', 'ALIGNMENT');
+  note('faith', 'FAITH');
+  note('size', 'SIZE');
+  if (has('Eq Weight') || values.get('Weight Carried'))
+    ignored.push('item weights and encumbrance');
+  if (has('spellPage')) ignored.push('spell page references');
 
   ignored.push(
     `all modifiers, saves and passive scores — recomputed from the ${request.sheet.classes.length > 1 ? 'classes' : 'class'} and ability scores rather than trusted (D-3)`,

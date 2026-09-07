@@ -230,6 +230,35 @@ describe.skipIf(!DATABASE_URL)('character import from PDF (M4.7)', () => {
       .expect(422);
   });
 
+  /**
+   * The 8 MB ceiling had no failing-if-broken test: raising or removing
+   * `limits.fileSize` would have passed CI. Multer refuses before the body is
+   * materialised, so nothing is parsed and no character is written.
+   */
+  it('refuses a file past the size ceiling before parsing it', async () => {
+    const host = await signUp('host@example.com');
+    const campaignId = await campaignFor(host);
+    const oversized = Buffer.concat([
+      Buffer.from('%PDF-1.7\n'),
+      Buffer.alloc(9 * 1024 * 1024, 0x20),
+    ]);
+
+    const res = await api()
+      .post(`/api/campaigns/${campaignId}/characters/import-pdf`)
+      .set('Cookie', host)
+      .attach('file', oversized, { filename: 'huge.pdf', contentType: 'application/pdf' });
+
+    // 413 specifically, not merely "a 4xx": without the limit these bytes reach
+    // the parser and come back 422 PDF_UNREADABLE, which a looser assertion
+    // would have accepted.
+    expect(res.status).toBe(413);
+    const list = await api()
+      .get(`/api/campaigns/${campaignId}/characters`)
+      .set('Cookie', host)
+      .expect(200);
+    expect(list.body).toHaveLength(0);
+  });
+
   it('requires a file', async () => {
     const host = await signUp('host@example.com');
     const campaignId = await campaignFor(host);

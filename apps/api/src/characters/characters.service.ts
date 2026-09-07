@@ -159,26 +159,29 @@ export class CharactersService {
       throw new ForbiddenException({ code: 'NOT_YOUR_CHARACTER' });
     }
 
-    const [blocking] = await this.db
-      .select({ id: pendingActions.id })
-      .from(pendingActions)
-      .innerJoin(sessions, eq(sessions.id, pendingActions.sessionId))
-      .where(
-        and(
-          eq(sessions.campaignId, campaignId),
-          eq(pendingActions.status, 'open'),
-          sql`${characterId} = ANY(${pendingActions.authorizedCharacterIds})`,
-        ),
-      )
-      .limit(1);
-    if (blocking) {
+    // The guard is part of the write, not a check before it. Checking first and
+    // deleting second leaves a window in which a DM turn opens a pending action
+    // naming this character between the two statements — and the delete would
+    // then remove a character an open action still points at, which is exactly
+    // what this refuses.
+    const openAction = sql`
+      select 1 from ${pendingActions}
+      join ${sessions} on ${sessions.id} = ${pendingActions.sessionId}
+      where ${sessions.campaignId} = ${campaignId}
+        and ${pendingActions.status} = 'open'
+        and ${characterId}::uuid = any(${pendingActions.authorizedCharacterIds})
+    `;
+    const deleted = await this.db
+      .delete(characters)
+      .where(and(eq(characters.id, characterId), sql`not exists (${openAction})`))
+      .returning({ id: characters.id });
+
+    if (deleted.length === 0) {
       throw new ConflictException({
         code: 'CHARACTER_HAS_OPEN_ACTION',
         message: 'That character is waiting on a roll. Resolve or cancel it first.',
       });
     }
-
-    await this.db.delete(characters).where(eq(characters.id, characterId));
   }
 
   /** Derived values are recomputed on read and never persisted as truth (FR-401). */
