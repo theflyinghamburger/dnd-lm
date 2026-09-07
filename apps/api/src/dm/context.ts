@@ -18,6 +18,9 @@ import {
   SKILLS,
   SKILL_IDS,
   SKILL_NAMES,
+  characterLevel,
+  classLine,
+  parseStoredSheet,
 } from '@dnd-lm/contracts';
 import { and, asc, desc, eq, inArray } from 'drizzle-orm';
 import { DB, type Db } from '../db/db.module';
@@ -114,7 +117,7 @@ export class DmContextReader implements DmReadOnly {
       .select()
       .from(characters)
       .where(eq(characters.campaignId, campaignId));
-    return rows.map((row) => ({ id: row.id, name: row.name, sheet: row.sheet as CharacterSheet }));
+    return rows.map((row) => ({ id: row.id, name: row.name, sheet: parseStoredSheet(row.sheet) }));
   }
 
   async campaignSettings(campaignId: string): Promise<DmCampaignSettings> {
@@ -236,7 +239,15 @@ export type ContextPackage = {
   characters: DmCharacterState[];
 };
 
-export function renderCharacter(char: DmCharacterState): string {
+/**
+ * How much of a sheet to show. `'core'` is what the DM saw before attacks and
+ * spells existed; `'full'` adds them. The state layer renders `'full'` and falls
+ * back to `'core'` if the table does not fit its budget, so the cut lands on a
+ * whole tier rather than mid-list.
+ */
+export type CharacterDetail = 'core' | 'full';
+
+export function renderCharacter(char: DmCharacterState, detail: CharacterDetail = 'core'): string {
   const s = char.sheet;
   const mods: string[] = ABILITIES.map((a) => `${a} ${s.abilityScores[a]}`);
   const skills = SKILL_IDS.map((k) => {
@@ -258,13 +269,57 @@ export function renderCharacter(char: DmCharacterState): string {
           .join(' ')
       : 'no gold';
   return [
-    `${char.name} — ${s.className} level ${s.level}`,
+    // The total is worth saying only when it is not already on the line.
+    `${char.name} — ${classLine(s.classes)}${
+      s.classes.length > 1 ? ` (level ${characterLevel(s.classes)})` : ''
+    }`,
     `HP ${s.currentHp ?? s.maxHp}/${s.maxHp}, AC ${s.armorClass}, speed ${s.speed}`,
     `abilities: ${mods.join(' ')}`,
     `skills: ${skills}`,
     inventory ? `inventory: ${inventory}` : 'inventory: empty',
     `gold: ${gold}`,
-  ].join('\n');
+    ...(detail === 'full' ? renderKit(s) : []),
+  ]
+    .filter(Boolean)
+    .join('\n');
+}
+
+/**
+ * Attacks and spells, for the `'full'` tier. Every attack, but only the spells
+ * that matter at the table — cantrips and what is actually prepared — with the
+ * rest counted rather than listed. A 95-spell wizard would otherwise eat the
+ * whole state budget on its own.
+ */
+function renderKit(s: CharacterSheet): string[] {
+  const lines: string[] = [];
+  if (s.race || s.background) {
+    lines.push(`${[s.race, s.background].filter(Boolean).join(', ')}`);
+  }
+  if (s.senses) lines.push(`senses: ${s.senses}`);
+  if (s.attacks.length > 0) {
+    lines.push(
+      `attacks: ${s.attacks
+        .map((a) => {
+          const bonus =
+            a.attackBonus === undefined ? '' : ` ${a.attackBonus >= 0 ? '+' : ''}${a.attackBonus}`;
+          return `${a.name}${bonus}${a.damage ? ` (${a.damage})` : ''}`;
+        })
+        .join(', ')}`,
+    );
+  }
+  if (s.spells.length > 0) {
+    const ready = s.spells.filter((spell) => spell.level === 0 || spell.prepared);
+    const rest = s.spells.length - ready.length;
+    const listed = ready.map(
+      (spell) => `${spell.name}${spell.level === 0 ? '' : ` (${spell.level})`}`,
+    );
+    lines.push(
+      `spells ready: ${listed.length > 0 ? listed.join(', ') : 'none prepared'}${
+        rest > 0 ? ` — and ${rest} more known but not prepared` : ''
+      }`,
+    );
+  }
+  return lines;
 }
 
 /** The SRD block is static for the MVP (D-2): rendered once per process. */
@@ -318,13 +373,21 @@ export async function buildContextPackage(args: {
   let remaining = LAYER_BUDGET.prompt_total;
 
   if (has('state')) {
-    const state = [
-      `Scene: ${scene ?? 'unset'}.`,
-      characterList.length === 0
-        ? 'No characters are in play yet.'
-        : characterList.map(renderCharacter).join('\n\n'),
-      `State version: ${args.stateVersion}.`,
-    ].join('\n\n');
+    const render = (detail: CharacterDetail) =>
+      [
+        `Scene: ${scene ?? 'unset'}.`,
+        characterList.length === 0
+          ? 'No characters are in play yet.'
+          : characterList.map((char) => renderCharacter(char, detail)).join('\n\n'),
+        `State version: ${args.stateVersion}.`,
+      ].join('\n\n');
+
+    // The budget is enforced, not merely recorded. Rendering the full tier and
+    // dropping to core when it does not fit keeps a 95-spell character from
+    // silently overrunning `prompt_total` while telemetry reported compliance
+    // (FR-701, NFR-502) — which is what capping the *count* alone used to do.
+    let state = render('full');
+    if (estimateTokens(state) > LAYER_BUDGET.state) state = render('core');
     layerTokens.state = Math.min(estimateTokens(state), LAYER_BUDGET.state);
     parts.push(`## Current state\n${state}`);
     remaining -= layerTokens.state;

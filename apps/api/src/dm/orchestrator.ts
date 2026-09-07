@@ -19,12 +19,12 @@ import {
 import { Command, GraphRecursionError } from '@langchain/langgraph';
 import { PostgresSaver } from '@langchain/langgraph-checkpoint-postgres';
 import {
-  type CharacterSheet,
   type DmFailureReason,
   type DmOutput,
   type EventEnvelope,
   type GraphEntryProfile,
   type ProposedStateChange,
+  parseStoredSheet,
 } from '@dnd-lm/contracts';
 import { and, eq, isNotNull, inArray, lt } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
@@ -905,7 +905,7 @@ export class DmOrchestrator implements OnApplicationBootstrap {
             errors.push(`adjust_hp: unknown character`);
             break;
           }
-          const sheet = target.sheet as CharacterSheet;
+          const sheet = parseStoredSheet(target.sheet);
           const next = (sheet.currentHp ?? sheet.maxHp) + (delta as number);
           if (next < 0 || next > sheet.maxHp) {
             errors.push(
@@ -935,8 +935,8 @@ export class DmOrchestrator implements OnApplicationBootstrap {
               errors.push(`remove_item: unknown character`);
               break;
             }
-            const have = (target.sheet as CharacterSheet).inventory
-              .filter((item) => item.name === name)
+            const have = parseStoredSheet(target.sheet)
+              .inventory.filter((item) => item.name === name)
               .reduce((sum, item) => sum + item.quantity, 0);
             if (have < (quantity as number)) {
               errors.push(`remove_item: ${target.name} has ${have} of "${name}"`);
@@ -970,7 +970,7 @@ export class DmOrchestrator implements OnApplicationBootstrap {
           .where(eq(characters.id, proposal.target_id))
           .limit(1);
         if (!target) return;
-        const sheet = target.sheet as CharacterSheet;
+        const sheet = parseStoredSheet(target.sheet);
         const next = (sheet.currentHp ?? sheet.maxHp) + (proposal.payload.delta as number);
         await tx
           .update(characters)
@@ -986,7 +986,7 @@ export class DmOrchestrator implements OnApplicationBootstrap {
           .where(eq(characters.id, proposal.target_id))
           .limit(1);
         if (!target) return;
-        const sheet = target.sheet as CharacterSheet;
+        const sheet = parseStoredSheet(target.sheet);
         const { name } = proposal.payload as { name: string };
         const quantity = proposal.payload.quantity as number;
         const inventory = [...sheet.inventory];

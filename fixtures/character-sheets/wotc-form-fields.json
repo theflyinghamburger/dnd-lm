@@ -1,0 +1,8374 @@
+[
+  {
+    "name": "CharacterName",
+    "value": "Varric Ironwright",
+    "page": 1,
+    "x": 47.5,
+    "y": 731.2
+  },
+  {
+    "name": "CLASS LEVEL",
+    "value": "Artificer 5 / Wizard 2",
+    "page": 1,
+    "x": 270.7,
+    "y": 742.4
+  },
+  {
+    "name": "PLAYER NAME",
+    "value": "FlyingHamburger",
+    "page": 1,
+    "x": 470.3,
+    "y": 742.4
+  },
+  {
+    "name": "RACE",
+    "value": "Custom Lineage",
+    "page": 1,
+    "x": 270.7,
+    "y": 716.4
+  },
+  {
+    "name": "BACKGROUND",
+    "value": "Guild Artisan / Guild Merchant",
+    "page": 1,
+    "x": 383.5,
+    "y": 716.4
+  },
+  {
+    "name": "EXPERIENCE POINTS",
+    "value": "(Milestone)",
+    "page": 1,
+    "x": 480.2,
+    "y": 716.4
+  },
+  {
+    "name": "STR",
+    "value": "6",
+    "page": 1,
+    "x": 36.8,
+    "y": 634.8
+  },
+  {
+    "name": "STRmod",
+    "value": "-2",
+    "page": 1,
+    "x": 46.4,
+    "y": 602.3
+  },
+  {
+    "name": "DEX",
+    "value": "14",
+    "page": 1,
+    "x": 36.8,
+    "y": 557.8
+  },
+  {
+    "name": "DEXmod",
+    "value": "+2",
+    "page": 1,
+    "x": 46.4,
+    "y": 525.3
+  },
+  {
+    "name": "CON",
+    "value": "16",
+    "page": 1,
+    "x": 36.8,
+    "y": 481.5
+  },
+  {
+    "name": "CONmod",
+    "value": "+3",
+    "page": 1,
+    "x": 46.4,
+    "y": 449
+  },
+  {
+    "name": "INT",
+    "value": "20",
+    "page": 1,
+    "x": 36.8,
+    "y": 404.5
+  },
+  {
+    "name": "INTmod",
+    "value": "+5",
+    "page": 1,
+    "x": 46.4,
+    "y": 372
+  },
+  {
+    "name": "WIS",
+    "value": "14",
+    "page": 1,
+    "x": 36.8,
+    "y": 328.3
+  },
+  {
+    "name": "WISmod",
+    "value": "+2",
+    "page": 1,
+    "x": 46.4,
+    "y": 295.7
+  },
+  {
+    "name": "CHA",
+    "value": "10",
+    "page": 1,
+    "x": 36.8,
+    "y": 252
+  },
+  {
+    "name": "CHamod",
+    "value": "+0",
+    "page": 1,
+    "x": 46.4,
+    "y": 219.5
+  },
+  {
+    "name": "ST Strength",
+    "value": "-2",
+    "page": 1,
+    "x": 113,
+    "y": 658.9
+  },
+  {
+    "name": "ST Dexterity",
+    "value": "+2",
+    "page": 1,
+    "x": 113,
+    "y": 645.4
+  },
+  {
+    "name": "ConProf",
+    "value": "•",
+    "page": 1,
+    "x": 99.6,
+    "y": 632.1
+  },
+  {
+    "name": "ST Constitution",
+    "value": "+6",
+    "page": 1,
+    "x": 113,
+    "y": 631.9
+  },
+  {
+    "name": "IntProf",
+    "value": "•",
+    "page": 1,
+    "x": 99.6,
+    "y": 618.5
+  },
+  {
+    "name": "ST Intelligence",
+    "value": "+8",
+    "page": 1,
+    "x": 113,
+    "y": 618.4
+  },
+  {
+    "name": "ST Wisdom",
+    "value": "+2",
+    "page": 1,
+    "x": 113,
+    "y": 604.9
+  },
+  {
+    "name": "ST Charisma",
+    "value": "+0",
+    "page": 1,
+    "x": 113,
+    "y": 591.5
+  },
+  {
+    "name": "Acrobatics",
+    "value": "+2",
+    "page": 1,
+    "x": 112,
+    "y": 489.4
+  },
+  {
+    "name": "AcrobaticsMod",
+    "value": "DEX",
+    "page": 1,
+    "x": 164.9,
+    "y": 488.6
+  },
+  {
+    "name": "Animal",
+    "value": "+2",
+    "page": 1,
+    "x": 112,
+    "y": 475.9
+  },
+  {
+    "name": "AnimalMod",
+    "value": "WIS",
+    "page": 1,
+    "x": 183.9,
+    "y": 475.1
+  },
+  {
+    "name": "Arcana",
+    "value": "+5",
+    "page": 1,
+    "x": 112,
+    "y": 462.3
+  },
+  {
+    "name": "ArcanaMod",
+    "value": "INT",
+    "page": 1,
+    "x": 153.9,
+    "y": 461.6
+  },
+  {
+    "name": "Athletics",
+    "value": "-2",
+    "page": 1,
+    "x": 112,
+    "y": 448.9
+  },
+  {
+    "name": "AthleticsMod",
+    "value": "STR",
+    "page": 1,
+    "x": 159.9,
+    "y": 448.1
+  },
+  {
+    "name": "Deception",
+    "value": "+0",
+    "page": 1,
+    "x": 112,
+    "y": 435.3
+  },
+  {
+    "name": "DeceptionMod",
+    "value": "CHA",
+    "page": 1,
+    "x": 164.9,
+    "y": 434.6
+  },
+  {
+    "name": "History",
+    "value": "+5",
+    "page": 1,
+    "x": 112,
+    "y": 421.8
+  },
+  {
+    "name": "HistoryMod",
+    "value": "INT",
+    "page": 1,
+    "x": 155.9,
+    "y": 421
+  },
+  {
+    "name": "InsightProf",
+    "value": "P",
+    "page": 1,
+    "x": 99.7,
+    "y": 407.7
+  },
+  {
+    "name": "Insight",
+    "value": "+5",
+    "page": 1,
+    "x": 112,
+    "y": 408.3
+  },
+  {
+    "name": "InsightMod",
+    "value": "WIS",
+    "page": 1,
+    "x": 154.9,
+    "y": 407.6
+  },
+  {
+    "name": "Intimidation",
+    "value": "+0",
+    "page": 1,
+    "x": 112,
+    "y": 394.9
+  },
+  {
+    "name": "IntimidationMod",
+    "value": "CHA",
+    "page": 1,
+    "x": 169.9,
+    "y": 394.1
+  },
+  {
+    "name": "InvestigationProf",
+    "value": "P",
+    "page": 1,
+    "x": 99.7,
+    "y": 380.6
+  },
+  {
+    "name": "Investigation",
+    "value": "+8",
+    "page": 1,
+    "x": 112,
+    "y": 381.3
+  },
+  {
+    "name": "InvestigationMod",
+    "value": "INT",
+    "page": 1,
+    "x": 170.9,
+    "y": 380.5
+  },
+  {
+    "name": "Medicine",
+    "value": "+2",
+    "page": 1,
+    "x": 112,
+    "y": 367.9
+  },
+  {
+    "name": "MedicineMod",
+    "value": "WIS",
+    "page": 1,
+    "x": 160.9,
+    "y": 367.1
+  },
+  {
+    "name": "Nature",
+    "value": "+5",
+    "page": 1,
+    "x": 112,
+    "y": 354.3
+  },
+  {
+    "name": "NatureMod",
+    "value": "INT",
+    "page": 1,
+    "x": 154.9,
+    "y": 353.5
+  },
+  {
+    "name": "PerceptionProf",
+    "value": "P",
+    "page": 1,
+    "x": 99.7,
+    "y": 339.9
+  },
+  {
+    "name": "Perception",
+    "value": "+5",
+    "page": 1,
+    "x": 112,
+    "y": 340.8
+  },
+  {
+    "name": "PerceptionMod",
+    "value": "WIS",
+    "page": 1,
+    "x": 164.9,
+    "y": 340
+  },
+  {
+    "name": "Performance",
+    "value": "+0",
+    "page": 1,
+    "x": 112,
+    "y": 327.3
+  },
+  {
+    "name": "PerformanceMod",
+    "value": "CHA",
+    "page": 1,
+    "x": 170.9,
+    "y": 326.6
+  },
+  {
+    "name": "PersuasionProf",
+    "value": "P",
+    "page": 1,
+    "x": 99.7,
+    "y": 312.9
+  },
+  {
+    "name": "Persuasion",
+    "value": "+3",
+    "page": 1,
+    "x": 112,
+    "y": 313.8
+  },
+  {
+    "name": "PersuasionMod",
+    "value": "CHA",
+    "page": 1,
+    "x": 166.9,
+    "y": 313
+  },
+  {
+    "name": "Religion",
+    "value": "+5",
+    "page": 1,
+    "x": 112,
+    "y": 300.3
+  },
+  {
+    "name": "SleightofHand",
+    "value": "+2",
+    "page": 1,
+    "x": 112,
+    "y": 286.9
+  },
+  {
+    "name": "Stealth",
+    "value": "+2",
+    "page": 1,
+    "x": 112,
+    "y": 273.3
+  },
+  {
+    "name": "Survival",
+    "value": "+2",
+    "page": 1,
+    "x": 112,
+    "y": 259.8
+  },
+  {
+    "name": "Passive1",
+    "value": "15",
+    "page": 1,
+    "x": 38.8,
+    "y": 165.6
+  },
+  {
+    "name": "Passive2",
+    "value": "15",
+    "page": 1,
+    "x": 38.8,
+    "y": 135.6
+  },
+  {
+    "name": "Passive3",
+    "value": "18",
+    "page": 1,
+    "x": 39,
+    "y": 104.7
+  },
+  {
+    "name": "AdditionalSenses",
+    "value": "Darkvision 60 ft.",
+    "page": 1,
+    "x": 37.8,
+    "y": 79.3
+  },
+  {
+    "name": "Init",
+    "value": "+7",
+    "page": 1,
+    "x": 238,
+    "y": 645.8
+  },
+  {
+    "name": "AC",
+    "value": "18",
+    "page": 1,
+    "x": 334.3,
+    "y": 643.4
+  },
+  {
+    "name": "ProfBonus",
+    "value": "+3",
+    "page": 1,
+    "x": 227.8,
+    "y": 482
+  },
+  {
+    "name": "Speed",
+    "value": "30 ft. (Walking)",
+    "page": 1,
+    "x": 236.2,
+    "y": 401.7
+  },
+  {
+    "name": "MaxHP",
+    "value": "57",
+    "page": 1,
+    "x": 426.8,
+    "y": 640.8
+  },
+  {
+    "name": "TempHP",
+    "value": "--",
+    "page": 1,
+    "x": 531.9,
+    "y": 641.4
+  },
+  {
+    "name": "Total",
+    "value": "5d8 + 2d6",
+    "page": 1,
+    "x": 438.4,
+    "y": 586.3
+  },
+  {
+    "name": "Check Box 12",
+    "value": "Off",
+    "page": 1,
+    "x": 537.4,
+    "y": 581.6
+  },
+  {
+    "name": "Check Box 13",
+    "value": "Off",
+    "page": 1,
+    "x": 550.2,
+    "y": 581.6
+  },
+  {
+    "name": "Check Box 14",
+    "value": "Off",
+    "page": 1,
+    "x": 563.1,
+    "y": 581.6
+  },
+  {
+    "name": "Check Box 15",
+    "value": "Off",
+    "page": 1,
+    "x": 537.3,
+    "y": 566.5
+  },
+  {
+    "name": "Check Box 16",
+    "value": "Off",
+    "page": 1,
+    "x": 550.2,
+    "y": 566.5
+  },
+  {
+    "name": "Check Box 17",
+    "value": "Off",
+    "page": 1,
+    "x": 563.1,
+    "y": 566.5
+  },
+  {
+    "name": "ProficienciesLang",
+    "value": "[rules text elided from the fixture]",
+    "page": 1,
+    "x": 414,
+    "y": 512.9
+  },
+  {
+    "name": "ReligionMod",
+    "value": "INT",
+    "page": 1,
+    "x": 157.9,
+    "y": 299.6
+  },
+  {
+    "name": "SleightofHandMod",
+    "value": "DEX",
+    "page": 1,
+    "x": 179.9,
+    "y": 286.1
+  },
+  {
+    "name": "StealthMod",
+    "value": "DEX",
+    "page": 1,
+    "x": 154.9,
+    "y": 272.5
+  },
+  {
+    "name": "SurvivalMod",
+    "value": "WIS",
+    "page": 1,
+    "x": 157.9,
+    "y": 259
+  },
+  {
+    "name": "Actions1",
+    "value": "[rules text elided from the fixture]",
+    "page": 1,
+    "x": 226,
+    "y": 329.2
+  },
+  {
+    "name": "Actions2",
+    "value": "[rules text elided from the fixture]",
+    "page": 1,
+    "x": 404.8,
+    "y": 329.4
+  },
+  {
+    "name": "Wpn Name",
+    "value": "Longsword",
+    "page": 1,
+    "x": 225,
+    "y": 160.7
+  },
+  {
+    "name": "Wpn1 AtkBonus",
+    "value": "+1",
+    "page": 1,
+    "x": 342.3,
+    "y": 160.7
+  },
+  {
+    "name": "Wpn1 Damage",
+    "value": "1d8-2 Slashing",
+    "page": 1,
+    "x": 378.3,
+    "y": 160.7
+  },
+  {
+    "name": "Wpn Notes 1",
+    "value": "Martial, Versatile, Sap",
+    "page": 1,
+    "x": 443.8,
+    "y": 160.7
+  },
+  {
+    "name": "Wpn Name 2",
+    "value": "Fire Bolt",
+    "page": 1,
+    "x": 225,
+    "y": 140.6
+  },
+  {
+    "name": "Wpn2 AtkBonus",
+    "value": "+9",
+    "page": 1,
+    "x": 342.3,
+    "y": 140.6
+  },
+  {
+    "name": "Wpn2 Damage",
+    "value": "2d10 Fire",
+    "page": 1,
+    "x": 378.3,
+    "y": 140.6
+  },
+  {
+    "name": "Wpn Notes 2",
+    "value": "V/S",
+    "page": 1,
+    "x": 443.8,
+    "y": 140.5
+  },
+  {
+    "name": "Wpn Name 3",
+    "value": "Ray of Frost",
+    "page": 1,
+    "x": 225,
+    "y": 119.7
+  },
+  {
+    "name": "Wpn3 AtkBonus",
+    "value": "+8",
+    "page": 1,
+    "x": 342.3,
+    "y": 119.7
+  },
+  {
+    "name": "Wpn3 Damage",
+    "value": "2d8 Cold",
+    "page": 1,
+    "x": 378.3,
+    "y": 119.7
+  },
+  {
+    "name": "Wpn Notes 3",
+    "value": "V/S",
+    "page": 1,
+    "x": 443.8,
+    "y": 119.6
+  },
+  {
+    "name": "Wpn Name 4",
+    "value": "Unarmed Strike",
+    "page": 1,
+    "x": 225.2,
+    "y": 99.3
+  },
+  {
+    "name": "Wpn4 AtkBonus",
+    "value": "+1",
+    "page": 1,
+    "x": 342.5,
+    "y": 99.3
+  },
+  {
+    "name": "Wpn4 Damage",
+    "value": "0 Bludgeoning",
+    "page": 1,
+    "x": 378.5,
+    "y": 99.3
+  },
+  {
+    "name": "Inspiration",
+    "value": "Off",
+    "page": 1,
+    "x": 229.7,
+    "y": 519.7
+  },
+  {
+    "name": "CharacterName2",
+    "value": "Varric Ironwright",
+    "page": 2,
+    "x": 47.3,
+    "y": 732.2
+  },
+  {
+    "name": "CLASS LEVEL2",
+    "value": "Artificer 5 / Wizard 2",
+    "page": 2,
+    "x": 270.6,
+    "y": 743.4
+  },
+  {
+    "name": "PLAYER NAME2",
+    "value": "FlyingHamburger",
+    "page": 2,
+    "x": 470.1,
+    "y": 743.4
+  },
+  {
+    "name": "RACE2",
+    "value": "Custom Lineage",
+    "page": 2,
+    "x": 270.6,
+    "y": 717.4
+  },
+  {
+    "name": "BACKGROUND2",
+    "value": "Guild Artisan / Guild Merchant",
+    "page": 2,
+    "x": 383.4,
+    "y": 717.4
+  },
+  {
+    "name": "EXPERIENCE POINTS2",
+    "value": "(Milestone)",
+    "page": 2,
+    "x": 480.1,
+    "y": 717.4
+  },
+  {
+    "name": "FeaturesTraits1",
+    "value": "[rules text elided from the fixture]",
+    "page": 2,
+    "x": 36.1,
+    "y": 655.9
+  },
+  {
+    "name": "FeaturesTraits2",
+    "value": "[rules text elided from the fixture]",
+    "page": 2,
+    "x": 218.6,
+    "y": 656.1
+  },
+  {
+    "name": "FeaturesTraits3",
+    "value": "[rules text elided from the fixture]",
+    "page": 2,
+    "x": 400,
+    "y": 656.4
+  },
+  {
+    "name": "CP",
+    "value": "0",
+    "page": 2,
+    "x": 38.1,
+    "y": 267.7
+  },
+  {
+    "name": "SP",
+    "value": "0",
+    "page": 2,
+    "x": 38.4,
+    "y": 238.8
+  },
+  {
+    "name": "EP",
+    "value": "0",
+    "page": 2,
+    "x": 38.4,
+    "y": 210
+  },
+  {
+    "name": "GP",
+    "value": "33",
+    "page": 2,
+    "x": 38.2,
+    "y": 181.4
+  },
+  {
+    "name": "PP",
+    "value": "0",
+    "page": 2,
+    "x": 37.9,
+    "y": 152.6
+  },
+  {
+    "name": "Weight Carried",
+    "value": "187 lb.",
+    "page": 2,
+    "x": 37.3,
+    "y": 115.3
+  },
+  {
+    "name": "Encumbered",
+    "value": "90 lb.",
+    "page": 2,
+    "x": 37.2,
+    "y": 87.2
+  },
+  {
+    "name": "PushDragLift",
+    "value": "180 lb.",
+    "page": 2,
+    "x": 37.4,
+    "y": 57.9
+  },
+  {
+    "name": "Eq Name0",
+    "value": "All-Purpose Tool, +1",
+    "page": 2,
+    "x": 112.2,
+    "y": 267
+  },
+  {
+    "name": "Eq Qty0",
+    "value": "1",
+    "page": 2,
+    "x": 271.8,
+    "y": 267
+  },
+  {
+    "name": "Eq Weight0",
+    "value": "--",
+    "page": 2,
+    "x": 306,
+    "y": 267
+  },
+  {
+    "name": "Eq Name1",
+    "value": "Scale Mail",
+    "page": 2,
+    "x": 112.2,
+    "y": 252.1
+  },
+  {
+    "name": "Eq Qty1",
+    "value": "1",
+    "page": 2,
+    "x": 271.8,
+    "y": 252.1
+  },
+  {
+    "name": "Eq Weight1",
+    "value": "45 lb.",
+    "page": 2,
+    "x": 306,
+    "y": 252.1
+  },
+  {
+    "name": "Eq Name2",
+    "value": "Shield",
+    "page": 2,
+    "x": 112.2,
+    "y": 237.2
+  },
+  {
+    "name": "Eq Qty2",
+    "value": "1",
+    "page": 2,
+    "x": 271.8,
+    "y": 237.2
+  },
+  {
+    "name": "Eq Weight2",
+    "value": "6 lb.",
+    "page": 2,
+    "x": 306,
+    "y": 237.2
+  },
+  {
+    "name": "Eq Name3",
+    "value": "Ember Reactor",
+    "page": 2,
+    "x": 112.2,
+    "y": 222.3
+  },
+  {
+    "name": "Eq Qty3",
+    "value": "1",
+    "page": 2,
+    "x": 271.8,
+    "y": 222.3
+  },
+  {
+    "name": "Eq Weight3",
+    "value": "2 lb.",
+    "page": 2,
+    "x": 306,
+    "y": 222.3
+  },
+  {
+    "name": "Eq Name4",
+    "value": "Dagger",
+    "page": 2,
+    "x": 112.2,
+    "y": 207.5
+  },
+  {
+    "name": "Eq Qty4",
+    "value": "1",
+    "page": 2,
+    "x": 271.8,
+    "y": 207.5
+  },
+  {
+    "name": "Eq Weight4",
+    "value": "1 lb.",
+    "page": 2,
+    "x": 306,
+    "y": 207.5
+  },
+  {
+    "name": "Eq Name5",
+    "value": "Longsword",
+    "page": 2,
+    "x": 112.2,
+    "y": 192.6
+  },
+  {
+    "name": "Eq Qty5",
+    "value": "1",
+    "page": 2,
+    "x": 271.8,
+    "y": 192.6
+  },
+  {
+    "name": "Eq Weight5",
+    "value": "3 lb.",
+    "page": 2,
+    "x": 306,
+    "y": 192.6
+  },
+  {
+    "name": "Eq Name6",
+    "value": "Light Hammer",
+    "page": 2,
+    "x": 112.2,
+    "y": 177.7
+  },
+  {
+    "name": "Eq Qty6",
+    "value": "1",
+    "page": 2,
+    "x": 271.8,
+    "y": 177.7
+  },
+  {
+    "name": "Eq Weight6",
+    "value": "2 lb.",
+    "page": 2,
+    "x": 306,
+    "y": 177.7
+  },
+  {
+    "name": "Eq Name7",
+    "value": "Crossbow, Light",
+    "page": 2,
+    "x": 112.2,
+    "y": 162.8
+  },
+  {
+    "name": "Eq Qty7",
+    "value": "1",
+    "page": 2,
+    "x": 271.8,
+    "y": 162.8
+  },
+  {
+    "name": "Eq Weight7",
+    "value": "5 lb.",
+    "page": 2,
+    "x": 306,
+    "y": 162.8
+  },
+  {
+    "name": "Eq Name8",
+    "value": "Crossbow Bolts",
+    "page": 2,
+    "x": 112.2,
+    "y": 147.9
+  },
+  {
+    "name": "Eq Qty8",
+    "value": "20",
+    "page": 2,
+    "x": 271.8,
+    "y": 147.9
+  },
+  {
+    "name": "Eq Weight8",
+    "value": "1.5 lb.",
+    "page": 2,
+    "x": 306,
+    "y": 147.9
+  },
+  {
+    "name": "Eq Name9",
+    "value": "Backpack",
+    "page": 2,
+    "x": 112.2,
+    "y": 133.1
+  },
+  {
+    "name": "Eq Qty9",
+    "value": "1",
+    "page": 2,
+    "x": 271.8,
+    "y": 133.1
+  },
+  {
+    "name": "Eq Weight9",
+    "value": "5 lb.",
+    "page": 2,
+    "x": 306,
+    "y": 133.1
+  },
+  {
+    "name": "Eq Name10",
+    "value": "Clothes, Common",
+    "page": 2,
+    "x": 112.2,
+    "y": 118.2
+  },
+  {
+    "name": "Eq Qty10",
+    "value": "1",
+    "page": 2,
+    "x": 271.8,
+    "y": 118.2
+  },
+  {
+    "name": "Eq Weight10",
+    "value": "3 lb.",
+    "page": 2,
+    "x": 306,
+    "y": 118.2
+  },
+  {
+    "name": "Eq Name11",
+    "value": "Thieves' Tools",
+    "page": 2,
+    "x": 112.2,
+    "y": 103.3
+  },
+  {
+    "name": "Eq Qty11",
+    "value": "1",
+    "page": 2,
+    "x": 271.8,
+    "y": 103.3
+  },
+  {
+    "name": "Eq Weight11",
+    "value": "1 lb.",
+    "page": 2,
+    "x": 306,
+    "y": 103.3
+  },
+  {
+    "name": "Eq Name12",
+    "value": "Bedroll",
+    "page": 2,
+    "x": 112.2,
+    "y": 88.4
+  },
+  {
+    "name": "Eq Qty12",
+    "value": "1",
+    "page": 2,
+    "x": 271.8,
+    "y": 88.4
+  },
+  {
+    "name": "Eq Weight12",
+    "value": "7 lb.",
+    "page": 2,
+    "x": 306,
+    "y": 88.4
+  },
+  {
+    "name": "Eq Name13",
+    "value": "Mess Kit",
+    "page": 2,
+    "x": 112.2,
+    "y": 73.5
+  },
+  {
+    "name": "Eq Qty13",
+    "value": "1",
+    "page": 2,
+    "x": 271.8,
+    "y": 73.5
+  },
+  {
+    "name": "Eq Weight13",
+    "value": "1 lb.",
+    "page": 2,
+    "x": 306,
+    "y": 73.5
+  },
+  {
+    "name": "Eq Name14",
+    "value": "Rations (1 day)",
+    "page": 2,
+    "x": 112.2,
+    "y": 58.7
+  },
+  {
+    "name": "Eq Qty14",
+    "value": "10",
+    "page": 2,
+    "x": 271.8,
+    "y": 58.7
+  },
+  {
+    "name": "Eq Weight14",
+    "value": "20 lb.",
+    "page": 2,
+    "x": 306,
+    "y": 58.7
+  },
+  {
+    "name": "Eq Name15",
+    "value": "Rope, Hempen (50 feet)",
+    "page": 2,
+    "x": 349.5,
+    "y": 267
+  },
+  {
+    "name": "Eq Qty15",
+    "value": "1",
+    "page": 2,
+    "x": 509.5,
+    "y": 267
+  },
+  {
+    "name": "Eq Weight15",
+    "value": "10 lb.",
+    "page": 2,
+    "x": 543.7,
+    "y": 267
+  },
+  {
+    "name": "Eq Name16",
+    "value": "Tinderbox",
+    "page": 2,
+    "x": 349.5,
+    "y": 252.1
+  },
+  {
+    "name": "Eq Qty16",
+    "value": "1",
+    "page": 2,
+    "x": 509.5,
+    "y": 252.1
+  },
+  {
+    "name": "Eq Weight16",
+    "value": "1 lb.",
+    "page": 2,
+    "x": 543.7,
+    "y": 252.1
+  },
+  {
+    "name": "Eq Name17",
+    "value": "Torch",
+    "page": 2,
+    "x": 349.5,
+    "y": 237.2
+  },
+  {
+    "name": "Eq Qty17",
+    "value": "10",
+    "page": 2,
+    "x": 509.5,
+    "y": 237.2
+  },
+  {
+    "name": "Eq Weight17",
+    "value": "10 lb.",
+    "page": 2,
+    "x": 543.7,
+    "y": 237.2
+  },
+  {
+    "name": "Eq Name18",
+    "value": "Waterskin",
+    "page": 2,
+    "x": 349.5,
+    "y": 222.3
+  },
+  {
+    "name": "Eq Qty18",
+    "value": "1",
+    "page": 2,
+    "x": 509.5,
+    "y": 222.3
+  },
+  {
+    "name": "Eq Weight18",
+    "value": "5 lb.",
+    "page": 2,
+    "x": 543.7,
+    "y": 222.3
+  },
+  {
+    "name": "Eq Name19",
+    "value": "Crowbar",
+    "page": 2,
+    "x": 349.5,
+    "y": 207.5
+  },
+  {
+    "name": "Eq Qty19",
+    "value": "1",
+    "page": 2,
+    "x": 509.5,
+    "y": 207.5
+  },
+  {
+    "name": "Eq Weight19",
+    "value": "5 lb.",
+    "page": 2,
+    "x": 543.7,
+    "y": 207.5
+  },
+  {
+    "name": "Eq Name20",
+    "value": "Hammer",
+    "page": 2,
+    "x": 349.5,
+    "y": 192.6
+  },
+  {
+    "name": "Eq Qty20",
+    "value": "1",
+    "page": 2,
+    "x": 509.5,
+    "y": 192.6
+  },
+  {
+    "name": "Eq Weight20",
+    "value": "3 lb.",
+    "page": 2,
+    "x": 543.7,
+    "y": 192.6
+  },
+  {
+    "name": "Eq Name21",
+    "value": "Piton",
+    "page": 2,
+    "x": 349.5,
+    "y": 177.7
+  },
+  {
+    "name": "Eq Qty21",
+    "value": "10",
+    "page": 2,
+    "x": 509.5,
+    "y": 177.7
+  },
+  {
+    "name": "Eq Weight21",
+    "value": "2.5 lb.",
+    "page": 2,
+    "x": 543.7,
+    "y": 177.7
+  },
+  {
+    "name": "Eq Name22",
+    "value": "Rations (1 day)",
+    "page": 2,
+    "x": 349.5,
+    "y": 162.8
+  },
+  {
+    "name": "Eq Qty22",
+    "value": "10",
+    "page": 2,
+    "x": 509.5,
+    "y": 162.8
+  },
+  {
+    "name": "Eq Weight22",
+    "value": "20 lb.",
+    "page": 2,
+    "x": 543.7,
+    "y": 162.8
+  },
+  {
+    "name": "Eq Name23",
+    "value": "Rope, Hempen (50 feet)",
+    "page": 2,
+    "x": 349.5,
+    "y": 147.9
+  },
+  {
+    "name": "Eq Qty23",
+    "value": "1",
+    "page": 2,
+    "x": 509.5,
+    "y": 147.9
+  },
+  {
+    "name": "Eq Weight23",
+    "value": "10 lb.",
+    "page": 2,
+    "x": 543.7,
+    "y": 147.9
+  },
+  {
+    "name": "Eq Name24",
+    "value": "Tinderbox",
+    "page": 2,
+    "x": 349.5,
+    "y": 133.1
+  },
+  {
+    "name": "Eq Qty24",
+    "value": "1",
+    "page": 2,
+    "x": 509.5,
+    "y": 133.1
+  },
+  {
+    "name": "Eq Weight24",
+    "value": "1 lb.",
+    "page": 2,
+    "x": 543.7,
+    "y": 133.1
+  },
+  {
+    "name": "Eq Name25",
+    "value": "Torch",
+    "page": 2,
+    "x": 349.5,
+    "y": 118.2
+  },
+  {
+    "name": "Eq Qty25",
+    "value": "10",
+    "page": 2,
+    "x": 509.5,
+    "y": 118.2
+  },
+  {
+    "name": "Eq Weight25",
+    "value": "10 lb.",
+    "page": 2,
+    "x": 543.7,
+    "y": 118.2
+  },
+  {
+    "name": "Attuned Name1",
+    "value": "All-Purpose Tool, +1",
+    "page": 2,
+    "x": 349.5,
+    "y": 88.3
+  },
+  {
+    "name": "Attuned Qty1",
+    "value": "1",
+    "page": 2,
+    "x": 509.5,
+    "y": 88.3
+  },
+  {
+    "name": "Attuned Weight1",
+    "value": "--",
+    "page": 2,
+    "x": 543.7,
+    "y": 88.3
+  },
+  {
+    "name": "CharacterName3",
+    "value": "Varric Ironwright",
+    "page": 3,
+    "x": 47.3,
+    "y": 732.2
+  },
+  {
+    "name": "CLASS LEVEL3",
+    "value": "Artificer 5 / Wizard 2",
+    "page": 3,
+    "x": 270.6,
+    "y": 743.4
+  },
+  {
+    "name": "PLAYER NAME3",
+    "value": "FlyingHamburger",
+    "page": 3,
+    "x": 470.1,
+    "y": 743.4
+  },
+  {
+    "name": "RACE3",
+    "value": "Custom Lineage",
+    "page": 3,
+    "x": 270.6,
+    "y": 717.4
+  },
+  {
+    "name": "BACKGROUND3",
+    "value": "Guild Artisan / Guild Merchant",
+    "page": 3,
+    "x": 383.4,
+    "y": 717.4
+  },
+  {
+    "name": "EXPERIENCE POINTS3",
+    "value": "(Milestone)",
+    "page": 3,
+    "x": 480.1,
+    "y": 717.4
+  },
+  {
+    "name": "FeaturesTraits4",
+    "value": "[rules text elided from the fixture]",
+    "page": 3,
+    "x": 36.1,
+    "y": 655.9
+  },
+  {
+    "name": "FeaturesTraits5",
+    "value": "[rules text elided from the fixture]",
+    "page": 3,
+    "x": 218.6,
+    "y": 656.1
+  },
+  {
+    "name": "CharacterName3",
+    "value": "Varric Ironwright",
+    "page": 4,
+    "x": 47.3,
+    "y": 732.2
+  },
+  {
+    "name": "CLASS LEVEL3",
+    "value": "Artificer 5 / Wizard 2",
+    "page": 4,
+    "x": 270.6,
+    "y": 743.4
+  },
+  {
+    "name": "PLAYER NAME3",
+    "value": "FlyingHamburger",
+    "page": 4,
+    "x": 470.1,
+    "y": 743.4
+  },
+  {
+    "name": "RACE3",
+    "value": "Custom Lineage",
+    "page": 4,
+    "x": 270.6,
+    "y": 717.4
+  },
+  {
+    "name": "BACKGROUND3",
+    "value": "Guild Artisan / Guild Merchant",
+    "page": 4,
+    "x": 383.4,
+    "y": 717.4
+  },
+  {
+    "name": "EXPERIENCE POINTS3",
+    "value": "(Milestone)",
+    "page": 4,
+    "x": 480.1,
+    "y": 717.4
+  },
+  {
+    "name": "Eq Name26",
+    "value": "Waterskin",
+    "page": 4,
+    "x": 36.5,
+    "y": 267
+  },
+  {
+    "name": "Eq Qty26",
+    "value": "1",
+    "page": 4,
+    "x": 235.8,
+    "y": 267
+  },
+  {
+    "name": "Eq Weight26",
+    "value": "5 lb.",
+    "page": 4,
+    "x": 270,
+    "y": 267
+  },
+  {
+    "name": "Eq Name27",
+    "value": "Ember Reactor",
+    "page": 4,
+    "x": 36.5,
+    "y": 252.1
+  },
+  {
+    "name": "Eq Qty27",
+    "value": "1",
+    "page": 4,
+    "x": 235.8,
+    "y": 252.1
+  },
+  {
+    "name": "Eq Weight27",
+    "value": "2 lb.",
+    "page": 4,
+    "x": 270,
+    "y": 252.1
+  },
+  {
+    "name": "CharacterName4",
+    "value": "Varric Ironwright",
+    "page": 5,
+    "x": 49.3,
+    "y": 731.7
+  },
+  {
+    "name": "SIZE",
+    "value": "Medium",
+    "page": 5,
+    "x": 398.6,
+    "y": 747.6
+  },
+  {
+    "name": "ALIGNMENT",
+    "value": "Chaotic Good",
+    "page": 5,
+    "x": 265.8,
+    "y": 721.4
+  },
+  {
+    "name": "FAITH",
+    "value": "God of Life",
+    "page": 5,
+    "x": 337.1,
+    "y": 721.4
+  },
+  {
+    "name": "PersonalityTraits",
+    "value": "[rules text elided from the fixture]",
+    "page": 5,
+    "x": 418.6,
+    "y": 661.6
+  },
+  {
+    "name": "Ideals",
+    "value": "[rules text elided from the fixture]",
+    "page": 5,
+    "x": 418.6,
+    "y": 592.5
+  },
+  {
+    "name": "Bonds",
+    "value": "[rules text elided from the fixture]",
+    "page": 5,
+    "x": 418.6,
+    "y": 537.1
+  },
+  {
+    "name": "Flaws",
+    "value": "[rules text elided from the fixture]",
+    "page": 5,
+    "x": 418.6,
+    "y": 482.3
+  },
+  {
+    "name": "spellCastingAbility0",
+    "value": "INT / INT",
+    "page": 6,
+    "x": 283.8,
+    "y": 735.8
+  },
+  {
+    "name": "spellSaveDC0",
+    "value": "17 / 16",
+    "page": 6,
+    "x": 384.5,
+    "y": 735.8
+  },
+  {
+    "name": "spellAtkBonus0",
+    "value": "+9 / +8",
+    "page": 6,
+    "x": 488.3,
+    "y": 735.8
+  },
+  {
+    "name": "spellCastingClass0",
+    "value": "Artificer / Wizard",
+    "page": 6,
+    "x": 47.5,
+    "y": 726.8
+  },
+  {
+    "name": "spellHeader0",
+    "value": "=== CANTRIPS ===",
+    "page": 6,
+    "x": 42,
+    "y": 640.1
+  },
+  {
+    "name": "spellSlotHeader0",
+    "value": "(At Will)",
+    "page": 6,
+    "x": 149,
+    "y": 640.1
+  },
+  {
+    "name": "spellPrepared0",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 628.4
+  },
+  {
+    "name": "spellName0",
+    "value": "Fire Bolt",
+    "page": 6,
+    "x": 41.9,
+    "y": 628.4
+  },
+  {
+    "name": "spellSource0",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 628.4
+  },
+  {
+    "name": "spellSaveHit0",
+    "value": "+9",
+    "page": 6,
+    "x": 231.7,
+    "y": 628.4
+  },
+  {
+    "name": "spellCastingTime0",
+    "value": "1A",
+    "page": 6,
+    "x": 257.7,
+    "y": 628.4
+  },
+  {
+    "name": "spellRange0",
+    "value": "120 ft.",
+    "page": 6,
+    "x": 277.5,
+    "y": 628.4
+  },
+  {
+    "name": "spellComponents0",
+    "value": "V,S",
+    "page": 6,
+    "x": 320.1,
+    "y": 628.4
+  },
+  {
+    "name": "spellDuration0",
+    "value": "Instantaneous",
+    "page": 6,
+    "x": 342.7,
+    "y": 628.4
+  },
+  {
+    "name": "spellPage0",
+    "value": "PHB 242",
+    "page": 6,
+    "x": 388.8,
+    "y": 628.4
+  },
+  {
+    "name": "spellNotes0",
+    "value": "V/S",
+    "page": 6,
+    "x": 422.6,
+    "y": 628.4
+  },
+  {
+    "name": "spellPrepared1",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 616.6
+  },
+  {
+    "name": "spellName1",
+    "value": "Mending",
+    "page": 6,
+    "x": 41.9,
+    "y": 616.6
+  },
+  {
+    "name": "spellSource1",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 616.6
+  },
+  {
+    "name": "spellSaveHit1",
+    "value": "--",
+    "page": 6,
+    "x": 231.7,
+    "y": 616.6
+  },
+  {
+    "name": "spellCastingTime1",
+    "value": "1m",
+    "page": 6,
+    "x": 257.7,
+    "y": 616.6
+  },
+  {
+    "name": "spellRange1",
+    "value": "Touch",
+    "page": 6,
+    "x": 277.5,
+    "y": 616.6
+  },
+  {
+    "name": "spellComponents1",
+    "value": "V,S,M",
+    "page": 6,
+    "x": 320.1,
+    "y": 616.6
+  },
+  {
+    "name": "spellDuration1",
+    "value": "Instantaneous",
+    "page": 6,
+    "x": 342.7,
+    "y": 616.6
+  },
+  {
+    "name": "spellPage1",
+    "value": "PHB 259",
+    "page": 6,
+    "x": 388.8,
+    "y": 616.6
+  },
+  {
+    "name": "spellNotes1",
+    "value": "V/S/M",
+    "page": 6,
+    "x": 422.6,
+    "y": 616.7
+  },
+  {
+    "name": "spellPrepared2",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 604.8
+  },
+  {
+    "name": "spellName2",
+    "value": "Toll the Dead",
+    "page": 6,
+    "x": 41.9,
+    "y": 604.8
+  },
+  {
+    "name": "spellSource2",
+    "value": "Wizard",
+    "page": 6,
+    "x": 149,
+    "y": 604.8
+  },
+  {
+    "name": "spellSaveHit2",
+    "value": "WIS 16",
+    "page": 6,
+    "x": 231.7,
+    "y": 604.8
+  },
+  {
+    "name": "spellCastingTime2",
+    "value": "1A",
+    "page": 6,
+    "x": 257.7,
+    "y": 604.8
+  },
+  {
+    "name": "spellRange2",
+    "value": "60 ft.",
+    "page": 6,
+    "x": 277.5,
+    "y": 604.8
+  },
+  {
+    "name": "spellComponents2",
+    "value": "V,S",
+    "page": 6,
+    "x": 320.1,
+    "y": 604.8
+  },
+  {
+    "name": "spellDuration2",
+    "value": "Instantaneous",
+    "page": 6,
+    "x": 342.7,
+    "y": 604.8
+  },
+  {
+    "name": "spellPage2",
+    "value": "XGtE 169",
+    "page": 6,
+    "x": 388.8,
+    "y": 604.8
+  },
+  {
+    "name": "spellNotes2",
+    "value": "V/S",
+    "page": 6,
+    "x": 423,
+    "y": 604.9
+  },
+  {
+    "name": "spellPrepared3",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 593
+  },
+  {
+    "name": "spellName3",
+    "value": "Lightning Lure",
+    "page": 6,
+    "x": 41.9,
+    "y": 593.1
+  },
+  {
+    "name": "spellSource3",
+    "value": "Wizard",
+    "page": 6,
+    "x": 149,
+    "y": 593.1
+  },
+  {
+    "name": "spellSaveHit3",
+    "value": "STR 16",
+    "page": 6,
+    "x": 231.7,
+    "y": 593.1
+  },
+  {
+    "name": "spellCastingTime3",
+    "value": "1A",
+    "page": 6,
+    "x": 257.7,
+    "y": 593.1
+  },
+  {
+    "name": "spellRange3",
+    "value": "Self/15 ft.",
+    "page": 6,
+    "x": 277.5,
+    "y": 593.1
+  },
+  {
+    "name": "spellComponents3",
+    "value": "V",
+    "page": 6,
+    "x": 320.1,
+    "y": 593.1
+  },
+  {
+    "name": "spellDuration3",
+    "value": "Instantaneous",
+    "page": 6,
+    "x": 342.7,
+    "y": 593.1
+  },
+  {
+    "name": "spellPage3",
+    "value": "SCAG 143",
+    "page": 6,
+    "x": 388.8,
+    "y": 593.1
+  },
+  {
+    "name": "spellNotes3",
+    "value": "V",
+    "page": 6,
+    "x": 422.6,
+    "y": 593.2
+  },
+  {
+    "name": "spellPrepared4",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 581.3
+  },
+  {
+    "name": "spellName4",
+    "value": "Ray of Frost",
+    "page": 6,
+    "x": 41.9,
+    "y": 581.3
+  },
+  {
+    "name": "spellSource4",
+    "value": "Wizard",
+    "page": 6,
+    "x": 149,
+    "y": 581.3
+  },
+  {
+    "name": "spellSaveHit4",
+    "value": "+8",
+    "page": 6,
+    "x": 231.7,
+    "y": 581.3
+  },
+  {
+    "name": "spellCastingTime4",
+    "value": "1A",
+    "page": 6,
+    "x": 257.7,
+    "y": 581.3
+  },
+  {
+    "name": "spellRange4",
+    "value": "60 ft.",
+    "page": 6,
+    "x": 277.5,
+    "y": 581.3
+  },
+  {
+    "name": "spellComponents4",
+    "value": "V,S",
+    "page": 6,
+    "x": 320.1,
+    "y": 581.3
+  },
+  {
+    "name": "spellDuration4",
+    "value": "Instantaneous",
+    "page": 6,
+    "x": 342.7,
+    "y": 581.3
+  },
+  {
+    "name": "spellPage4",
+    "value": "PHB 271",
+    "page": 6,
+    "x": 388.8,
+    "y": 581.3
+  },
+  {
+    "name": "spellNotes4",
+    "value": "V/S",
+    "page": 6,
+    "x": 422.6,
+    "y": 581.4
+  },
+  {
+    "name": "spellHeader1",
+    "value": "=== 1st LEVEL ===",
+    "page": 6,
+    "x": 41.9,
+    "y": 557.8
+  },
+  {
+    "name": "spellSlotHeader1",
+    "value": "4 Slots OOOO",
+    "page": 6,
+    "x": 149,
+    "y": 557.8
+  },
+  {
+    "name": "spellPrepared5",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 546.1
+  },
+  {
+    "name": "spellName5",
+    "value": "Cure Wounds",
+    "page": 6,
+    "x": 41.9,
+    "y": 546.1
+  },
+  {
+    "name": "spellSource5",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 546.1
+  },
+  {
+    "name": "spellSaveHit5",
+    "value": "--",
+    "page": 6,
+    "x": 231.7,
+    "y": 546.1
+  },
+  {
+    "name": "spellCastingTime5",
+    "value": "1A",
+    "page": 6,
+    "x": 257.7,
+    "y": 546.1
+  },
+  {
+    "name": "spellRange5",
+    "value": "Touch",
+    "page": 6,
+    "x": 277.5,
+    "y": 546.2
+  },
+  {
+    "name": "spellComponents5",
+    "value": "V,S",
+    "page": 6,
+    "x": 320.1,
+    "y": 546.1
+  },
+  {
+    "name": "spellDuration5",
+    "value": "Instantaneous",
+    "page": 6,
+    "x": 342.7,
+    "y": 546.1
+  },
+  {
+    "name": "spellPage5",
+    "value": "PHB 230",
+    "page": 6,
+    "x": 388.8,
+    "y": 546.1
+  },
+  {
+    "name": "spellNotes5",
+    "value": "V/S",
+    "page": 6,
+    "x": 422.6,
+    "y": 546.1
+  },
+  {
+    "name": "spellPrepared6",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 534.3
+  },
+  {
+    "name": "spellName6",
+    "value": "Faerie Fire",
+    "page": 6,
+    "x": 41.9,
+    "y": 534.3
+  },
+  {
+    "name": "spellSource6",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 534.3
+  },
+  {
+    "name": "spellSaveHit6",
+    "value": "DEX 17",
+    "page": 6,
+    "x": 231.7,
+    "y": 534.3
+  },
+  {
+    "name": "spellCastingTime6",
+    "value": "1A",
+    "page": 6,
+    "x": 257.7,
+    "y": 534.3
+  },
+  {
+    "name": "spellRange6",
+    "value": "60 ft./20 ft. Cube",
+    "page": 6,
+    "x": 277.5,
+    "y": 534.3
+  },
+  {
+    "name": "spellComponents6",
+    "value": "V",
+    "page": 6,
+    "x": 320.1,
+    "y": 534.3
+  },
+  {
+    "name": "spellDuration6",
+    "value": "Concentration, up to 1 minute",
+    "page": 6,
+    "x": 342.7,
+    "y": 534.3
+  },
+  {
+    "name": "spellPage6",
+    "value": "PHB 239",
+    "page": 6,
+    "x": 388.8,
+    "y": 534.3
+  },
+  {
+    "name": "spellNotes6",
+    "value": "D: 1m, 20 ft. Cube, V",
+    "page": 6,
+    "x": 422.6,
+    "y": 534.4
+  },
+  {
+    "name": "spellPrepared7",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 522.6
+  },
+  {
+    "name": "spellName7",
+    "value": "Absorb Elements",
+    "page": 6,
+    "x": 41.9,
+    "y": 522.6
+  },
+  {
+    "name": "spellSource7",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 522.6
+  },
+  {
+    "name": "spellSaveHit7",
+    "value": "--",
+    "page": 6,
+    "x": 231.7,
+    "y": 522.6
+  },
+  {
+    "name": "spellCastingTime7",
+    "value": "1R",
+    "page": 6,
+    "x": 257.7,
+    "y": 522.6
+  },
+  {
+    "name": "spellRange7",
+    "value": "Self",
+    "page": 6,
+    "x": 277.5,
+    "y": 522.6
+  },
+  {
+    "name": "spellComponents7",
+    "value": "S",
+    "page": 6,
+    "x": 320.1,
+    "y": 522.6
+  },
+  {
+    "name": "spellDuration7",
+    "value": "1 round",
+    "page": 6,
+    "x": 342.7,
+    "y": 522.6
+  },
+  {
+    "name": "spellPage7",
+    "value": "EE 150",
+    "page": 6,
+    "x": 388.8,
+    "y": 522.6
+  },
+  {
+    "name": "spellNotes7",
+    "value": "D: 1Rnd, S",
+    "page": 6,
+    "x": 422.6,
+    "y": 522.6
+  },
+  {
+    "name": "spellPrepared8",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 510.8
+  },
+  {
+    "name": "spellName8",
+    "value": "Grease",
+    "page": 6,
+    "x": 41.9,
+    "y": 510.8
+  },
+  {
+    "name": "spellSource8",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 510.8
+  },
+  {
+    "name": "spellSaveHit8",
+    "value": "DEX 17",
+    "page": 6,
+    "x": 231.7,
+    "y": 510.8
+  },
+  {
+    "name": "spellCastingTime8",
+    "value": "1A",
+    "page": 6,
+    "x": 257.7,
+    "y": 510.8
+  },
+  {
+    "name": "spellRange8",
+    "value": "60 ft./10 ft. Square",
+    "page": 6,
+    "x": 277.5,
+    "y": 510.8
+  },
+  {
+    "name": "spellComponents8",
+    "value": "V,S,M",
+    "page": 6,
+    "x": 320.1,
+    "y": 510.8
+  },
+  {
+    "name": "spellDuration8",
+    "value": "1 minute",
+    "page": 6,
+    "x": 342.7,
+    "y": 510.8
+  },
+  {
+    "name": "spellPage8",
+    "value": "PHB 246",
+    "page": 6,
+    "x": 388.8,
+    "y": 510.8
+  },
+  {
+    "name": "spellNotes8",
+    "value": "D: 1m, 10 ft. Square, V/S/M",
+    "page": 6,
+    "x": 422.5,
+    "y": 510.9
+  },
+  {
+    "name": "spellPrepared9",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 499.1
+  },
+  {
+    "name": "spellName9",
+    "value": "Sanctuary",
+    "page": 6,
+    "x": 41.9,
+    "y": 499.1
+  },
+  {
+    "name": "spellSource9",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 499.1
+  },
+  {
+    "name": "spellSaveHit9",
+    "value": "WIS 17",
+    "page": 6,
+    "x": 231.7,
+    "y": 499.1
+  },
+  {
+    "name": "spellCastingTime9",
+    "value": "1BA",
+    "page": 6,
+    "x": 257.7,
+    "y": 499.1
+  },
+  {
+    "name": "spellRange9",
+    "value": "30 ft.",
+    "page": 6,
+    "x": 277.5,
+    "y": 499.1
+  },
+  {
+    "name": "spellComponents9",
+    "value": "V,S,M",
+    "page": 6,
+    "x": 320.1,
+    "y": 499.1
+  },
+  {
+    "name": "spellDuration9",
+    "value": "1 minute",
+    "page": 6,
+    "x": 342.7,
+    "y": 499.1
+  },
+  {
+    "name": "spellPage9",
+    "value": "PHB 272",
+    "page": 6,
+    "x": 388.8,
+    "y": 499.1
+  },
+  {
+    "name": "spellNotes9",
+    "value": "D: 1m, V/S/M",
+    "page": 6,
+    "x": 422.8,
+    "y": 499.1
+  },
+  {
+    "name": "spellPrepared10",
+    "value": "P",
+    "page": 6,
+    "x": 29.1,
+    "y": 487.3
+  },
+  {
+    "name": "spellName10",
+    "value": "Shield",
+    "page": 6,
+    "x": 41.9,
+    "y": 487.3
+  },
+  {
+    "name": "spellSource10",
+    "value": "Artificer (Always Prepared)",
+    "page": 6,
+    "x": 148.9,
+    "y": 487.3
+  },
+  {
+    "name": "spellSaveHit10",
+    "value": "--",
+    "page": 6,
+    "x": 231.7,
+    "y": 487.3
+  },
+  {
+    "name": "spellCastingTime10",
+    "value": "1R",
+    "page": 6,
+    "x": 257.7,
+    "y": 487.3
+  },
+  {
+    "name": "spellRange10",
+    "value": "Self",
+    "page": 6,
+    "x": 277.5,
+    "y": 487.3
+  },
+  {
+    "name": "spellComponents10",
+    "value": "V,S",
+    "page": 6,
+    "x": 320.1,
+    "y": 487.3
+  },
+  {
+    "name": "spellDuration10",
+    "value": "1 round",
+    "page": 6,
+    "x": 342.7,
+    "y": 487.3
+  },
+  {
+    "name": "spellPage10",
+    "value": "PHB 275",
+    "page": 6,
+    "x": 388.8,
+    "y": 487.3
+  },
+  {
+    "name": "spellNotes10",
+    "value": "D: 1Rnd, V/S",
+    "page": 6,
+    "x": 422.6,
+    "y": 487.3
+  },
+  {
+    "name": "spellPrepared11",
+    "value": "P",
+    "page": 6,
+    "x": 29,
+    "y": 475.6
+  },
+  {
+    "name": "spellName11",
+    "value": "Heroism",
+    "page": 6,
+    "x": 41.9,
+    "y": 475.6
+  },
+  {
+    "name": "spellSource11",
+    "value": "Artificer (Always Prepared)",
+    "page": 6,
+    "x": 149,
+    "y": 475.6
+  },
+  {
+    "name": "spellSaveHit11",
+    "value": "--",
+    "page": 6,
+    "x": 231.7,
+    "y": 475.6
+  },
+  {
+    "name": "spellCastingTime11",
+    "value": "1A",
+    "page": 6,
+    "x": 257.7,
+    "y": 475.6
+  },
+  {
+    "name": "spellRange11",
+    "value": "Touch",
+    "page": 6,
+    "x": 277.5,
+    "y": 475.6
+  },
+  {
+    "name": "spellComponents11",
+    "value": "V,S",
+    "page": 6,
+    "x": 320.1,
+    "y": 475.6
+  },
+  {
+    "name": "spellDuration11",
+    "value": "Concentration, up to 1 minute",
+    "page": 6,
+    "x": 342.7,
+    "y": 475.6
+  },
+  {
+    "name": "spellPage11",
+    "value": "PHB 250",
+    "page": 6,
+    "x": 388.8,
+    "y": 475.6
+  },
+  {
+    "name": "spellNotes11",
+    "value": "D: 1m, V/S",
+    "page": 6,
+    "x": 422.6,
+    "y": 475.6
+  },
+  {
+    "name": "spellPrepared12",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 463.8
+  },
+  {
+    "name": "spellName12",
+    "value": "Alarm [R]",
+    "page": 6,
+    "x": 41.9,
+    "y": 463.8
+  },
+  {
+    "name": "spellSource12",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 463.8
+  },
+  {
+    "name": "spellSaveHit12",
+    "value": "--",
+    "page": 6,
+    "x": 231.7,
+    "y": 463.8
+  },
+  {
+    "name": "spellCastingTime12",
+    "value": "11m",
+    "page": 6,
+    "x": 257.7,
+    "y": 463.8
+  },
+  {
+    "name": "spellRange12",
+    "value": "30 ft.",
+    "page": 6,
+    "x": 277.5,
+    "y": 463.8
+  },
+  {
+    "name": "spellComponents12",
+    "value": "V,S,M",
+    "page": 6,
+    "x": 320.1,
+    "y": 463.8
+  },
+  {
+    "name": "spellDuration12",
+    "value": "8 hours",
+    "page": 6,
+    "x": 342.7,
+    "y": 463.8
+  },
+  {
+    "name": "spellPage12",
+    "value": "PHB 211",
+    "page": 6,
+    "x": 388.8,
+    "y": 463.8
+  },
+  {
+    "name": "spellNotes12",
+    "value": "D: 8h, V/S/M",
+    "page": 6,
+    "x": 422.6,
+    "y": 463.9
+  },
+  {
+    "name": "spellPrepared13",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 452.1
+  },
+  {
+    "name": "spellName13",
+    "value": "Detect Magic [R]",
+    "page": 6,
+    "x": 41.9,
+    "y": 452.1
+  },
+  {
+    "name": "spellSource13",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149.1,
+    "y": 452
+  },
+  {
+    "name": "spellSaveHit13",
+    "value": "--",
+    "page": 6,
+    "x": 231.7,
+    "y": 452.1
+  },
+  {
+    "name": "spellCastingTime13",
+    "value": "1A + 10m",
+    "page": 6,
+    "x": 257.7,
+    "y": 452.1
+  },
+  {
+    "name": "spellRange13",
+    "value": "Self/30 ft. Sphere",
+    "page": 6,
+    "x": 277.5,
+    "y": 452.1
+  },
+  {
+    "name": "spellComponents13",
+    "value": "V,S",
+    "page": 6,
+    "x": 320.1,
+    "y": 452.1
+  },
+  {
+    "name": "spellDuration13",
+    "value": "Concentration, up to 10 minutes",
+    "page": 6,
+    "x": 342.7,
+    "y": 452.1
+  },
+  {
+    "name": "spellPage13",
+    "value": "PHB 231",
+    "page": 6,
+    "x": 388.8,
+    "y": 452.1
+  },
+  {
+    "name": "spellNotes13",
+    "value": "D: 10m, 30 ft. Sphere, V/S",
+    "page": 6,
+    "x": 422.6,
+    "y": 452.1
+  },
+  {
+    "name": "spellPrepared14",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 440.3
+  },
+  {
+    "name": "spellName14",
+    "value": "Disguise Self",
+    "page": 6,
+    "x": 41.9,
+    "y": 440.3
+  },
+  {
+    "name": "spellSource14",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 440.3
+  },
+  {
+    "name": "spellSaveHit14",
+    "value": "--",
+    "page": 6,
+    "x": 231.7,
+    "y": 440.3
+  },
+  {
+    "name": "spellCastingTime14",
+    "value": "1A",
+    "page": 6,
+    "x": 257.7,
+    "y": 440.3
+  },
+  {
+    "name": "spellRange14",
+    "value": "Self",
+    "page": 6,
+    "x": 277.5,
+    "y": 440.3
+  },
+  {
+    "name": "spellComponents14",
+    "value": "V,S",
+    "page": 6,
+    "x": 320.1,
+    "y": 440.3
+  },
+  {
+    "name": "spellDuration14",
+    "value": "1 hour",
+    "page": 6,
+    "x": 342.7,
+    "y": 440.3
+  },
+  {
+    "name": "spellPage14",
+    "value": "PHB 233",
+    "page": 6,
+    "x": 388.8,
+    "y": 440.3
+  },
+  {
+    "name": "spellNotes14",
+    "value": "D: 1h, V/S",
+    "page": 6,
+    "x": 422.6,
+    "y": 440.4
+  },
+  {
+    "name": "spellPrepared15",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 428.5
+  },
+  {
+    "name": "spellName15",
+    "value": "Expeditious Retreat",
+    "page": 6,
+    "x": 41.9,
+    "y": 428.5
+  },
+  {
+    "name": "spellSource15",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 428.5
+  },
+  {
+    "name": "spellSaveHit15",
+    "value": "--",
+    "page": 6,
+    "x": 231.7,
+    "y": 428.5
+  },
+  {
+    "name": "spellCastingTime15",
+    "value": "1BA",
+    "page": 6,
+    "x": 257.7,
+    "y": 428.5
+  },
+  {
+    "name": "spellRange15",
+    "value": "Self",
+    "page": 6,
+    "x": 277.5,
+    "y": 428.5
+  },
+  {
+    "name": "spellComponents15",
+    "value": "V,S",
+    "page": 6,
+    "x": 320.1,
+    "y": 428.5
+  },
+  {
+    "name": "spellDuration15",
+    "value": "Concentration, up to 10 minutes",
+    "page": 6,
+    "x": 342.7,
+    "y": 428.5
+  },
+  {
+    "name": "spellPage15",
+    "value": "PHB 238",
+    "page": 6,
+    "x": 388.8,
+    "y": 428.5
+  },
+  {
+    "name": "spellNotes15",
+    "value": "D: 10m, V/S",
+    "page": 6,
+    "x": 422.6,
+    "y": 428.6
+  },
+  {
+    "name": "spellPrepared16",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 416.8
+  },
+  {
+    "name": "spellName16",
+    "value": "False Life",
+    "page": 6,
+    "x": 41.9,
+    "y": 416.8
+  },
+  {
+    "name": "spellSource16",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 416.8
+  },
+  {
+    "name": "spellSaveHit16",
+    "value": "--",
+    "page": 6,
+    "x": 231.7,
+    "y": 416.8
+  },
+  {
+    "name": "spellCastingTime16",
+    "value": "1A",
+    "page": 6,
+    "x": 257.7,
+    "y": 416.8
+  },
+  {
+    "name": "spellRange16",
+    "value": "Self",
+    "page": 6,
+    "x": 277.5,
+    "y": 416.8
+  },
+  {
+    "name": "spellComponents16",
+    "value": "V,S,M",
+    "page": 6,
+    "x": 320.1,
+    "y": 416.8
+  },
+  {
+    "name": "spellDuration16",
+    "value": "1 hour",
+    "page": 6,
+    "x": 342.7,
+    "y": 416.8
+  },
+  {
+    "name": "spellPage16",
+    "value": "PHB 239",
+    "page": 6,
+    "x": 388.8,
+    "y": 416.8
+  },
+  {
+    "name": "spellNotes16",
+    "value": "D: 1h, V/S/M",
+    "page": 6,
+    "x": 422.6,
+    "y": 416.9
+  },
+  {
+    "name": "spellPrepared17",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 405
+  },
+  {
+    "name": "spellName17",
+    "value": "Feather Fall",
+    "page": 6,
+    "x": 41.9,
+    "y": 405
+  },
+  {
+    "name": "spellSource17",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 405
+  },
+  {
+    "name": "spellSaveHit17",
+    "value": "--",
+    "page": 6,
+    "x": 231.7,
+    "y": 405
+  },
+  {
+    "name": "spellCastingTime17",
+    "value": "1R",
+    "page": 6,
+    "x": 257.7,
+    "y": 405
+  },
+  {
+    "name": "spellRange17",
+    "value": "60 ft.",
+    "page": 6,
+    "x": 277.5,
+    "y": 405
+  },
+  {
+    "name": "spellComponents17",
+    "value": "V,M",
+    "page": 6,
+    "x": 320.1,
+    "y": 405
+  },
+  {
+    "name": "spellDuration17",
+    "value": "1 minute",
+    "page": 6,
+    "x": 342.7,
+    "y": 405
+  },
+  {
+    "name": "spellPage17",
+    "value": "PHB 239",
+    "page": 6,
+    "x": 388.8,
+    "y": 405
+  },
+  {
+    "name": "spellNotes17",
+    "value": "D: 1m, V/M",
+    "page": 6,
+    "x": 422.6,
+    "y": 405.1
+  },
+  {
+    "name": "spellPrepared18",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 393.3
+  },
+  {
+    "name": "spellName18",
+    "value": "Identify [R]",
+    "page": 6,
+    "x": 41.9,
+    "y": 393.3
+  },
+  {
+    "name": "spellSource18",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 393.3
+  },
+  {
+    "name": "spellSaveHit18",
+    "value": "--",
+    "page": 6,
+    "x": 231.7,
+    "y": 393.3
+  },
+  {
+    "name": "spellCastingTime18",
+    "value": "11m",
+    "page": 6,
+    "x": 257.7,
+    "y": 393.3
+  },
+  {
+    "name": "spellRange18",
+    "value": "Touch",
+    "page": 6,
+    "x": 277.5,
+    "y": 393.3
+  },
+  {
+    "name": "spellComponents18",
+    "value": "V,S,M",
+    "page": 6,
+    "x": 320.1,
+    "y": 393.3
+  },
+  {
+    "name": "spellDuration18",
+    "value": "Instantaneous",
+    "page": 6,
+    "x": 342.7,
+    "y": 393.3
+  },
+  {
+    "name": "spellPage18",
+    "value": "PHB 252",
+    "page": 6,
+    "x": 388.8,
+    "y": 393.3
+  },
+  {
+    "name": "spellNotes18",
+    "value": "V/S/M",
+    "page": 6,
+    "x": 422.6,
+    "y": 393.4
+  },
+  {
+    "name": "spellPrepared19",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 381.5
+  },
+  {
+    "name": "spellName19",
+    "value": "Jump",
+    "page": 6,
+    "x": 41.9,
+    "y": 381.5
+  },
+  {
+    "name": "spellSource19",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 381.5
+  },
+  {
+    "name": "spellSaveHit19",
+    "value": "--",
+    "page": 6,
+    "x": 231.7,
+    "y": 381.5
+  },
+  {
+    "name": "spellCastingTime19",
+    "value": "1A",
+    "page": 6,
+    "x": 257.7,
+    "y": 381.5
+  },
+  {
+    "name": "spellRange19",
+    "value": "Touch",
+    "page": 6,
+    "x": 277.5,
+    "y": 381.5
+  },
+  {
+    "name": "spellComponents19",
+    "value": "V,S,M",
+    "page": 6,
+    "x": 320.1,
+    "y": 381.5
+  },
+  {
+    "name": "spellDuration19",
+    "value": "1 minute",
+    "page": 6,
+    "x": 342.7,
+    "y": 381.5
+  },
+  {
+    "name": "spellPage19",
+    "value": "PHB 254",
+    "page": 6,
+    "x": 388.8,
+    "y": 381.5
+  },
+  {
+    "name": "spellNotes19",
+    "value": "D: 1m, V/S/M",
+    "page": 6,
+    "x": 422.6,
+    "y": 381.6
+  },
+  {
+    "name": "spellPrepared20",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 369.8
+  },
+  {
+    "name": "spellName20",
+    "value": "Longstrider",
+    "page": 6,
+    "x": 41.9,
+    "y": 369.8
+  },
+  {
+    "name": "spellSource20",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 369.8
+  },
+  {
+    "name": "spellSaveHit20",
+    "value": "--",
+    "page": 6,
+    "x": 231.7,
+    "y": 369.8
+  },
+  {
+    "name": "spellCastingTime20",
+    "value": "1A",
+    "page": 6,
+    "x": 257.7,
+    "y": 369.8
+  },
+  {
+    "name": "spellRange20",
+    "value": "Touch",
+    "page": 6,
+    "x": 277.5,
+    "y": 369.8
+  },
+  {
+    "name": "spellComponents20",
+    "value": "V,S,M",
+    "page": 6,
+    "x": 320.1,
+    "y": 369.8
+  },
+  {
+    "name": "spellDuration20",
+    "value": "1 hour",
+    "page": 6,
+    "x": 342.7,
+    "y": 369.8
+  },
+  {
+    "name": "spellPage20",
+    "value": "PHB 256",
+    "page": 6,
+    "x": 388.8,
+    "y": 369.8
+  },
+  {
+    "name": "spellNotes20",
+    "value": "D: 1h, V/S/M",
+    "page": 6,
+    "x": 422.6,
+    "y": 369.8
+  },
+  {
+    "name": "spellPrepared21",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 358
+  },
+  {
+    "name": "spellName21",
+    "value": "Purify Food and Drink [R]",
+    "page": 6,
+    "x": 41.9,
+    "y": 358
+  },
+  {
+    "name": "spellSource21",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 358
+  },
+  {
+    "name": "spellSaveHit21",
+    "value": "--",
+    "page": 6,
+    "x": 231.7,
+    "y": 358
+  },
+  {
+    "name": "spellCastingTime21",
+    "value": "1A + 10m",
+    "page": 6,
+    "x": 257.7,
+    "y": 358
+  },
+  {
+    "name": "spellRange21",
+    "value": "10 ft./5 ft. Sphere",
+    "page": 6,
+    "x": 277.5,
+    "y": 358
+  },
+  {
+    "name": "spellComponents21",
+    "value": "V,S",
+    "page": 6,
+    "x": 320.1,
+    "y": 358
+  },
+  {
+    "name": "spellDuration21",
+    "value": "Instantaneous",
+    "page": 6,
+    "x": 342.7,
+    "y": 358
+  },
+  {
+    "name": "spellPage21",
+    "value": "PHB 270",
+    "page": 6,
+    "x": 388.8,
+    "y": 358
+  },
+  {
+    "name": "spellNotes21",
+    "value": "5 ft. Sphere, V/S",
+    "page": 6,
+    "x": 422.6,
+    "y": 358.1
+  },
+  {
+    "name": "spellPrepared22",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 346.3
+  },
+  {
+    "name": "spellName22",
+    "value": "Catapult",
+    "page": 6,
+    "x": 41.9,
+    "y": 346.3
+  },
+  {
+    "name": "spellSource22",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 346.3
+  },
+  {
+    "name": "spellSaveHit22",
+    "value": "DEX 17",
+    "page": 6,
+    "x": 231.7,
+    "y": 346.3
+  },
+  {
+    "name": "spellCastingTime22",
+    "value": "1A",
+    "page": 6,
+    "x": 257.7,
+    "y": 346.3
+  },
+  {
+    "name": "spellRange22",
+    "value": "60 ft.",
+    "page": 6,
+    "x": 277.5,
+    "y": 346.3
+  },
+  {
+    "name": "spellComponents22",
+    "value": "S",
+    "page": 6,
+    "x": 320.1,
+    "y": 346.3
+  },
+  {
+    "name": "spellDuration22",
+    "value": "Instantaneous",
+    "page": 6,
+    "x": 342.7,
+    "y": 346.3
+  },
+  {
+    "name": "spellPage22",
+    "value": "EE 150",
+    "page": 6,
+    "x": 388.8,
+    "y": 346.3
+  },
+  {
+    "name": "spellNotes22",
+    "value": "S",
+    "page": 6,
+    "x": 422.6,
+    "y": 346.3
+  },
+  {
+    "name": "spellPrepared23",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 334.5
+  },
+  {
+    "name": "spellName23",
+    "value": "Snare",
+    "page": 6,
+    "x": 41.9,
+    "y": 334.5
+  },
+  {
+    "name": "spellSource23",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 334.5
+  },
+  {
+    "name": "spellSaveHit23",
+    "value": "DEX 17",
+    "page": 6,
+    "x": 231.7,
+    "y": 334.5
+  },
+  {
+    "name": "spellCastingTime23",
+    "value": "1m",
+    "page": 6,
+    "x": 257.7,
+    "y": 334.5
+  },
+  {
+    "name": "spellRange23",
+    "value": "Touch",
+    "page": 6,
+    "x": 277.5,
+    "y": 334.5
+  },
+  {
+    "name": "spellComponents23",
+    "value": "S,M",
+    "page": 6,
+    "x": 320.1,
+    "y": 334.5
+  },
+  {
+    "name": "spellDuration23",
+    "value": "8 hours",
+    "page": 6,
+    "x": 342.7,
+    "y": 334.5
+  },
+  {
+    "name": "spellPage23",
+    "value": "XGtE 165",
+    "page": 6,
+    "x": 388.8,
+    "y": 334.5
+  },
+  {
+    "name": "spellNotes23",
+    "value": "D: 8h, S/M",
+    "page": 6,
+    "x": 422.6,
+    "y": 334.6
+  },
+  {
+    "name": "spellPrepared24",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 322.8
+  },
+  {
+    "name": "spellName24",
+    "value": "Tasha's Caustic Brew",
+    "page": 6,
+    "x": 41.9,
+    "y": 322.9
+  },
+  {
+    "name": "spellSource24",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 322.8
+  },
+  {
+    "name": "spellSaveHit24",
+    "value": "DEX 17",
+    "page": 6,
+    "x": 231.7,
+    "y": 322.8
+  },
+  {
+    "name": "spellCastingTime24",
+    "value": "1A",
+    "page": 6,
+    "x": 257.7,
+    "y": 322.8
+  },
+  {
+    "name": "spellRange24",
+    "value": "Self/30 ft. Line",
+    "page": 6,
+    "x": 277.5,
+    "y": 322.8
+  },
+  {
+    "name": "spellComponents24",
+    "value": "V,S,M",
+    "page": 6,
+    "x": 320.1,
+    "y": 322.8
+  },
+  {
+    "name": "spellDuration24",
+    "value": "Concentration, up to 1 minute",
+    "page": 6,
+    "x": 342.7,
+    "y": 322.8
+  },
+  {
+    "name": "spellPage24",
+    "value": "TCoE 115",
+    "page": 6,
+    "x": 388.8,
+    "y": 322.8
+  },
+  {
+    "name": "spellNotes24",
+    "value": "D: 1m, 30 ft. Line, V/S/M",
+    "page": 6,
+    "x": 422.6,
+    "y": 322.8
+  },
+  {
+    "name": "spellPrepared25",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 311
+  },
+  {
+    "name": "spellName25",
+    "value": "Faerie Fire",
+    "page": 6,
+    "x": 41.9,
+    "y": 311
+  },
+  {
+    "name": "spellSource25",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 311
+  },
+  {
+    "name": "spellSaveHit25",
+    "value": "DEX 17",
+    "page": 6,
+    "x": 231.7,
+    "y": 311
+  },
+  {
+    "name": "spellCastingTime25",
+    "value": "1A",
+    "page": 6,
+    "x": 257.7,
+    "y": 311
+  },
+  {
+    "name": "spellRange25",
+    "value": "60 ft./20 ft. Cube",
+    "page": 6,
+    "x": 277.5,
+    "y": 311
+  },
+  {
+    "name": "spellComponents25",
+    "value": "V",
+    "page": 6,
+    "x": 320.1,
+    "y": 311
+  },
+  {
+    "name": "spellDuration25",
+    "value": "Concentration, up to 1 minute",
+    "page": 6,
+    "x": 342.7,
+    "y": 311
+  },
+  {
+    "name": "spellPage25",
+    "value": "PHB-2024 271",
+    "page": 6,
+    "x": 388.8,
+    "y": 311
+  },
+  {
+    "name": "spellNotes25",
+    "value": "D: 1m, 20 ft. Cube, V",
+    "page": 6,
+    "x": 422.6,
+    "y": 311.1
+  },
+  {
+    "name": "spellPrepared26",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 299.3
+  },
+  {
+    "name": "spellName26",
+    "value": "False Life",
+    "page": 6,
+    "x": 41.9,
+    "y": 299.3
+  },
+  {
+    "name": "spellSource26",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 299.3
+  },
+  {
+    "name": "spellSaveHit26",
+    "value": "--",
+    "page": 6,
+    "x": 231.7,
+    "y": 299.3
+  },
+  {
+    "name": "spellCastingTime26",
+    "value": "1A",
+    "page": 6,
+    "x": 257.7,
+    "y": 299.3
+  },
+  {
+    "name": "spellRange26",
+    "value": "Self",
+    "page": 6,
+    "x": 277.5,
+    "y": 299.3
+  },
+  {
+    "name": "spellComponents26",
+    "value": "V,S,M",
+    "page": 6,
+    "x": 320.1,
+    "y": 299.3
+  },
+  {
+    "name": "spellDuration26",
+    "value": "Instantaneous",
+    "page": 6,
+    "x": 342.7,
+    "y": 299.3
+  },
+  {
+    "name": "spellPage26",
+    "value": "PHB-2024 271",
+    "page": 6,
+    "x": 388.8,
+    "y": 299.3
+  },
+  {
+    "name": "spellNotes26",
+    "value": "V/S/M",
+    "page": 6,
+    "x": 422.6,
+    "y": 299.3
+  },
+  {
+    "name": "spellPrepared27",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 287.5
+  },
+  {
+    "name": "spellName27",
+    "value": "Feather Fall",
+    "page": 6,
+    "x": 41.9,
+    "y": 287.5
+  },
+  {
+    "name": "spellSource27",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 287.5
+  },
+  {
+    "name": "spellSaveHit27",
+    "value": "--",
+    "page": 6,
+    "x": 231.7,
+    "y": 287.5
+  },
+  {
+    "name": "spellCastingTime27",
+    "value": "1R",
+    "page": 6,
+    "x": 257.7,
+    "y": 287.5
+  },
+  {
+    "name": "spellRange27",
+    "value": "60 ft.",
+    "page": 6,
+    "x": 277.5,
+    "y": 287.5
+  },
+  {
+    "name": "spellComponents27",
+    "value": "V,M",
+    "page": 6,
+    "x": 320.1,
+    "y": 287.5
+  },
+  {
+    "name": "spellDuration27",
+    "value": "1 minute",
+    "page": 6,
+    "x": 342.7,
+    "y": 287.5
+  },
+  {
+    "name": "spellPage27",
+    "value": "PHB-2024 271",
+    "page": 6,
+    "x": 388.8,
+    "y": 287.5
+  },
+  {
+    "name": "spellNotes27",
+    "value": "D: 1m, V/M",
+    "page": 6,
+    "x": 422.6,
+    "y": 287.6
+  },
+  {
+    "name": "spellPrepared28",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 275.8
+  },
+  {
+    "name": "spellName28",
+    "value": "Purify Food and Drink [R]",
+    "page": 6,
+    "x": 41.9,
+    "y": 275.8
+  },
+  {
+    "name": "spellSource28",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 275.8
+  },
+  {
+    "name": "spellSaveHit28",
+    "value": "--",
+    "page": 6,
+    "x": 231.7,
+    "y": 275.8
+  },
+  {
+    "name": "spellCastingTime28",
+    "value": "1A + 10m",
+    "page": 6,
+    "x": 257.7,
+    "y": 275.8
+  },
+  {
+    "name": "spellRange28",
+    "value": "10 ft./5 ft. Sphere",
+    "page": 6,
+    "x": 277.5,
+    "y": 275.8
+  },
+  {
+    "name": "spellComponents28",
+    "value": "V,S",
+    "page": 6,
+    "x": 320.1,
+    "y": 275.8
+  },
+  {
+    "name": "spellDuration28",
+    "value": "Instantaneous",
+    "page": 6,
+    "x": 342.7,
+    "y": 275.8
+  },
+  {
+    "name": "spellPage28",
+    "value": "PHB-2024 310",
+    "page": 6,
+    "x": 388.8,
+    "y": 275.8
+  },
+  {
+    "name": "spellNotes28",
+    "value": "5 ft. Sphere, V/S",
+    "page": 6,
+    "x": 422.6,
+    "y": 275.8
+  },
+  {
+    "name": "spellPrepared29",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 264
+  },
+  {
+    "name": "spellName29",
+    "value": "Grease",
+    "page": 6,
+    "x": 41.9,
+    "y": 264
+  },
+  {
+    "name": "spellSource29",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 264
+  },
+  {
+    "name": "spellSaveHit29",
+    "value": "DEX 17",
+    "page": 6,
+    "x": 231.7,
+    "y": 264
+  },
+  {
+    "name": "spellCastingTime29",
+    "value": "1A",
+    "page": 6,
+    "x": 257.7,
+    "y": 264
+  },
+  {
+    "name": "spellRange29",
+    "value": "60 ft./10 ft. Square",
+    "page": 6,
+    "x": 277.5,
+    "y": 264
+  },
+  {
+    "name": "spellComponents29",
+    "value": "V,S,M",
+    "page": 6,
+    "x": 320.1,
+    "y": 264
+  },
+  {
+    "name": "spellDuration29",
+    "value": "1 minute",
+    "page": 6,
+    "x": 342.7,
+    "y": 264
+  },
+  {
+    "name": "spellPage29",
+    "value": "PHB-2024 280",
+    "page": 6,
+    "x": 388.8,
+    "y": 264
+  },
+  {
+    "name": "spellNotes29",
+    "value": "D: 1m, 10 ft. Square, V/S/M",
+    "page": 6,
+    "x": 422.6,
+    "y": 264.1
+  },
+  {
+    "name": "spellPrepared30",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 252.2
+  },
+  {
+    "name": "spellName30",
+    "value": "Jump",
+    "page": 6,
+    "x": 41.9,
+    "y": 252.2
+  },
+  {
+    "name": "spellSource30",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 252.2
+  },
+  {
+    "name": "spellSaveHit30",
+    "value": "--",
+    "page": 6,
+    "x": 231.7,
+    "y": 252.2
+  },
+  {
+    "name": "spellCastingTime30",
+    "value": "1BA",
+    "page": 6,
+    "x": 257.7,
+    "y": 252.2
+  },
+  {
+    "name": "spellRange30",
+    "value": "Touch",
+    "page": 6,
+    "x": 277.5,
+    "y": 252.2
+  },
+  {
+    "name": "spellComponents30",
+    "value": "V,S,M",
+    "page": 6,
+    "x": 320.1,
+    "y": 252.2
+  },
+  {
+    "name": "spellDuration30",
+    "value": "1 minute",
+    "page": 6,
+    "x": 342.7,
+    "y": 252.2
+  },
+  {
+    "name": "spellPage30",
+    "value": "PHB-2024 290",
+    "page": 6,
+    "x": 388.8,
+    "y": 252.2
+  },
+  {
+    "name": "spellNotes30",
+    "value": "D: 1m, V/S/M",
+    "page": 6,
+    "x": 422.6,
+    "y": 252.3
+  },
+  {
+    "name": "spellPrepared31",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 240.5
+  },
+  {
+    "name": "spellName31",
+    "value": "Sanctuary",
+    "page": 6,
+    "x": 41.9,
+    "y": 240.5
+  },
+  {
+    "name": "spellSource31",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 240.5
+  },
+  {
+    "name": "spellSaveHit31",
+    "value": "WIS 17",
+    "page": 6,
+    "x": 231.7,
+    "y": 240.5
+  },
+  {
+    "name": "spellCastingTime31",
+    "value": "1BA",
+    "page": 6,
+    "x": 257.7,
+    "y": 240.5
+  },
+  {
+    "name": "spellRange31",
+    "value": "30 ft.",
+    "page": 6,
+    "x": 277.5,
+    "y": 240.5
+  },
+  {
+    "name": "spellComponents31",
+    "value": "V,S,M",
+    "page": 6,
+    "x": 320.1,
+    "y": 240.5
+  },
+  {
+    "name": "spellDuration31",
+    "value": "1 minute",
+    "page": 6,
+    "x": 342.7,
+    "y": 240.5
+  },
+  {
+    "name": "spellPage31",
+    "value": "PHB-2024 313",
+    "page": 6,
+    "x": 388.8,
+    "y": 240.5
+  },
+  {
+    "name": "spellNotes31",
+    "value": "D: 1m, V/S/M",
+    "page": 6,
+    "x": 422.6,
+    "y": 240.6
+  },
+  {
+    "name": "spellPrepared32",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 228.7
+  },
+  {
+    "name": "spellName32",
+    "value": "Longstrider",
+    "page": 6,
+    "x": 41.9,
+    "y": 228.7
+  },
+  {
+    "name": "spellSource32",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 228.7
+  },
+  {
+    "name": "spellSaveHit32",
+    "value": "--",
+    "page": 6,
+    "x": 231.7,
+    "y": 228.7
+  },
+  {
+    "name": "spellCastingTime32",
+    "value": "1A",
+    "page": 6,
+    "x": 257.7,
+    "y": 228.7
+  },
+  {
+    "name": "spellRange32",
+    "value": "Touch",
+    "page": 6,
+    "x": 277.5,
+    "y": 228.7
+  },
+  {
+    "name": "spellComponents32",
+    "value": "V,S,M",
+    "page": 6,
+    "x": 320.1,
+    "y": 228.7
+  },
+  {
+    "name": "spellDuration32",
+    "value": "1 hour",
+    "page": 6,
+    "x": 342.7,
+    "y": 228.7
+  },
+  {
+    "name": "spellPage32",
+    "value": "PHB-2024 293",
+    "page": 6,
+    "x": 388.8,
+    "y": 228.7
+  },
+  {
+    "name": "spellNotes32",
+    "value": "D: 1h, V/S/M",
+    "page": 6,
+    "x": 422.6,
+    "y": 228.8
+  },
+  {
+    "name": "spellPrepared33",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 217
+  },
+  {
+    "name": "spellName33",
+    "value": "Cure Wounds",
+    "page": 6,
+    "x": 41.9,
+    "y": 217
+  },
+  {
+    "name": "spellSource33",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 217
+  },
+  {
+    "name": "spellSaveHit33",
+    "value": "--",
+    "page": 6,
+    "x": 231.7,
+    "y": 217
+  },
+  {
+    "name": "spellCastingTime33",
+    "value": "1A",
+    "page": 6,
+    "x": 257.7,
+    "y": 217
+  },
+  {
+    "name": "spellRange33",
+    "value": "Touch",
+    "page": 6,
+    "x": 277.5,
+    "y": 217
+  },
+  {
+    "name": "spellComponents33",
+    "value": "V,S",
+    "page": 6,
+    "x": 320.1,
+    "y": 217
+  },
+  {
+    "name": "spellDuration33",
+    "value": "Instantaneous",
+    "page": 6,
+    "x": 342.7,
+    "y": 217
+  },
+  {
+    "name": "spellPage33",
+    "value": "PHB-2024 259",
+    "page": 6,
+    "x": 388.8,
+    "y": 217
+  },
+  {
+    "name": "spellNotes33",
+    "value": "V/S",
+    "page": 6,
+    "x": 422.6,
+    "y": 217
+  },
+  {
+    "name": "spellPrepared34",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 205.2
+  },
+  {
+    "name": "spellName34",
+    "value": "Detect Magic [R]",
+    "page": 6,
+    "x": 41.9,
+    "y": 205.2
+  },
+  {
+    "name": "spellSource34",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 205.2
+  },
+  {
+    "name": "spellSaveHit34",
+    "value": "--",
+    "page": 6,
+    "x": 231.7,
+    "y": 205.2
+  },
+  {
+    "name": "spellCastingTime34",
+    "value": "1A + 10m",
+    "page": 6,
+    "x": 257.7,
+    "y": 205.2
+  },
+  {
+    "name": "spellRange34",
+    "value": "Self/30 ft. Sphere",
+    "page": 6,
+    "x": 277.5,
+    "y": 205.2
+  },
+  {
+    "name": "spellComponents34",
+    "value": "V,S",
+    "page": 6,
+    "x": 320.1,
+    "y": 205.2
+  },
+  {
+    "name": "spellDuration34",
+    "value": "Concentration, up to 10 minutes",
+    "page": 6,
+    "x": 342.7,
+    "y": 205.2
+  },
+  {
+    "name": "spellPage34",
+    "value": "PHB-2024 262",
+    "page": 6,
+    "x": 388.8,
+    "y": 205.2
+  },
+  {
+    "name": "spellNotes34",
+    "value": "D: 10m, 30 ft. Sphere, V/S",
+    "page": 6,
+    "x": 422.6,
+    "y": 205.3
+  },
+  {
+    "name": "spellPrepared35",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 193.5
+  },
+  {
+    "name": "spellName35",
+    "value": "Disguise Self",
+    "page": 6,
+    "x": 41.9,
+    "y": 193.5
+  },
+  {
+    "name": "spellSource35",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 193.5
+  },
+  {
+    "name": "spellSaveHit35",
+    "value": "--",
+    "page": 6,
+    "x": 231.7,
+    "y": 193.5
+  },
+  {
+    "name": "spellCastingTime35",
+    "value": "1A",
+    "page": 6,
+    "x": 257.7,
+    "y": 193.5
+  },
+  {
+    "name": "spellRange35",
+    "value": "Self",
+    "page": 6,
+    "x": 277.5,
+    "y": 193.5
+  },
+  {
+    "name": "spellComponents35",
+    "value": "V,S",
+    "page": 6,
+    "x": 320.1,
+    "y": 193.5
+  },
+  {
+    "name": "spellDuration35",
+    "value": "1 hour",
+    "page": 6,
+    "x": 342.7,
+    "y": 193.5
+  },
+  {
+    "name": "spellPage35",
+    "value": "PHB-2024 262",
+    "page": 6,
+    "x": 388.8,
+    "y": 193.5
+  },
+  {
+    "name": "spellNotes35",
+    "value": "D: 1h, V/S",
+    "page": 6,
+    "x": 422.6,
+    "y": 193.5
+  },
+  {
+    "name": "spellPrepared36",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 181.7
+  },
+  {
+    "name": "spellName36",
+    "value": "Identify [R]",
+    "page": 6,
+    "x": 41.9,
+    "y": 181.7
+  },
+  {
+    "name": "spellSource36",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 181.7
+  },
+  {
+    "name": "spellSaveHit36",
+    "value": "--",
+    "page": 6,
+    "x": 231.7,
+    "y": 181.7
+  },
+  {
+    "name": "spellCastingTime36",
+    "value": "11m",
+    "page": 6,
+    "x": 257.7,
+    "y": 181.7
+  },
+  {
+    "name": "spellRange36",
+    "value": "Touch",
+    "page": 6,
+    "x": 277.5,
+    "y": 181.7
+  },
+  {
+    "name": "spellComponents36",
+    "value": "V,S,M",
+    "page": 6,
+    "x": 320.1,
+    "y": 181.7
+  },
+  {
+    "name": "spellDuration36",
+    "value": "Instantaneous",
+    "page": 6,
+    "x": 342.7,
+    "y": 181.7
+  },
+  {
+    "name": "spellPage36",
+    "value": "PHB-2024 287",
+    "page": 6,
+    "x": 388.8,
+    "y": 181.7
+  },
+  {
+    "name": "spellNotes36",
+    "value": "V/S/M",
+    "page": 6,
+    "x": 422.6,
+    "y": 181.8
+  },
+  {
+    "name": "spellPrepared37",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 170
+  },
+  {
+    "name": "spellName37",
+    "value": "Expeditious Retreat",
+    "page": 6,
+    "x": 41.9,
+    "y": 170
+  },
+  {
+    "name": "spellSource37",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 170
+  },
+  {
+    "name": "spellSaveHit37",
+    "value": "--",
+    "page": 6,
+    "x": 231.7,
+    "y": 170
+  },
+  {
+    "name": "spellCastingTime37",
+    "value": "1BA",
+    "page": 6,
+    "x": 257.7,
+    "y": 170
+  },
+  {
+    "name": "spellRange37",
+    "value": "Self",
+    "page": 6,
+    "x": 277.5,
+    "y": 170
+  },
+  {
+    "name": "spellComponents37",
+    "value": "V,S",
+    "page": 6,
+    "x": 320.1,
+    "y": 170
+  },
+  {
+    "name": "spellDuration37",
+    "value": "Concentration, up to 10 minutes",
+    "page": 6,
+    "x": 342.7,
+    "y": 170
+  },
+  {
+    "name": "spellPage37",
+    "value": "PHB-2024 270",
+    "page": 6,
+    "x": 388.8,
+    "y": 170
+  },
+  {
+    "name": "spellNotes37",
+    "value": "D: 10m, V/S",
+    "page": 6,
+    "x": 422.6,
+    "y": 170
+  },
+  {
+    "name": "spellPrepared38",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 158.2
+  },
+  {
+    "name": "spellName38",
+    "value": "Alarm [R]",
+    "page": 6,
+    "x": 41.9,
+    "y": 158.2
+  },
+  {
+    "name": "spellSource38",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 158.2
+  },
+  {
+    "name": "spellSaveHit38",
+    "value": "--",
+    "page": 6,
+    "x": 231.7,
+    "y": 158.2
+  },
+  {
+    "name": "spellCastingTime38",
+    "value": "11m",
+    "page": 6,
+    "x": 257.7,
+    "y": 158.2
+  },
+  {
+    "name": "spellRange38",
+    "value": "30 ft./20 ft. Cube",
+    "page": 6,
+    "x": 277.5,
+    "y": 158.2
+  },
+  {
+    "name": "spellComponents38",
+    "value": "V,S,M",
+    "page": 6,
+    "x": 320.1,
+    "y": 158.2
+  },
+  {
+    "name": "spellDuration38",
+    "value": "8 hours",
+    "page": 6,
+    "x": 342.7,
+    "y": 158.2
+  },
+  {
+    "name": "spellPage38",
+    "value": "PHB-2024 239",
+    "page": 6,
+    "x": 388.8,
+    "y": 158.2
+  },
+  {
+    "name": "spellNotes38",
+    "value": "D: 8h, 20 ft. Cube, V/S/M",
+    "page": 6,
+    "x": 422.6,
+    "y": 158.3
+  },
+  {
+    "name": "spellPrepared39",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 146.5
+  },
+  {
+    "name": "spellName39",
+    "value": "Quick Clothier",
+    "page": 6,
+    "x": 41.9,
+    "y": 146.5
+  },
+  {
+    "name": "spellSource39",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 146.5
+  },
+  {
+    "name": "spellSaveHit39",
+    "value": "--",
+    "page": 6,
+    "x": 231.7,
+    "y": 146.5
+  },
+  {
+    "name": "spellCastingTime39",
+    "value": "1A",
+    "page": 6,
+    "x": 257.7,
+    "y": 146.5
+  },
+  {
+    "name": "spellRange39",
+    "value": "Touch",
+    "page": 6,
+    "x": 277.5,
+    "y": 146.5
+  },
+  {
+    "name": "spellComponents39",
+    "value": "V,S,M",
+    "page": 6,
+    "x": 320.1,
+    "y": 146.5
+  },
+  {
+    "name": "spellDuration39",
+    "value": "24 hours",
+    "page": 6,
+    "x": 342.7,
+    "y": 146.5
+  },
+  {
+    "name": "spellPage39",
+    "value": "DDBD",
+    "page": 6,
+    "x": 388.8,
+    "y": 146.5
+  },
+  {
+    "name": "spellNotes39",
+    "value": "D: 24h, V/S/M",
+    "page": 6,
+    "x": 422.6,
+    "y": 146.5
+  },
+  {
+    "name": "spellPrepared40",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 134.7
+  },
+  {
+    "name": "spellName40",
+    "value": "Tenser's Floating Disk [R]",
+    "page": 6,
+    "x": 41.9,
+    "y": 134.7
+  },
+  {
+    "name": "spellSource40",
+    "value": "Wizard",
+    "page": 6,
+    "x": 149,
+    "y": 134.7
+  },
+  {
+    "name": "spellSaveHit40",
+    "value": "--",
+    "page": 6,
+    "x": 231.7,
+    "y": 134.7
+  },
+  {
+    "name": "spellCastingTime40",
+    "value": "1A + 10m",
+    "page": 6,
+    "x": 257.7,
+    "y": 134.7
+  },
+  {
+    "name": "spellRange40",
+    "value": "30 ft.",
+    "page": 6,
+    "x": 277.5,
+    "y": 134.7
+  },
+  {
+    "name": "spellComponents40",
+    "value": "V,S,M",
+    "page": 6,
+    "x": 320.1,
+    "y": 134.7
+  },
+  {
+    "name": "spellDuration40",
+    "value": "1 hour",
+    "page": 6,
+    "x": 342.7,
+    "y": 134.7
+  },
+  {
+    "name": "spellPage40",
+    "value": "PHB 282",
+    "page": 6,
+    "x": 388.8,
+    "y": 134.7
+  },
+  {
+    "name": "spellNotes40",
+    "value": "D: 1h, V/S/M",
+    "page": 6,
+    "x": 422.6,
+    "y": 134.8
+  },
+  {
+    "name": "spellPrepared41",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 123
+  },
+  {
+    "name": "spellName41",
+    "value": "Identify [R]",
+    "page": 6,
+    "x": 41.9,
+    "y": 123
+  },
+  {
+    "name": "spellSource41",
+    "value": "Wizard",
+    "page": 6,
+    "x": 149,
+    "y": 123
+  },
+  {
+    "name": "spellSaveHit41",
+    "value": "--",
+    "page": 6,
+    "x": 231.7,
+    "y": 123
+  },
+  {
+    "name": "spellCastingTime41",
+    "value": "11m",
+    "page": 6,
+    "x": 257.7,
+    "y": 123
+  },
+  {
+    "name": "spellRange41",
+    "value": "Touch",
+    "page": 6,
+    "x": 277.5,
+    "y": 123
+  },
+  {
+    "name": "spellComponents41",
+    "value": "V,S,M",
+    "page": 6,
+    "x": 320.1,
+    "y": 123
+  },
+  {
+    "name": "spellDuration41",
+    "value": "Instantaneous",
+    "page": 6,
+    "x": 342.7,
+    "y": 123
+  },
+  {
+    "name": "spellPage41",
+    "value": "PHB 252",
+    "page": 6,
+    "x": 388.8,
+    "y": 123
+  },
+  {
+    "name": "spellNotes41",
+    "value": "V/S/M",
+    "page": 6,
+    "x": 422.6,
+    "y": 123
+  },
+  {
+    "name": "spellPrepared42",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 111.2
+  },
+  {
+    "name": "spellName42",
+    "value": "Chromatic Orb",
+    "page": 6,
+    "x": 41.9,
+    "y": 111.2
+  },
+  {
+    "name": "spellSource42",
+    "value": "Wizard",
+    "page": 6,
+    "x": 149,
+    "y": 111.2
+  },
+  {
+    "name": "spellSaveHit42",
+    "value": "+8",
+    "page": 6,
+    "x": 231.7,
+    "y": 111.2
+  },
+  {
+    "name": "spellCastingTime42",
+    "value": "1A",
+    "page": 6,
+    "x": 257.7,
+    "y": 111.2
+  },
+  {
+    "name": "spellRange42",
+    "value": "90 ft.",
+    "page": 6,
+    "x": 277.5,
+    "y": 111.2
+  },
+  {
+    "name": "spellComponents42",
+    "value": "V,S,M",
+    "page": 6,
+    "x": 320.1,
+    "y": 111.2
+  },
+  {
+    "name": "spellDuration42",
+    "value": "Instantaneous",
+    "page": 6,
+    "x": 342.7,
+    "y": 111.2
+  },
+  {
+    "name": "spellPage42",
+    "value": "PHB 221",
+    "page": 6,
+    "x": 388.8,
+    "y": 111.2
+  },
+  {
+    "name": "spellNotes42",
+    "value": "V/S/M",
+    "page": 6,
+    "x": 422.6,
+    "y": 111.3
+  },
+  {
+    "name": "spellPrepared43",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 99.5
+  },
+  {
+    "name": "spellName43",
+    "value": "Thunderwave",
+    "page": 6,
+    "x": 41.9,
+    "y": 99.5
+  },
+  {
+    "name": "spellSource43",
+    "value": "Wizard",
+    "page": 6,
+    "x": 149,
+    "y": 99.4
+  },
+  {
+    "name": "spellSaveHit43",
+    "value": "CON 16",
+    "page": 6,
+    "x": 231.7,
+    "y": 99.5
+  },
+  {
+    "name": "spellCastingTime43",
+    "value": "1A",
+    "page": 6,
+    "x": 257.7,
+    "y": 99.5
+  },
+  {
+    "name": "spellRange43",
+    "value": "Self/15 ft. Cube",
+    "page": 6,
+    "x": 277.5,
+    "y": 99.5
+  },
+  {
+    "name": "spellComponents43",
+    "value": "V,S",
+    "page": 6,
+    "x": 320.1,
+    "y": 99.5
+  },
+  {
+    "name": "spellDuration43",
+    "value": "Instantaneous",
+    "page": 6,
+    "x": 342.7,
+    "y": 99.5
+  },
+  {
+    "name": "spellPage43",
+    "value": "PHB 282",
+    "page": 6,
+    "x": 388.8,
+    "y": 99.5
+  },
+  {
+    "name": "spellNotes43",
+    "value": "15 ft. Cube, V/S",
+    "page": 6,
+    "x": 422.6,
+    "y": 99.5
+  },
+  {
+    "name": "spellPrepared44",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 87.7
+  },
+  {
+    "name": "spellName44",
+    "value": "Tasha's Hideous Laughter",
+    "page": 6,
+    "x": 41.9,
+    "y": 87.7
+  },
+  {
+    "name": "spellSource44",
+    "value": "Wizard",
+    "page": 6,
+    "x": 149,
+    "y": 87.6
+  },
+  {
+    "name": "spellSaveHit44",
+    "value": "WIS 16",
+    "page": 6,
+    "x": 231.7,
+    "y": 87.7
+  },
+  {
+    "name": "spellCastingTime44",
+    "value": "1A",
+    "page": 6,
+    "x": 257.7,
+    "y": 87.7
+  },
+  {
+    "name": "spellRange44",
+    "value": "30 ft.",
+    "page": 6,
+    "x": 277.5,
+    "y": 87.7
+  },
+  {
+    "name": "spellComponents44",
+    "value": "V,S,M",
+    "page": 6,
+    "x": 320.1,
+    "y": 87.7
+  },
+  {
+    "name": "spellDuration44",
+    "value": "Concentration, up to 1 minute",
+    "page": 6,
+    "x": 342.7,
+    "y": 87.7
+  },
+  {
+    "name": "spellPage44",
+    "value": "PHB 280",
+    "page": 6,
+    "x": 388.8,
+    "y": 87.7
+  },
+  {
+    "name": "spellNotes44",
+    "value": "D: 1m, V/S/M",
+    "page": 6,
+    "x": 422.6,
+    "y": 87.8
+  },
+  {
+    "name": "spellPrepared45",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 75.9
+  },
+  {
+    "name": "spellName45",
+    "value": "Detect Magic [R]",
+    "page": 6,
+    "x": 41.9,
+    "y": 75.9
+  },
+  {
+    "name": "spellSource45",
+    "value": "Wizard",
+    "page": 6,
+    "x": 149,
+    "y": 75.9
+  },
+  {
+    "name": "spellSaveHit45",
+    "value": "--",
+    "page": 6,
+    "x": 231.7,
+    "y": 75.9
+  },
+  {
+    "name": "spellCastingTime45",
+    "value": "1A + 10m",
+    "page": 6,
+    "x": 257.7,
+    "y": 75.9
+  },
+  {
+    "name": "spellRange45",
+    "value": "Self/30 ft. Sphere",
+    "page": 6,
+    "x": 277.5,
+    "y": 75.9
+  },
+  {
+    "name": "spellComponents45",
+    "value": "V,S",
+    "page": 6,
+    "x": 320.1,
+    "y": 75.9
+  },
+  {
+    "name": "spellDuration45",
+    "value": "Concentration, up to 10 minutes",
+    "page": 6,
+    "x": 342.7,
+    "y": 75.9
+  },
+  {
+    "name": "spellPage45",
+    "value": "PHB 231",
+    "page": 6,
+    "x": 388.8,
+    "y": 75.9
+  },
+  {
+    "name": "spellNotes45",
+    "value": "D: 10m, 30 ft. Sphere, V/S",
+    "page": 6,
+    "x": 422.6,
+    "y": 76
+  },
+  {
+    "name": "spellPrepared46",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 64.2
+  },
+  {
+    "name": "spellName46",
+    "value": "Expeditious Retreat",
+    "page": 6,
+    "x": 41.9,
+    "y": 64.2
+  },
+  {
+    "name": "spellSource46",
+    "value": "Wizard",
+    "page": 6,
+    "x": 149,
+    "y": 64.2
+  },
+  {
+    "name": "spellSaveHit46",
+    "value": "--",
+    "page": 6,
+    "x": 231.7,
+    "y": 64.2
+  },
+  {
+    "name": "spellCastingTime46",
+    "value": "1BA",
+    "page": 6,
+    "x": 257.7,
+    "y": 64.2
+  },
+  {
+    "name": "spellRange46",
+    "value": "Self",
+    "page": 6,
+    "x": 277.5,
+    "y": 64.2
+  },
+  {
+    "name": "spellComponents46",
+    "value": "V,S",
+    "page": 6,
+    "x": 320.1,
+    "y": 64.2
+  },
+  {
+    "name": "spellDuration46",
+    "value": "Concentration, up to 10 minutes",
+    "page": 6,
+    "x": 342.7,
+    "y": 64.2
+  },
+  {
+    "name": "spellPage46",
+    "value": "PHB 238",
+    "page": 6,
+    "x": 388.8,
+    "y": 64.2
+  },
+  {
+    "name": "spellNotes46",
+    "value": "D: 10m, V/S",
+    "page": 6,
+    "x": 422.6,
+    "y": 64.3
+  },
+  {
+    "name": "spellCastingAbility0",
+    "value": "INT / INT",
+    "page": 7,
+    "x": 283.8,
+    "y": 735.8
+  },
+  {
+    "name": "spellSaveDC0",
+    "value": "17 / 16",
+    "page": 7,
+    "x": 384.5,
+    "y": 735.8
+  },
+  {
+    "name": "spellAtkBonus0",
+    "value": "+9 / +8",
+    "page": 7,
+    "x": 488.3,
+    "y": 735.8
+  },
+  {
+    "name": "spellCastingClass0",
+    "value": "Artificer / Wizard",
+    "page": 7,
+    "x": 47.5,
+    "y": 726.8
+  },
+  {
+    "name": "spellPrepared47",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 640.1
+  },
+  {
+    "name": "spellName47",
+    "value": "Longstrider",
+    "page": 7,
+    "x": 42,
+    "y": 640.1
+  },
+  {
+    "name": "spellSource47",
+    "value": "Wizard",
+    "page": 7,
+    "x": 149,
+    "y": 640.1
+  },
+  {
+    "name": "spellSaveHit47",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 640.1
+  },
+  {
+    "name": "spellCastingTime47",
+    "value": "1A",
+    "page": 7,
+    "x": 257.5,
+    "y": 640.1
+  },
+  {
+    "name": "spellRange47",
+    "value": "Touch",
+    "page": 7,
+    "x": 277.5,
+    "y": 640.1
+  },
+  {
+    "name": "spellComponents47",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 640.1
+  },
+  {
+    "name": "spellDuration47",
+    "value": "1 hour",
+    "page": 7,
+    "x": 342.7,
+    "y": 640.1
+  },
+  {
+    "name": "spellPage47",
+    "value": "PHB 256",
+    "page": 7,
+    "x": 388.8,
+    "y": 640.1
+  },
+  {
+    "name": "spellNotes47",
+    "value": "D: 1h, V/S/M",
+    "page": 7,
+    "x": 422.6,
+    "y": 640.2
+  },
+  {
+    "name": "spellPrepared48",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 628.4
+  },
+  {
+    "name": "spellName48",
+    "value": "Find Familiar [R]",
+    "page": 7,
+    "x": 41.9,
+    "y": 628.4
+  },
+  {
+    "name": "spellSource48",
+    "value": "Wizard",
+    "page": 7,
+    "x": 149,
+    "y": 628.4
+  },
+  {
+    "name": "spellSaveHit48",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 628.4
+  },
+  {
+    "name": "spellCastingTime48",
+    "value": "1h + 10m",
+    "page": 7,
+    "x": 257.7,
+    "y": 628.4
+  },
+  {
+    "name": "spellRange48",
+    "value": "10 ft.",
+    "page": 7,
+    "x": 277.5,
+    "y": 628.4
+  },
+  {
+    "name": "spellComponents48",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 628.4
+  },
+  {
+    "name": "spellDuration48",
+    "value": "Instantaneous",
+    "page": 7,
+    "x": 342.7,
+    "y": 628.4
+  },
+  {
+    "name": "spellPage48",
+    "value": "PHB 240",
+    "page": 7,
+    "x": 388.8,
+    "y": 628.4
+  },
+  {
+    "name": "spellNotes48",
+    "value": "V/S/M",
+    "page": 7,
+    "x": 422.6,
+    "y": 628.4
+  },
+  {
+    "name": "spellPrepared49",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 616.6
+  },
+  {
+    "name": "spellName49",
+    "value": "Hex",
+    "page": 7,
+    "x": 41.9,
+    "y": 616.6
+  },
+  {
+    "name": "spellSource49",
+    "value": "Fey Touched",
+    "page": 7,
+    "x": 149,
+    "y": 616.6
+  },
+  {
+    "name": "spellSaveHit49",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 616.6
+  },
+  {
+    "name": "spellCastingTime49",
+    "value": "1BA",
+    "page": 7,
+    "x": 257.7,
+    "y": 616.6
+  },
+  {
+    "name": "spellRange49",
+    "value": "90 ft.",
+    "page": 7,
+    "x": 277.5,
+    "y": 616.6
+  },
+  {
+    "name": "spellComponents49",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 616.6
+  },
+  {
+    "name": "spellDuration49",
+    "value": "Concentration, up to 1 hour",
+    "page": 7,
+    "x": 342.7,
+    "y": 616.6
+  },
+  {
+    "name": "spellPage49",
+    "value": "PHB 251",
+    "page": 7,
+    "x": 388.8,
+    "y": 616.6
+  },
+  {
+    "name": "spellNotes49",
+    "value": "1/LR (Used), D: 1h, V/S/M",
+    "page": 7,
+    "x": 422.6,
+    "y": 616.7
+  },
+  {
+    "name": "spellHeader2",
+    "value": "=== 2nd LEVEL ===",
+    "page": 7,
+    "x": 41.9,
+    "y": 593.1
+  },
+  {
+    "name": "spellSlotHeader2",
+    "value": "3 Slots OOO",
+    "page": 7,
+    "x": 149,
+    "y": 593.1
+  },
+  {
+    "name": "spellPrepared50",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 581.3
+  },
+  {
+    "name": "spellName50",
+    "value": "Heat Metal",
+    "page": 7,
+    "x": 41.9,
+    "y": 581.3
+  },
+  {
+    "name": "spellSource50",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 581.3
+  },
+  {
+    "name": "spellSaveHit50",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 581.3
+  },
+  {
+    "name": "spellCastingTime50",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 581.3
+  },
+  {
+    "name": "spellRange50",
+    "value": "60 ft.",
+    "page": 7,
+    "x": 277.5,
+    "y": 581.3
+  },
+  {
+    "name": "spellComponents50",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 581.3
+  },
+  {
+    "name": "spellDuration50",
+    "value": "Concentration, up to 1 minute",
+    "page": 7,
+    "x": 342.7,
+    "y": 581.3
+  },
+  {
+    "name": "spellPage50",
+    "value": "PHB 250",
+    "page": 7,
+    "x": 388.8,
+    "y": 581.3
+  },
+  {
+    "name": "spellNotes50",
+    "value": "D: 1m, V/S/M",
+    "page": 7,
+    "x": 422.6,
+    "y": 581.4
+  },
+  {
+    "name": "spellPrepared51",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 569.6
+  },
+  {
+    "name": "spellName51",
+    "value": "Invisibility",
+    "page": 7,
+    "x": 41.9,
+    "y": 569.6
+  },
+  {
+    "name": "spellSource51",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 569.6
+  },
+  {
+    "name": "spellSaveHit51",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 569.6
+  },
+  {
+    "name": "spellCastingTime51",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 569.6
+  },
+  {
+    "name": "spellRange51",
+    "value": "Touch",
+    "page": 7,
+    "x": 277.5,
+    "y": 569.6
+  },
+  {
+    "name": "spellComponents51",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 569.6
+  },
+  {
+    "name": "spellDuration51",
+    "value": "Concentration, up to 1 hour",
+    "page": 7,
+    "x": 342.7,
+    "y": 569.5
+  },
+  {
+    "name": "spellPage51",
+    "value": "PHB 254",
+    "page": 7,
+    "x": 388.8,
+    "y": 569.6
+  },
+  {
+    "name": "spellNotes51",
+    "value": "D: 1h, V/S/M",
+    "page": 7,
+    "x": 422.6,
+    "y": 569.7
+  },
+  {
+    "name": "spellPrepared52",
+    "value": "P",
+    "page": 7,
+    "x": 29,
+    "y": 557.8
+  },
+  {
+    "name": "spellName52",
+    "value": "Branding Smite",
+    "page": 7,
+    "x": 41.9,
+    "y": 557.8
+  },
+  {
+    "name": "spellSource52",
+    "value": "Artificer (Always Prepared)",
+    "page": 7,
+    "x": 149,
+    "y": 557.8
+  },
+  {
+    "name": "spellSaveHit52",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 557.8
+  },
+  {
+    "name": "spellCastingTime52",
+    "value": "1BA",
+    "page": 7,
+    "x": 257.7,
+    "y": 557.8
+  },
+  {
+    "name": "spellRange52",
+    "value": "Self",
+    "page": 7,
+    "x": 277.5,
+    "y": 557.8
+  },
+  {
+    "name": "spellComponents52",
+    "value": "V",
+    "page": 7,
+    "x": 320.1,
+    "y": 557.8
+  },
+  {
+    "name": "spellDuration52",
+    "value": "Concentration, up to 1 minute",
+    "page": 7,
+    "x": 342.7,
+    "y": 557.8
+  },
+  {
+    "name": "spellPage52",
+    "value": "PHB 219",
+    "page": 7,
+    "x": 388.8,
+    "y": 557.8
+  },
+  {
+    "name": "spellNotes52",
+    "value": "D: 1m, V",
+    "page": 7,
+    "x": 422.6,
+    "y": 557.9
+  },
+  {
+    "name": "spellPrepared53",
+    "value": "P",
+    "page": 7,
+    "x": 29,
+    "y": 546.1
+  },
+  {
+    "name": "spellName53",
+    "value": "Warding Bond",
+    "page": 7,
+    "x": 41.9,
+    "y": 546.1
+  },
+  {
+    "name": "spellSource53",
+    "value": "Artificer (Always Prepared)",
+    "page": 7,
+    "x": 149,
+    "y": 546.1
+  },
+  {
+    "name": "spellSaveHit53",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 546.1
+  },
+  {
+    "name": "spellCastingTime53",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 546.1
+  },
+  {
+    "name": "spellRange53",
+    "value": "Touch",
+    "page": 7,
+    "x": 277.5,
+    "y": 546.2
+  },
+  {
+    "name": "spellComponents53",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 546.1
+  },
+  {
+    "name": "spellDuration53",
+    "value": "1 hour",
+    "page": 7,
+    "x": 342.7,
+    "y": 546.1
+  },
+  {
+    "name": "spellPage53",
+    "value": "PHB 287",
+    "page": 7,
+    "x": 388.8,
+    "y": 546.1
+  },
+  {
+    "name": "spellNotes53",
+    "value": "D: 1h, V/S/M",
+    "page": 7,
+    "x": 422.6,
+    "y": 546.1
+  },
+  {
+    "name": "spellPrepared54",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 534.3
+  },
+  {
+    "name": "spellName54",
+    "value": "Aid",
+    "page": 7,
+    "x": 41.9,
+    "y": 534.3
+  },
+  {
+    "name": "spellSource54",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 534.3
+  },
+  {
+    "name": "spellSaveHit54",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 534.3
+  },
+  {
+    "name": "spellCastingTime54",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 534.3
+  },
+  {
+    "name": "spellRange54",
+    "value": "30 ft.",
+    "page": 7,
+    "x": 277.5,
+    "y": 534.3
+  },
+  {
+    "name": "spellComponents54",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 534.3
+  },
+  {
+    "name": "spellDuration54",
+    "value": "8 hours",
+    "page": 7,
+    "x": 342.7,
+    "y": 534.3
+  },
+  {
+    "name": "spellPage54",
+    "value": "PHB 211",
+    "page": 7,
+    "x": 388.8,
+    "y": 534.3
+  },
+  {
+    "name": "spellNotes54",
+    "value": "D: 8h, V/S/M",
+    "page": 7,
+    "x": 422.6,
+    "y": 534.4
+  },
+  {
+    "name": "spellPrepared55",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 522.6
+  },
+  {
+    "name": "spellName55",
+    "value": "Alter Self",
+    "page": 7,
+    "x": 41.9,
+    "y": 522.6
+  },
+  {
+    "name": "spellSource55",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 522.6
+  },
+  {
+    "name": "spellSaveHit55",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 522.6
+  },
+  {
+    "name": "spellCastingTime55",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 522.6
+  },
+  {
+    "name": "spellRange55",
+    "value": "Self",
+    "page": 7,
+    "x": 277.5,
+    "y": 522.6
+  },
+  {
+    "name": "spellComponents55",
+    "value": "V,S",
+    "page": 7,
+    "x": 320.1,
+    "y": 522.6
+  },
+  {
+    "name": "spellDuration55",
+    "value": "Concentration, up to 1 hour",
+    "page": 7,
+    "x": 342.7,
+    "y": 522.6
+  },
+  {
+    "name": "spellPage55",
+    "value": "PHB 211",
+    "page": 7,
+    "x": 388.8,
+    "y": 522.6
+  },
+  {
+    "name": "spellNotes55",
+    "value": "D: 1h, V/S",
+    "page": 7,
+    "x": 422.6,
+    "y": 522.6
+  },
+  {
+    "name": "spellPrepared56",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 510.8
+  },
+  {
+    "name": "spellName56",
+    "value": "Arcane Lock",
+    "page": 7,
+    "x": 41.9,
+    "y": 510.8
+  },
+  {
+    "name": "spellSource56",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 510.8
+  },
+  {
+    "name": "spellSaveHit56",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 510.8
+  },
+  {
+    "name": "spellCastingTime56",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 510.8
+  },
+  {
+    "name": "spellRange56",
+    "value": "Touch",
+    "page": 7,
+    "x": 277.5,
+    "y": 510.8
+  },
+  {
+    "name": "spellComponents56",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 510.8
+  },
+  {
+    "name": "spellDuration56",
+    "value": "Until dispelled",
+    "page": 7,
+    "x": 342.7,
+    "y": 510.8
+  },
+  {
+    "name": "spellPage56",
+    "value": "PHB 215",
+    "page": 7,
+    "x": 388.8,
+    "y": 510.8
+  },
+  {
+    "name": "spellNotes56",
+    "value": "D: Until Dispelled, V/S/M",
+    "page": 7,
+    "x": 422.5,
+    "y": 510.9
+  },
+  {
+    "name": "spellPrepared57",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 499.1
+  },
+  {
+    "name": "spellName57",
+    "value": "Blur",
+    "page": 7,
+    "x": 41.9,
+    "y": 499.1
+  },
+  {
+    "name": "spellSource57",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 499.1
+  },
+  {
+    "name": "spellSaveHit57",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 499.1
+  },
+  {
+    "name": "spellCastingTime57",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 499.1
+  },
+  {
+    "name": "spellRange57",
+    "value": "Self",
+    "page": 7,
+    "x": 277.5,
+    "y": 499.1
+  },
+  {
+    "name": "spellComponents57",
+    "value": "V",
+    "page": 7,
+    "x": 320.1,
+    "y": 499.1
+  },
+  {
+    "name": "spellDuration57",
+    "value": "Concentration, up to 1 minute",
+    "page": 7,
+    "x": 342.7,
+    "y": 499.1
+  },
+  {
+    "name": "spellPage57",
+    "value": "PHB 219",
+    "page": 7,
+    "x": 388.8,
+    "y": 499.1
+  },
+  {
+    "name": "spellNotes57",
+    "value": "D: 1m, V",
+    "page": 7,
+    "x": 422.8,
+    "y": 499.1
+  },
+  {
+    "name": "spellPrepared58",
+    "value": "O",
+    "page": 7,
+    "x": 29.1,
+    "y": 487.3
+  },
+  {
+    "name": "spellName58",
+    "value": "Continual Flame",
+    "page": 7,
+    "x": 41.9,
+    "y": 487.3
+  },
+  {
+    "name": "spellSource58",
+    "value": "Artificer",
+    "page": 7,
+    "x": 148.9,
+    "y": 487.3
+  },
+  {
+    "name": "spellSaveHit58",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 487.3
+  },
+  {
+    "name": "spellCastingTime58",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 487.3
+  },
+  {
+    "name": "spellRange58",
+    "value": "Touch",
+    "page": 7,
+    "x": 277.5,
+    "y": 487.3
+  },
+  {
+    "name": "spellComponents58",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 487.3
+  },
+  {
+    "name": "spellDuration58",
+    "value": "Until dispelled",
+    "page": 7,
+    "x": 342.7,
+    "y": 487.3
+  },
+  {
+    "name": "spellPage58",
+    "value": "PHB 227",
+    "page": 7,
+    "x": 388.8,
+    "y": 487.3
+  },
+  {
+    "name": "spellNotes58",
+    "value": "D: Until Dispelled, V/S/M",
+    "page": 7,
+    "x": 422.6,
+    "y": 487.3
+  },
+  {
+    "name": "spellPrepared59",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 475.6
+  },
+  {
+    "name": "spellName59",
+    "value": "Darkvision",
+    "page": 7,
+    "x": 41.9,
+    "y": 475.6
+  },
+  {
+    "name": "spellSource59",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 475.6
+  },
+  {
+    "name": "spellSaveHit59",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 475.6
+  },
+  {
+    "name": "spellCastingTime59",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 475.6
+  },
+  {
+    "name": "spellRange59",
+    "value": "Touch",
+    "page": 7,
+    "x": 277.5,
+    "y": 475.6
+  },
+  {
+    "name": "spellComponents59",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 475.6
+  },
+  {
+    "name": "spellDuration59",
+    "value": "8 hours",
+    "page": 7,
+    "x": 342.7,
+    "y": 475.6
+  },
+  {
+    "name": "spellPage59",
+    "value": "PHB 230",
+    "page": 7,
+    "x": 388.8,
+    "y": 475.6
+  },
+  {
+    "name": "spellNotes59",
+    "value": "D: 8h, V/S/M",
+    "page": 7,
+    "x": 422.6,
+    "y": 475.6
+  },
+  {
+    "name": "spellPrepared60",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 463.8
+  },
+  {
+    "name": "spellName60",
+    "value": "Enhance Ability",
+    "page": 7,
+    "x": 41.9,
+    "y": 463.8
+  },
+  {
+    "name": "spellSource60",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 463.8
+  },
+  {
+    "name": "spellSaveHit60",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 463.8
+  },
+  {
+    "name": "spellCastingTime60",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 463.8
+  },
+  {
+    "name": "spellRange60",
+    "value": "Touch",
+    "page": 7,
+    "x": 277.5,
+    "y": 463.8
+  },
+  {
+    "name": "spellComponents60",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 463.8
+  },
+  {
+    "name": "spellDuration60",
+    "value": "Concentration, up to 1 hour",
+    "page": 7,
+    "x": 342.7,
+    "y": 463.8
+  },
+  {
+    "name": "spellPage60",
+    "value": "PHB 237",
+    "page": 7,
+    "x": 388.8,
+    "y": 463.8
+  },
+  {
+    "name": "spellNotes60",
+    "value": "D: 1h, V/S/M",
+    "page": 7,
+    "x": 422.6,
+    "y": 463.9
+  },
+  {
+    "name": "spellPrepared61",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 452.1
+  },
+  {
+    "name": "spellName61",
+    "value": "Enlarge/Reduce",
+    "page": 7,
+    "x": 41.9,
+    "y": 452.1
+  },
+  {
+    "name": "spellSource61",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149.1,
+    "y": 452
+  },
+  {
+    "name": "spellSaveHit61",
+    "value": "CON 17",
+    "page": 7,
+    "x": 231.7,
+    "y": 452.1
+  },
+  {
+    "name": "spellCastingTime61",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 452.1
+  },
+  {
+    "name": "spellRange61",
+    "value": "30 ft.",
+    "page": 7,
+    "x": 277.5,
+    "y": 452.1
+  },
+  {
+    "name": "spellComponents61",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 452.1
+  },
+  {
+    "name": "spellDuration61",
+    "value": "Concentration, up to 1 minute",
+    "page": 7,
+    "x": 342.7,
+    "y": 452.1
+  },
+  {
+    "name": "spellPage61",
+    "value": "PHB 237",
+    "page": 7,
+    "x": 388.8,
+    "y": 452.1
+  },
+  {
+    "name": "spellNotes61",
+    "value": "D: 1m, V/S/M",
+    "page": 7,
+    "x": 422.6,
+    "y": 452.1
+  },
+  {
+    "name": "spellPrepared62",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 440.3
+  },
+  {
+    "name": "spellName62",
+    "value": "Lesser Restoration",
+    "page": 7,
+    "x": 41.9,
+    "y": 440.3
+  },
+  {
+    "name": "spellSource62",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 440.3
+  },
+  {
+    "name": "spellSaveHit62",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 440.3
+  },
+  {
+    "name": "spellCastingTime62",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 440.3
+  },
+  {
+    "name": "spellRange62",
+    "value": "Touch",
+    "page": 7,
+    "x": 277.5,
+    "y": 440.3
+  },
+  {
+    "name": "spellComponents62",
+    "value": "V,S",
+    "page": 7,
+    "x": 320.1,
+    "y": 440.3
+  },
+  {
+    "name": "spellDuration62",
+    "value": "Instantaneous",
+    "page": 7,
+    "x": 342.7,
+    "y": 440.3
+  },
+  {
+    "name": "spellPage62",
+    "value": "PHB 255",
+    "page": 7,
+    "x": 388.8,
+    "y": 440.3
+  },
+  {
+    "name": "spellNotes62",
+    "value": "V/S",
+    "page": 7,
+    "x": 422.6,
+    "y": 440.4
+  },
+  {
+    "name": "spellPrepared63",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 428.5
+  },
+  {
+    "name": "spellName63",
+    "value": "Levitate",
+    "page": 7,
+    "x": 41.9,
+    "y": 428.5
+  },
+  {
+    "name": "spellSource63",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 428.5
+  },
+  {
+    "name": "spellSaveHit63",
+    "value": "CON 17",
+    "page": 7,
+    "x": 231.7,
+    "y": 428.5
+  },
+  {
+    "name": "spellCastingTime63",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 428.5
+  },
+  {
+    "name": "spellRange63",
+    "value": "60 ft.",
+    "page": 7,
+    "x": 277.5,
+    "y": 428.5
+  },
+  {
+    "name": "spellComponents63",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 428.5
+  },
+  {
+    "name": "spellDuration63",
+    "value": "Concentration, up to 10 minutes",
+    "page": 7,
+    "x": 342.7,
+    "y": 428.5
+  },
+  {
+    "name": "spellPage63",
+    "value": "PHB 255",
+    "page": 7,
+    "x": 388.8,
+    "y": 428.5
+  },
+  {
+    "name": "spellNotes63",
+    "value": "D: 10m, V/S/M",
+    "page": 7,
+    "x": 422.6,
+    "y": 428.6
+  },
+  {
+    "name": "spellPrepared64",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 416.8
+  },
+  {
+    "name": "spellName64",
+    "value": "Magic Mouth [R]",
+    "page": 7,
+    "x": 41.9,
+    "y": 416.8
+  },
+  {
+    "name": "spellSource64",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 416.8
+  },
+  {
+    "name": "spellSaveHit64",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 416.8
+  },
+  {
+    "name": "spellCastingTime64",
+    "value": "11m",
+    "page": 7,
+    "x": 257.7,
+    "y": 416.8
+  },
+  {
+    "name": "spellRange64",
+    "value": "30 ft.",
+    "page": 7,
+    "x": 277.5,
+    "y": 416.8
+  },
+  {
+    "name": "spellComponents64",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 416.8
+  },
+  {
+    "name": "spellDuration64",
+    "value": "Until dispelled",
+    "page": 7,
+    "x": 342.7,
+    "y": 416.8
+  },
+  {
+    "name": "spellPage64",
+    "value": "PHB 257",
+    "page": 7,
+    "x": 388.8,
+    "y": 416.8
+  },
+  {
+    "name": "spellNotes64",
+    "value": "D: Until Dispelled, V/S/M",
+    "page": 7,
+    "x": 422.6,
+    "y": 416.9
+  },
+  {
+    "name": "spellPrepared65",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 405
+  },
+  {
+    "name": "spellName65",
+    "value": "Magic Weapon",
+    "page": 7,
+    "x": 41.9,
+    "y": 405
+  },
+  {
+    "name": "spellSource65",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 405
+  },
+  {
+    "name": "spellSaveHit65",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 405
+  },
+  {
+    "name": "spellCastingTime65",
+    "value": "1BA",
+    "page": 7,
+    "x": 257.7,
+    "y": 405
+  },
+  {
+    "name": "spellRange65",
+    "value": "Touch",
+    "page": 7,
+    "x": 277.5,
+    "y": 405
+  },
+  {
+    "name": "spellComponents65",
+    "value": "V,S",
+    "page": 7,
+    "x": 320.1,
+    "y": 405
+  },
+  {
+    "name": "spellDuration65",
+    "value": "Concentration, up to 1 hour",
+    "page": 7,
+    "x": 342.7,
+    "y": 405
+  },
+  {
+    "name": "spellPage65",
+    "value": "PHB 257",
+    "page": 7,
+    "x": 388.8,
+    "y": 405
+  },
+  {
+    "name": "spellNotes65",
+    "value": "D: 1h, V/S",
+    "page": 7,
+    "x": 422.6,
+    "y": 405.1
+  },
+  {
+    "name": "spellPrepared66",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 393.3
+  },
+  {
+    "name": "spellName66",
+    "value": "Protection from Poison",
+    "page": 7,
+    "x": 41.9,
+    "y": 393.3
+  },
+  {
+    "name": "spellSource66",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 393.3
+  },
+  {
+    "name": "spellSaveHit66",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 393.3
+  },
+  {
+    "name": "spellCastingTime66",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 393.3
+  },
+  {
+    "name": "spellRange66",
+    "value": "Touch",
+    "page": 7,
+    "x": 277.5,
+    "y": 393.3
+  },
+  {
+    "name": "spellComponents66",
+    "value": "V,S",
+    "page": 7,
+    "x": 320.1,
+    "y": 393.3
+  },
+  {
+    "name": "spellDuration66",
+    "value": "1 hour",
+    "page": 7,
+    "x": 342.7,
+    "y": 393.3
+  },
+  {
+    "name": "spellPage66",
+    "value": "PHB 270",
+    "page": 7,
+    "x": 388.8,
+    "y": 393.3
+  },
+  {
+    "name": "spellNotes66",
+    "value": "D: 1h, V/S",
+    "page": 7,
+    "x": 422.6,
+    "y": 393.4
+  },
+  {
+    "name": "spellPrepared67",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 381.5
+  },
+  {
+    "name": "spellName67",
+    "value": "Rope Trick",
+    "page": 7,
+    "x": 41.9,
+    "y": 381.5
+  },
+  {
+    "name": "spellSource67",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 381.5
+  },
+  {
+    "name": "spellSaveHit67",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 381.5
+  },
+  {
+    "name": "spellCastingTime67",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 381.5
+  },
+  {
+    "name": "spellRange67",
+    "value": "Touch",
+    "page": 7,
+    "x": 277.5,
+    "y": 381.5
+  },
+  {
+    "name": "spellComponents67",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 381.5
+  },
+  {
+    "name": "spellDuration67",
+    "value": "1 hour",
+    "page": 7,
+    "x": 342.7,
+    "y": 381.5
+  },
+  {
+    "name": "spellPage67",
+    "value": "PHB 272",
+    "page": 7,
+    "x": 388.8,
+    "y": 381.5
+  },
+  {
+    "name": "spellNotes67",
+    "value": "D: 1h, V/S/M",
+    "page": 7,
+    "x": 422.6,
+    "y": 381.6
+  },
+  {
+    "name": "spellPrepared68",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 369.8
+  },
+  {
+    "name": "spellName68",
+    "value": "See Invisibility",
+    "page": 7,
+    "x": 41.9,
+    "y": 369.8
+  },
+  {
+    "name": "spellSource68",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 369.8
+  },
+  {
+    "name": "spellSaveHit68",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 369.8
+  },
+  {
+    "name": "spellCastingTime68",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 369.8
+  },
+  {
+    "name": "spellRange68",
+    "value": "Self",
+    "page": 7,
+    "x": 277.5,
+    "y": 369.8
+  },
+  {
+    "name": "spellComponents68",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 369.8
+  },
+  {
+    "name": "spellDuration68",
+    "value": "1 hour",
+    "page": 7,
+    "x": 342.7,
+    "y": 369.8
+  },
+  {
+    "name": "spellPage68",
+    "value": "PHB 274",
+    "page": 7,
+    "x": 388.8,
+    "y": 369.8
+  },
+  {
+    "name": "spellNotes68",
+    "value": "D: 1h, V/S/M",
+    "page": 7,
+    "x": 422.6,
+    "y": 369.8
+  },
+  {
+    "name": "spellPrepared69",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 358
+  },
+  {
+    "name": "spellName69",
+    "value": "Spider Climb",
+    "page": 7,
+    "x": 41.9,
+    "y": 358
+  },
+  {
+    "name": "spellSource69",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 358
+  },
+  {
+    "name": "spellSaveHit69",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 358
+  },
+  {
+    "name": "spellCastingTime69",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 358
+  },
+  {
+    "name": "spellRange69",
+    "value": "Touch",
+    "page": 7,
+    "x": 277.5,
+    "y": 358
+  },
+  {
+    "name": "spellComponents69",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 358
+  },
+  {
+    "name": "spellDuration69",
+    "value": "Concentration, up to 1 hour",
+    "page": 7,
+    "x": 342.7,
+    "y": 358
+  },
+  {
+    "name": "spellPage69",
+    "value": "PHB 277",
+    "page": 7,
+    "x": 388.8,
+    "y": 358
+  },
+  {
+    "name": "spellNotes69",
+    "value": "D: 1h, V/S/M",
+    "page": 7,
+    "x": 422.6,
+    "y": 358.1
+  },
+  {
+    "name": "spellPrepared70",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 346.3
+  },
+  {
+    "name": "spellName70",
+    "value": "Web",
+    "page": 7,
+    "x": 41.9,
+    "y": 346.3
+  },
+  {
+    "name": "spellSource70",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 346.3
+  },
+  {
+    "name": "spellSaveHit70",
+    "value": "DEX 17",
+    "page": 7,
+    "x": 231.7,
+    "y": 346.3
+  },
+  {
+    "name": "spellCastingTime70",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 346.3
+  },
+  {
+    "name": "spellRange70",
+    "value": "60 ft./20 ft. Cube",
+    "page": 7,
+    "x": 277.5,
+    "y": 346.3
+  },
+  {
+    "name": "spellComponents70",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 346.3
+  },
+  {
+    "name": "spellDuration70",
+    "value": "Concentration, up to 1 hour",
+    "page": 7,
+    "x": 342.7,
+    "y": 346.3
+  },
+  {
+    "name": "spellPage70",
+    "value": "PHB 287",
+    "page": 7,
+    "x": 388.8,
+    "y": 346.3
+  },
+  {
+    "name": "spellNotes70",
+    "value": "D: 1h, 20 ft. Cube, V/S/M",
+    "page": 7,
+    "x": 422.6,
+    "y": 346.3
+  },
+  {
+    "name": "spellPrepared71",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 334.5
+  },
+  {
+    "name": "spellName71",
+    "value": "Pyrotechnics",
+    "page": 7,
+    "x": 41.9,
+    "y": 334.5
+  },
+  {
+    "name": "spellSource71",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 334.5
+  },
+  {
+    "name": "spellSaveHit71",
+    "value": "CON 17",
+    "page": 7,
+    "x": 231.7,
+    "y": 334.5
+  },
+  {
+    "name": "spellCastingTime71",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 334.5
+  },
+  {
+    "name": "spellRange71",
+    "value": "60 ft./5 ft. Cube",
+    "page": 7,
+    "x": 277.5,
+    "y": 334.5
+  },
+  {
+    "name": "spellComponents71",
+    "value": "V,S",
+    "page": 7,
+    "x": 320.1,
+    "y": 334.5
+  },
+  {
+    "name": "spellDuration71",
+    "value": "Instantaneous",
+    "page": 7,
+    "x": 342.7,
+    "y": 334.5
+  },
+  {
+    "name": "spellPage71",
+    "value": "EE 163",
+    "page": 7,
+    "x": 388.8,
+    "y": 334.5
+  },
+  {
+    "name": "spellNotes71",
+    "value": "5 ft. Cube, V/S",
+    "page": 7,
+    "x": 422.6,
+    "y": 334.6
+  },
+  {
+    "name": "spellPrepared72",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 322.8
+  },
+  {
+    "name": "spellName72",
+    "value": "Skywrite [R]",
+    "page": 7,
+    "x": 41.9,
+    "y": 322.9
+  },
+  {
+    "name": "spellSource72",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 322.8
+  },
+  {
+    "name": "spellSaveHit72",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 322.8
+  },
+  {
+    "name": "spellCastingTime72",
+    "value": "1A + 10m",
+    "page": 7,
+    "x": 257.7,
+    "y": 322.8
+  },
+  {
+    "name": "spellRange72",
+    "value": "Sight",
+    "page": 7,
+    "x": 277.5,
+    "y": 322.8
+  },
+  {
+    "name": "spellComponents72",
+    "value": "V,S",
+    "page": 7,
+    "x": 320.1,
+    "y": 322.8
+  },
+  {
+    "name": "spellDuration72",
+    "value": "Concentration, up to 1 hour",
+    "page": 7,
+    "x": 342.7,
+    "y": 322.8
+  },
+  {
+    "name": "spellPage72",
+    "value": "EE 165",
+    "page": 7,
+    "x": 388.8,
+    "y": 322.8
+  },
+  {
+    "name": "spellNotes72",
+    "value": "D: 1h, V/S",
+    "page": 7,
+    "x": 422.6,
+    "y": 322.8
+  },
+  {
+    "name": "spellPrepared73",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 311
+  },
+  {
+    "name": "spellName73",
+    "value": "Aid",
+    "page": 7,
+    "x": 41.9,
+    "y": 311
+  },
+  {
+    "name": "spellSource73",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 311
+  },
+  {
+    "name": "spellSaveHit73",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 311
+  },
+  {
+    "name": "spellCastingTime73",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 311
+  },
+  {
+    "name": "spellRange73",
+    "value": "30 ft.",
+    "page": 7,
+    "x": 277.5,
+    "y": 311
+  },
+  {
+    "name": "spellComponents73",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 311
+  },
+  {
+    "name": "spellDuration73",
+    "value": "8 hours",
+    "page": 7,
+    "x": 342.7,
+    "y": 311
+  },
+  {
+    "name": "spellPage73",
+    "value": "PHB-2024 239",
+    "page": 7,
+    "x": 388.8,
+    "y": 311
+  },
+  {
+    "name": "spellNotes73",
+    "value": "D: 8h, V/S/M",
+    "page": 7,
+    "x": 422.6,
+    "y": 311.1
+  },
+  {
+    "name": "spellPrepared74",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 299.3
+  },
+  {
+    "name": "spellName74",
+    "value": "Alter Self",
+    "page": 7,
+    "x": 41.9,
+    "y": 299.3
+  },
+  {
+    "name": "spellSource74",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 299.3
+  },
+  {
+    "name": "spellSaveHit74",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 299.3
+  },
+  {
+    "name": "spellCastingTime74",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 299.3
+  },
+  {
+    "name": "spellRange74",
+    "value": "Self",
+    "page": 7,
+    "x": 277.5,
+    "y": 299.3
+  },
+  {
+    "name": "spellComponents74",
+    "value": "V,S",
+    "page": 7,
+    "x": 320.1,
+    "y": 299.3
+  },
+  {
+    "name": "spellDuration74",
+    "value": "Concentration, up to 1 hour",
+    "page": 7,
+    "x": 342.7,
+    "y": 299.3
+  },
+  {
+    "name": "spellPage74",
+    "value": "PHB-2024 239",
+    "page": 7,
+    "x": 388.8,
+    "y": 299.3
+  },
+  {
+    "name": "spellNotes74",
+    "value": "D: 1h, V/S",
+    "page": 7,
+    "x": 422.6,
+    "y": 299.3
+  },
+  {
+    "name": "spellPrepared75",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 287.5
+  },
+  {
+    "name": "spellName75",
+    "value": "Arcane Lock",
+    "page": 7,
+    "x": 41.9,
+    "y": 287.5
+  },
+  {
+    "name": "spellSource75",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 287.5
+  },
+  {
+    "name": "spellSaveHit75",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 287.5
+  },
+  {
+    "name": "spellCastingTime75",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 287.5
+  },
+  {
+    "name": "spellRange75",
+    "value": "Touch",
+    "page": 7,
+    "x": 277.5,
+    "y": 287.5
+  },
+  {
+    "name": "spellComponents75",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 287.5
+  },
+  {
+    "name": "spellDuration75",
+    "value": "Until dispelled",
+    "page": 7,
+    "x": 342.7,
+    "y": 287.5
+  },
+  {
+    "name": "spellPage75",
+    "value": "PHB-2024 242",
+    "page": 7,
+    "x": 388.8,
+    "y": 287.5
+  },
+  {
+    "name": "spellNotes75",
+    "value": "D: Until Dispelled, V/S/M",
+    "page": 7,
+    "x": 422.6,
+    "y": 287.6
+  },
+  {
+    "name": "spellPrepared76",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 275.8
+  },
+  {
+    "name": "spellName76",
+    "value": "Protection from Poison",
+    "page": 7,
+    "x": 41.9,
+    "y": 275.8
+  },
+  {
+    "name": "spellSource76",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 275.8
+  },
+  {
+    "name": "spellSaveHit76",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 275.8
+  },
+  {
+    "name": "spellCastingTime76",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 275.8
+  },
+  {
+    "name": "spellRange76",
+    "value": "Touch",
+    "page": 7,
+    "x": 277.5,
+    "y": 275.8
+  },
+  {
+    "name": "spellComponents76",
+    "value": "V,S",
+    "page": 7,
+    "x": 320.1,
+    "y": 275.8
+  },
+  {
+    "name": "spellDuration76",
+    "value": "1 hour",
+    "page": 7,
+    "x": 342.7,
+    "y": 275.8
+  },
+  {
+    "name": "spellPage76",
+    "value": "PHB-2024 310",
+    "page": 7,
+    "x": 388.8,
+    "y": 275.8
+  },
+  {
+    "name": "spellNotes76",
+    "value": "D: 1h, V/S",
+    "page": 7,
+    "x": 422.6,
+    "y": 275.8
+  },
+  {
+    "name": "spellPrepared77",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 264
+  },
+  {
+    "name": "spellName77",
+    "value": "Blur",
+    "page": 7,
+    "x": 41.9,
+    "y": 264
+  },
+  {
+    "name": "spellSource77",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 264
+  },
+  {
+    "name": "spellSaveHit77",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 264
+  },
+  {
+    "name": "spellCastingTime77",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 264
+  },
+  {
+    "name": "spellRange77",
+    "value": "Self",
+    "page": 7,
+    "x": 277.5,
+    "y": 264
+  },
+  {
+    "name": "spellComponents77",
+    "value": "V",
+    "page": 7,
+    "x": 320.1,
+    "y": 264
+  },
+  {
+    "name": "spellDuration77",
+    "value": "Concentration, up to 1 minute",
+    "page": 7,
+    "x": 342.7,
+    "y": 264
+  },
+  {
+    "name": "spellPage77",
+    "value": "PHB-2024 248",
+    "page": 7,
+    "x": 388.8,
+    "y": 264
+  },
+  {
+    "name": "spellNotes77",
+    "value": "D: 1m, V",
+    "page": 7,
+    "x": 422.6,
+    "y": 264.1
+  },
+  {
+    "name": "spellPrepared78",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 252.2
+  },
+  {
+    "name": "spellName78",
+    "value": "Rope Trick",
+    "page": 7,
+    "x": 41.9,
+    "y": 252.2
+  },
+  {
+    "name": "spellSource78",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 252.2
+  },
+  {
+    "name": "spellSaveHit78",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 252.2
+  },
+  {
+    "name": "spellCastingTime78",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 252.2
+  },
+  {
+    "name": "spellRange78",
+    "value": "Touch",
+    "page": 7,
+    "x": 277.5,
+    "y": 252.2
+  },
+  {
+    "name": "spellComponents78",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 252.2
+  },
+  {
+    "name": "spellDuration78",
+    "value": "1 hour",
+    "page": 7,
+    "x": 342.7,
+    "y": 252.2
+  },
+  {
+    "name": "spellPage78",
+    "value": "PHB-2024 312",
+    "page": 7,
+    "x": 388.8,
+    "y": 252.2
+  },
+  {
+    "name": "spellNotes78",
+    "value": "D: 1h, V/S/M",
+    "page": 7,
+    "x": 422.6,
+    "y": 252.3
+  },
+  {
+    "name": "spellPrepared79",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 240.5
+  },
+  {
+    "name": "spellName79",
+    "value": "Levitate",
+    "page": 7,
+    "x": 41.9,
+    "y": 240.5
+  },
+  {
+    "name": "spellSource79",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 240.5
+  },
+  {
+    "name": "spellSaveHit79",
+    "value": "CON 17",
+    "page": 7,
+    "x": 231.7,
+    "y": 240.5
+  },
+  {
+    "name": "spellCastingTime79",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 240.5
+  },
+  {
+    "name": "spellRange79",
+    "value": "60 ft.",
+    "page": 7,
+    "x": 277.5,
+    "y": 240.5
+  },
+  {
+    "name": "spellComponents79",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 240.5
+  },
+  {
+    "name": "spellDuration79",
+    "value": "Concentration, up to 10 minutes",
+    "page": 7,
+    "x": 342.7,
+    "y": 240.5
+  },
+  {
+    "name": "spellPage79",
+    "value": "PHB-2024 291",
+    "page": 7,
+    "x": 388.8,
+    "y": 240.5
+  },
+  {
+    "name": "spellNotes79",
+    "value": "D: 10m, V/S/M",
+    "page": 7,
+    "x": 422.6,
+    "y": 240.6
+  },
+  {
+    "name": "spellPrepared80",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 228.7
+  },
+  {
+    "name": "spellName80",
+    "value": "See Invisibility",
+    "page": 7,
+    "x": 41.9,
+    "y": 228.7
+  },
+  {
+    "name": "spellSource80",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 228.7
+  },
+  {
+    "name": "spellSaveHit80",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 228.7
+  },
+  {
+    "name": "spellCastingTime80",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 228.7
+  },
+  {
+    "name": "spellRange80",
+    "value": "Self",
+    "page": 7,
+    "x": 277.5,
+    "y": 228.7
+  },
+  {
+    "name": "spellComponents80",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 228.7
+  },
+  {
+    "name": "spellDuration80",
+    "value": "1 hour",
+    "page": 7,
+    "x": 342.7,
+    "y": 228.7
+  },
+  {
+    "name": "spellPage80",
+    "value": "PHB-2024 314",
+    "page": 7,
+    "x": 388.8,
+    "y": 228.7
+  },
+  {
+    "name": "spellNotes80",
+    "value": "D: 1h, V/S/M",
+    "page": 7,
+    "x": 422.6,
+    "y": 228.8
+  },
+  {
+    "name": "spellPrepared81",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 217
+  },
+  {
+    "name": "spellName81",
+    "value": "Lesser Restoration",
+    "page": 7,
+    "x": 41.9,
+    "y": 217
+  },
+  {
+    "name": "spellSource81",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 217
+  },
+  {
+    "name": "spellSaveHit81",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 217
+  },
+  {
+    "name": "spellCastingTime81",
+    "value": "1BA",
+    "page": 7,
+    "x": 257.7,
+    "y": 217
+  },
+  {
+    "name": "spellRange81",
+    "value": "Touch",
+    "page": 7,
+    "x": 277.5,
+    "y": 217
+  },
+  {
+    "name": "spellComponents81",
+    "value": "V,S",
+    "page": 7,
+    "x": 320.1,
+    "y": 217
+  },
+  {
+    "name": "spellDuration81",
+    "value": "Instantaneous",
+    "page": 7,
+    "x": 342.7,
+    "y": 217
+  },
+  {
+    "name": "spellPage81",
+    "value": "PHB-2024 291",
+    "page": 7,
+    "x": 388.8,
+    "y": 217
+  },
+  {
+    "name": "spellNotes81",
+    "value": "V/S",
+    "page": 7,
+    "x": 422.6,
+    "y": 217
+  },
+  {
+    "name": "spellPrepared82",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 205.2
+  },
+  {
+    "name": "spellName82",
+    "value": "Magic Mouth [R]",
+    "page": 7,
+    "x": 41.9,
+    "y": 205.2
+  },
+  {
+    "name": "spellSource82",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 205.2
+  },
+  {
+    "name": "spellSaveHit82",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 205.2
+  },
+  {
+    "name": "spellCastingTime82",
+    "value": "11m",
+    "page": 7,
+    "x": 257.7,
+    "y": 205.2
+  },
+  {
+    "name": "spellRange82",
+    "value": "30 ft.",
+    "page": 7,
+    "x": 277.5,
+    "y": 205.2
+  },
+  {
+    "name": "spellComponents82",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 205.2
+  },
+  {
+    "name": "spellDuration82",
+    "value": "Until dispelled",
+    "page": 7,
+    "x": 342.7,
+    "y": 205.2
+  },
+  {
+    "name": "spellPage82",
+    "value": "PHB-2024 295",
+    "page": 7,
+    "x": 388.8,
+    "y": 205.2
+  },
+  {
+    "name": "spellNotes82",
+    "value": "D: Until Dispelled, V/S/M",
+    "page": 7,
+    "x": 422.6,
+    "y": 205.3
+  },
+  {
+    "name": "spellPrepared83",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 193.5
+  },
+  {
+    "name": "spellName83",
+    "value": "Magic Weapon",
+    "page": 7,
+    "x": 41.9,
+    "y": 193.5
+  },
+  {
+    "name": "spellSource83",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 193.5
+  },
+  {
+    "name": "spellSaveHit83",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 193.5
+  },
+  {
+    "name": "spellCastingTime83",
+    "value": "1BA",
+    "page": 7,
+    "x": 257.7,
+    "y": 193.5
+  },
+  {
+    "name": "spellRange83",
+    "value": "Touch",
+    "page": 7,
+    "x": 277.5,
+    "y": 193.5
+  },
+  {
+    "name": "spellComponents83",
+    "value": "V,S",
+    "page": 7,
+    "x": 320.1,
+    "y": 193.5
+  },
+  {
+    "name": "spellDuration83",
+    "value": "1 hour",
+    "page": 7,
+    "x": 342.7,
+    "y": 193.5
+  },
+  {
+    "name": "spellPage83",
+    "value": "PHB-2024 295",
+    "page": 7,
+    "x": 388.8,
+    "y": 193.5
+  },
+  {
+    "name": "spellNotes83",
+    "value": "D: 1h, V/S",
+    "page": 7,
+    "x": 422.6,
+    "y": 193.5
+  },
+  {
+    "name": "spellPrepared84",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 181.7
+  },
+  {
+    "name": "spellName84",
+    "value": "Continual Flame",
+    "page": 7,
+    "x": 41.9,
+    "y": 181.7
+  },
+  {
+    "name": "spellSource84",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 181.7
+  },
+  {
+    "name": "spellSaveHit84",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 181.7
+  },
+  {
+    "name": "spellCastingTime84",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 181.7
+  },
+  {
+    "name": "spellRange84",
+    "value": "Touch",
+    "page": 7,
+    "x": 277.5,
+    "y": 181.7
+  },
+  {
+    "name": "spellComponents84",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 181.7
+  },
+  {
+    "name": "spellDuration84",
+    "value": "Until dispelled",
+    "page": 7,
+    "x": 342.7,
+    "y": 181.7
+  },
+  {
+    "name": "spellPage84",
+    "value": "PHB-2024 256",
+    "page": 7,
+    "x": 388.8,
+    "y": 181.7
+  },
+  {
+    "name": "spellNotes84",
+    "value": "D: Until Dispelled, V/S/M",
+    "page": 7,
+    "x": 422.6,
+    "y": 181.8
+  },
+  {
+    "name": "spellPrepared85",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 170
+  },
+  {
+    "name": "spellName85",
+    "value": "Spider Climb",
+    "page": 7,
+    "x": 41.9,
+    "y": 170
+  },
+  {
+    "name": "spellSource85",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 170
+  },
+  {
+    "name": "spellSaveHit85",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 170
+  },
+  {
+    "name": "spellCastingTime85",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 170
+  },
+  {
+    "name": "spellRange85",
+    "value": "Touch",
+    "page": 7,
+    "x": 277.5,
+    "y": 170
+  },
+  {
+    "name": "spellComponents85",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 170
+  },
+  {
+    "name": "spellDuration85",
+    "value": "Concentration, up to 1 hour",
+    "page": 7,
+    "x": 342.7,
+    "y": 170
+  },
+  {
+    "name": "spellPage85",
+    "value": "PHB-2024 318",
+    "page": 7,
+    "x": 388.8,
+    "y": 170
+  },
+  {
+    "name": "spellNotes85",
+    "value": "D: 1h, V/S/M",
+    "page": 7,
+    "x": 422.6,
+    "y": 170
+  },
+  {
+    "name": "spellPrepared86",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 158.2
+  },
+  {
+    "name": "spellName86",
+    "value": "Darkvision",
+    "page": 7,
+    "x": 41.9,
+    "y": 158.2
+  },
+  {
+    "name": "spellSource86",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 158.2
+  },
+  {
+    "name": "spellSaveHit86",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 158.2
+  },
+  {
+    "name": "spellCastingTime86",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 158.2
+  },
+  {
+    "name": "spellRange86",
+    "value": "Touch",
+    "page": 7,
+    "x": 277.5,
+    "y": 158.2
+  },
+  {
+    "name": "spellComponents86",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 158.2
+  },
+  {
+    "name": "spellDuration86",
+    "value": "8 hours",
+    "page": 7,
+    "x": 342.7,
+    "y": 158.2
+  },
+  {
+    "name": "spellPage86",
+    "value": "PHB-2024 260",
+    "page": 7,
+    "x": 388.8,
+    "y": 158.2
+  },
+  {
+    "name": "spellNotes86",
+    "value": "D: 8h, V/S/M",
+    "page": 7,
+    "x": 422.6,
+    "y": 158.3
+  },
+  {
+    "name": "spellPrepared87",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 146.5
+  },
+  {
+    "name": "spellName87",
+    "value": "Invisibility",
+    "page": 7,
+    "x": 41.9,
+    "y": 146.5
+  },
+  {
+    "name": "spellSource87",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 146.5
+  },
+  {
+    "name": "spellSaveHit87",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 146.5
+  },
+  {
+    "name": "spellCastingTime87",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 146.5
+  },
+  {
+    "name": "spellRange87",
+    "value": "Touch",
+    "page": 7,
+    "x": 277.5,
+    "y": 146.5
+  },
+  {
+    "name": "spellComponents87",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 146.5
+  },
+  {
+    "name": "spellDuration87",
+    "value": "Concentration, up to 1 hour",
+    "page": 7,
+    "x": 342.7,
+    "y": 146.5
+  },
+  {
+    "name": "spellPage87",
+    "value": "PHB-2024 289",
+    "page": 7,
+    "x": 388.8,
+    "y": 146.5
+  },
+  {
+    "name": "spellNotes87",
+    "value": "D: 1h, V/S/M",
+    "page": 7,
+    "x": 422.6,
+    "y": 146.5
+  },
+  {
+    "name": "spellPrepared88",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 134.7
+  },
+  {
+    "name": "spellName88",
+    "value": "Heat Metal",
+    "page": 7,
+    "x": 41.9,
+    "y": 134.7
+  },
+  {
+    "name": "spellSource88",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 134.7
+  },
+  {
+    "name": "spellSaveHit88",
+    "value": "CON 17",
+    "page": 7,
+    "x": 231.7,
+    "y": 134.7
+  },
+  {
+    "name": "spellCastingTime88",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 134.7
+  },
+  {
+    "name": "spellRange88",
+    "value": "60 ft.",
+    "page": 7,
+    "x": 277.5,
+    "y": 134.7
+  },
+  {
+    "name": "spellComponents88",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 134.7
+  },
+  {
+    "name": "spellDuration88",
+    "value": "Concentration, up to 1 minute",
+    "page": 7,
+    "x": 342.7,
+    "y": 134.7
+  },
+  {
+    "name": "spellPage88",
+    "value": "PHB-2024 284",
+    "page": 7,
+    "x": 388.8,
+    "y": 134.7
+  },
+  {
+    "name": "spellNotes88",
+    "value": "D: 1m, V/S/M",
+    "page": 7,
+    "x": 422.6,
+    "y": 134.8
+  },
+  {
+    "name": "spellPrepared89",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 123
+  },
+  {
+    "name": "spellName89",
+    "value": "Enhance Ability",
+    "page": 7,
+    "x": 41.9,
+    "y": 123
+  },
+  {
+    "name": "spellSource89",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 123
+  },
+  {
+    "name": "spellSaveHit89",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 123
+  },
+  {
+    "name": "spellCastingTime89",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 123
+  },
+  {
+    "name": "spellRange89",
+    "value": "Touch",
+    "page": 7,
+    "x": 277.5,
+    "y": 123
+  },
+  {
+    "name": "spellComponents89",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 123
+  },
+  {
+    "name": "spellDuration89",
+    "value": "Concentration, up to 1 hour",
+    "page": 7,
+    "x": 342.7,
+    "y": 123
+  },
+  {
+    "name": "spellPage89",
+    "value": "PHB-2024 268",
+    "page": 7,
+    "x": 388.8,
+    "y": 123
+  },
+  {
+    "name": "spellNotes89",
+    "value": "D: 1h, V/S/M",
+    "page": 7,
+    "x": 422.6,
+    "y": 123
+  },
+  {
+    "name": "spellPrepared90",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 111.2
+  },
+  {
+    "name": "spellName90",
+    "value": "Enlarge/Reduce",
+    "page": 7,
+    "x": 41.9,
+    "y": 111.2
+  },
+  {
+    "name": "spellSource90",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 111.2
+  },
+  {
+    "name": "spellSaveHit90",
+    "value": "CON 17",
+    "page": 7,
+    "x": 231.7,
+    "y": 111.2
+  },
+  {
+    "name": "spellCastingTime90",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 111.2
+  },
+  {
+    "name": "spellRange90",
+    "value": "30 ft.",
+    "page": 7,
+    "x": 277.5,
+    "y": 111.2
+  },
+  {
+    "name": "spellComponents90",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 111.2
+  },
+  {
+    "name": "spellDuration90",
+    "value": "Concentration, up to 1 minute",
+    "page": 7,
+    "x": 342.7,
+    "y": 111.2
+  },
+  {
+    "name": "spellPage90",
+    "value": "PHB-2024 268",
+    "page": 7,
+    "x": 388.8,
+    "y": 111.2
+  },
+  {
+    "name": "spellNotes90",
+    "value": "D: 1m, V/S/M",
+    "page": 7,
+    "x": 422.6,
+    "y": 111.3
+  },
+  {
+    "name": "spellPrepared91",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 99.5
+  },
+  {
+    "name": "spellName91",
+    "value": "Web",
+    "page": 7,
+    "x": 41.9,
+    "y": 99.5
+  },
+  {
+    "name": "spellSource91",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 99.4
+  },
+  {
+    "name": "spellSaveHit91",
+    "value": "DEX 17",
+    "page": 7,
+    "x": 231.7,
+    "y": 99.5
+  },
+  {
+    "name": "spellCastingTime91",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 99.5
+  },
+  {
+    "name": "spellRange91",
+    "value": "60 ft./20 ft. Cube",
+    "page": 7,
+    "x": 277.5,
+    "y": 99.5
+  },
+  {
+    "name": "spellComponents91",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 99.5
+  },
+  {
+    "name": "spellDuration91",
+    "value": "Concentration, up to 1 hour",
+    "page": 7,
+    "x": 342.7,
+    "y": 99.5
+  },
+  {
+    "name": "spellPage91",
+    "value": "PHB-2024 340",
+    "page": 7,
+    "x": 388.8,
+    "y": 99.5
+  },
+  {
+    "name": "spellNotes91",
+    "value": "D: 1h, 20 ft. Cube, V/S/M",
+    "page": 7,
+    "x": 422.6,
+    "y": 99.5
+  },
+  {
+    "name": "spellPrepared92",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 87.7
+  },
+  {
+    "name": "spellName92",
+    "value": "Tortoise Shell",
+    "page": 7,
+    "x": 41.9,
+    "y": 87.7
+  },
+  {
+    "name": "spellSource92",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 87.6
+  },
+  {
+    "name": "spellSaveHit92",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 87.7
+  },
+  {
+    "name": "spellCastingTime92",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 87.7
+  },
+  {
+    "name": "spellRange92",
+    "value": "Touch",
+    "page": 7,
+    "x": 277.5,
+    "y": 87.7
+  },
+  {
+    "name": "spellComponents92",
+    "value": "V,S",
+    "page": 7,
+    "x": 320.1,
+    "y": 87.7
+  },
+  {
+    "name": "spellDuration92",
+    "value": "Concentration, up to 1 minute",
+    "page": 7,
+    "x": 342.7,
+    "y": 87.7
+  },
+  {
+    "name": "spellPage92",
+    "value": "DDBD",
+    "page": 7,
+    "x": 388.8,
+    "y": 87.7
+  },
+  {
+    "name": "spellNotes92",
+    "value": "D: 1m, V/S",
+    "page": 7,
+    "x": 422.6,
+    "y": 87.8
+  },
+  {
+    "name": "spellPrepared93",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 75.9
+  },
+  {
+    "name": "spellName93",
+    "value": "Conjure Tools",
+    "page": 7,
+    "x": 41.9,
+    "y": 75.9
+  },
+  {
+    "name": "spellSource93",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 75.9
+  },
+  {
+    "name": "spellSaveHit93",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 75.9
+  },
+  {
+    "name": "spellCastingTime93",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 75.9
+  },
+  {
+    "name": "spellRange93",
+    "value": "30 ft.",
+    "page": 7,
+    "x": 277.5,
+    "y": 75.9
+  },
+  {
+    "name": "spellComponents93",
+    "value": "V,S",
+    "page": 7,
+    "x": 320.1,
+    "y": 75.9
+  },
+  {
+    "name": "spellDuration93",
+    "value": "8 hours",
+    "page": 7,
+    "x": 342.7,
+    "y": 75.9
+  },
+  {
+    "name": "spellPage93",
+    "value": "DDBD",
+    "page": 7,
+    "x": 388.8,
+    "y": 75.9
+  },
+  {
+    "name": "spellNotes93",
+    "value": "D: 8h, V/S",
+    "page": 7,
+    "x": 422.6,
+    "y": 76
+  },
+  {
+    "name": "spellPrepared94",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 64.2
+  },
+  {
+    "name": "spellName94",
+    "value": "Misty Step",
+    "page": 7,
+    "x": 41.9,
+    "y": 64.2
+  },
+  {
+    "name": "spellSource94",
+    "value": "Fey Touched",
+    "page": 7,
+    "x": 149,
+    "y": 64.2
+  },
+  {
+    "name": "spellSaveHit94",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 64.2
+  },
+  {
+    "name": "spellCastingTime94",
+    "value": "1BA",
+    "page": 7,
+    "x": 257.7,
+    "y": 64.2
+  },
+  {
+    "name": "spellRange94",
+    "value": "Self",
+    "page": 7,
+    "x": 277.5,
+    "y": 64.2
+  },
+  {
+    "name": "spellComponents94",
+    "value": "V",
+    "page": 7,
+    "x": 320.1,
+    "y": 64.2
+  },
+  {
+    "name": "spellDuration94",
+    "value": "Instantaneous",
+    "page": 7,
+    "x": 342.7,
+    "y": 64.2
+  },
+  {
+    "name": "spellPage94",
+    "value": "PHB 260",
+    "page": 7,
+    "x": 388.8,
+    "y": 64.2
+  },
+  {
+    "name": "spellNotes94",
+    "value": "1/LR, V",
+    "page": 7,
+    "x": 422.6,
+    "y": 64.3
+  },
+  {
+    "name": "spellCastingAbility0",
+    "value": "INT / INT",
+    "page": 8,
+    "x": 283.8,
+    "y": 735.8
+  },
+  {
+    "name": "spellSaveDC0",
+    "value": "17 / 16",
+    "page": 8,
+    "x": 384.5,
+    "y": 735.8
+  },
+  {
+    "name": "spellAtkBonus0",
+    "value": "+9 / +8",
+    "page": 8,
+    "x": 488.3,
+    "y": 735.8
+  },
+  {
+    "name": "spellCastingClass0",
+    "value": "Artificer / Wizard",
+    "page": 8,
+    "x": 47.5,
+    "y": 726.8
+  }
+]

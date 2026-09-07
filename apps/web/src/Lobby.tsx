@@ -183,10 +183,37 @@ function CharacterPicker({
     mutationFn: (pregen: ImportCharacterRequest) => api.importCharacter(campaignId, pregen),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['characters', campaignId] }),
   });
+  /**
+   * The same import from a form-fillable sheet PDF (M4.7). `ignored` is kept and
+   * shown: a wizard whose spells came across but whose features did not should
+   * find that out here, not mid-session.
+   */
+  const importPdf = useMutation({
+    mutationFn: ({ file, confirmLevel }: { file: File; confirmLevel?: number }) =>
+      api.importCharacterPdf(campaignId, file, confirmLevel),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['characters', campaignId] }),
+  });
+  const removeCharacter = useMutation({
+    mutationFn: (characterId: string) => api.deleteCharacter(campaignId, characterId),
+    onSuccess: () => {
+      onChange('');
+      return queryClient.invalidateQueries({ queryKey: ['characters', campaignId] });
+    },
+  });
+  /**
+   * The file is kept only so the override can resend it: the level check refuses
+   * before anything is written, so "import anyway" has to upload again.
+   */
+  const [pending, setPending] = useState<File | null>(null);
+  const mismatch =
+    importPdf.error instanceof ApiError && importPdf.error.code === 'LEVEL_MISMATCH'
+      ? (importPdf.error.body?.parsedLevel as number | undefined)
+      : undefined;
 
   const mine = (characters.data ?? []).filter((c) => c.ownerUserId === user.id);
   const selectId = `character-${campaignId}`;
   const pregenId = `pregen-${campaignId}`;
+  const pdfId = `sheet-pdf-${campaignId}`;
 
   return (
     <>
@@ -205,6 +232,23 @@ function CharacterPicker({
               </option>
             ))}
           </select>
+          <button
+            type="button"
+            disabled={!value || removeCharacter.isPending}
+            onClick={() => {
+              const chosen = mine.find((c) => c.id === value);
+              if (chosen && confirm(`Delete ${chosen.name}? This cannot be undone.`)) {
+                removeCharacter.mutate(chosen.id);
+              }
+            }}
+          >
+            Delete
+          </button>
+          {removeCharacter.error && (
+            <span role="alert" className="error">
+              {describeApiError(removeCharacter.error)}
+            </span>
+          )}
         </>
       )}
 
@@ -235,6 +279,41 @@ function CharacterPicker({
       {importCharacter.error && (
         <span role="alert" className="error">
           {describeApiError(importCharacter.error)}
+        </span>
+      )}
+
+      <label htmlFor={pdfId}>{importPdf.isPending ? 'Reading sheet…' : 'Import sheet PDF'}</label>
+      <input
+        id={pdfId}
+        type="file"
+        accept="application/pdf,.pdf"
+        disabled={importPdf.isPending}
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          // Reset first, so re-picking the same file after a failure still fires.
+          event.target.value = '';
+          setPending(file ?? null);
+          if (file) importPdf.mutate({ file });
+        }}
+      />
+      {importPdf.error && (
+        <span role="alert" className="error">
+          {describeApiError(importPdf.error)}
+        </span>
+      )}
+      {mismatch !== undefined && pending && (
+        <button
+          type="button"
+          disabled={importPdf.isPending}
+          onClick={() => importPdf.mutate({ file: pending, confirmLevel: mismatch })}
+        >
+          Import anyway as level {mismatch}
+        </button>
+      )}
+      {importPdf.data && importPdf.data.ignored.length > 0 && (
+        <span role="status" className="role">
+          Imported {importPdf.data.character.name}. Not carried across:{' '}
+          {importPdf.data.ignored.join('; ')}.
         </span>
       )}
     </>

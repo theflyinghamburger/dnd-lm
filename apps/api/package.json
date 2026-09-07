@@ -32,6 +32,7 @@
     "rxjs": "^7.8.2",
     "socket.io": "^4.8.3",
     "undici": "^8.10.1",
+    "unpdf": "^1.8.1",
     "zod": "^4.5.4"
   },
   "devDependencies": {

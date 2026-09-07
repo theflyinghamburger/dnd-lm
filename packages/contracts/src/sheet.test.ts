@@ -1,10 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { CharacterSheet, deriveSheet } from './sheet';
+import { CharacterSheet, deriveSheet, parseStoredSheet } from './sheet';
 import { ABILITIES, SKILL_IDS, abilityModifier, proficiencyBonus } from './srd';
 
 const base = {
-  className: 'Fighter',
-  level: 5,
+  classes: [{ name: 'Fighter', level: 5 }],
   abilityScores: { str: 16, dex: 14, con: 15, int: 10, wis: 12, cha: 8 },
   skillProficiencies: ['athletics', 'perception'],
   saveProficiencies: ['str', 'con'],
@@ -106,7 +105,26 @@ describe('CharacterSheet import validation (D-3)', () => {
       CharacterSheet.safeParse({ ...base, abilityScores: { ...base.abilityScores, str: 31 } })
         .success,
     ).toBe(false);
-    expect(CharacterSheet.safeParse({ ...base, level: 21 }).success).toBe(false);
+    expect(
+      CharacterSheet.safeParse({ ...base, classes: [{ name: 'Fighter', level: 21 }] }).success,
+    ).toBe(false);
+  });
+
+  /** The cap is on the character, not on any one class (M4.7 multiclass). */
+  it('rejects a multiclass whose levels sum past 20', () => {
+    expect(
+      CharacterSheet.safeParse({
+        ...base,
+        classes: [
+          { name: 'Fighter', level: 20 },
+          { name: 'Wizard', level: 1 },
+        ],
+      }).success,
+    ).toBe(false);
+  });
+
+  it('rejects a sheet with no class at all', () => {
+    expect(CharacterSheet.safeParse({ ...base, classes: [] }).success).toBe(false);
   });
 
   it('fills the optional inputs so a minimal sheet still derives', () => {
@@ -114,5 +132,39 @@ describe('CharacterSheet import validation (D-3)', () => {
     expect(parsed.speed).toBe(30);
     expect(parsed.inventory).toEqual([]);
     expect(parsed.currency).toEqual({ cp: 0, sp: 0, gp: 0, pp: 0 });
+  });
+});
+
+/** M4.7: every read path goes through this instead of casting the jsonb column. */
+describe('parseStoredSheet', () => {
+  const legacy = (() => {
+    const { classes, ...rest } = CharacterSheet.parse(base);
+    void classes;
+    return { ...rest, className: 'Fighter', level: 5 };
+  })();
+
+  it('reshapes a sheet stored before classes[] existed', () => {
+    const parsed = parseStoredSheet(legacy);
+    expect(parsed.classes).toEqual([{ name: 'Fighter', level: 5 }]);
+    expect(deriveSheet(parsed).level).toBe(5);
+    expect(parsed).not.toHaveProperty('className');
+  });
+
+  it('passes a current sheet through unchanged', () => {
+    expect(parseStoredSheet(CharacterSheet.parse(base)).classes).toEqual([
+      { name: 'Fighter', level: 5 },
+    ]);
+  });
+
+  /** Naming the bad field is the whole reason this parses rather than casts. */
+  it('throws naming the field when the stored row is structurally wrong', () => {
+    expect(() => parseStoredSheet({ ...legacy, abilityScores: { str: 'nope' } })).toThrow(
+      /abilityScores/,
+    );
+  });
+
+  it('refuses a value that is not an object at all', () => {
+    expect(() => parseStoredSheet(null)).toThrow();
+    expect(() => parseStoredSheet('a sheet')).toThrow();
   });
 });
