@@ -80,21 +80,53 @@ function reject(code: string, message: string): never {
   throw new UnprocessableEntityException({ code, message });
 }
 
+/** Told what was shortened, so the caps in this file never cut in silence (AC-6). */
+export type OnTruncate = (label: string, max: number, original: string) => void;
+
 /** Trimmed and capped, or absent — an empty or placeholder field is not a value. */
-function short(value: string | undefined, max: number): string | undefined {
+function short(
+  value: string | undefined,
+  max: number,
+  label?: string,
+  onTruncate?: OnTruncate,
+): string | undefined {
   // Runs of whitespace collapse to one space: these fields are single-line by
   // nature, and a newline would let a value carry prompt-shaped text into the
   // state layer, which is not wrapped in the untrusted-data markers.
   const trimmed = value?.replace(/\s+/g, ' ').trim();
-  return trimmed && trimmed !== '--' ? trimmed.slice(0, max) : undefined;
+  if (!trimmed || trimmed === '--') return undefined;
+  if (trimmed.length > max && label) onTruncate?.(label, max, trimmed);
+  return trimmed.slice(0, max);
 }
 
 /** Same, but for a value that must exist. */
-function shortOr(value: string | undefined, max: number, fallback: string): string {
-  return short(value, max) ?? fallback;
+function shortOr(
+  value: string | undefined,
+  max: number,
+  fallback: string,
+  label?: string,
+  onTruncate?: OnTruncate,
+): string {
+  return short(value, max, label, onTruncate) ?? fallback;
 }
 
 const sign = (n: number): string => `${n >= 0 ? '+' : ''}${n}`;
+
+/**
+ * Whether a proficiency box is ticked. Saves mark with "•" and skills with "P",
+ * so any affirmative value counts — but an exporter that writes unchecked boxes
+ * as `/Off` rather than leaving them empty would otherwise mark *every* save and
+ * skill proficient, silently. This sheet demonstrably writes "Off" for its death
+ * saves, so the sentinel is not hypothetical.
+ *
+ * Denying the known off-values rather than allowing only "•" and "P": a marker
+ * style we have not seen should read as proficient-and-slightly-odd, not as a
+ * proficiency quietly lost.
+ */
+const OFF_VALUES = new Set(['off', 'false', 'no', 'n', '0', '']);
+function isMarked(value: string | undefined): boolean {
+  return value !== undefined && !OFF_VALUES.has(value.trim().toLowerCase());
+}
 
 /** Leading signed integer: `"+3"`, `"-2"`, `"30 ft. (Walking)"`, `"20"`. `"--"` is absent. */
 function leadingInt(value: string | undefined): number | undefined {
@@ -108,7 +140,7 @@ function leadingInt(value: string | undefined): number | undefined {
  * of the name, which is why the level is matched at the end rather than the name
  * at the start.
  */
-export function parseClassLine(line: string): CharacterClass[] {
+export function parseClassLine(line: string, onTruncate?: OnTruncate): CharacterClass[] {
   const classes: CharacterClass[] = [];
   for (const part of line.split('/')) {
     const trimmed = part.trim();
@@ -122,7 +154,7 @@ export function parseClassLine(line: string): CharacterClass[] {
     }
     classes.push({
       // 40 is the schema's cap and real subclass names reach past it.
-      name: (match[1] as string).replace(/\s+/g, ' ').trim().slice(0, 40),
+      name: shortOr(match[1] as string, 40, '', 'class name', onTruncate),
       level: Number.parseInt(match[2] as string, 10),
     });
   }
@@ -141,7 +173,10 @@ export function parseClassLine(line: string): CharacterClass[] {
  * splits them. A spell above the first banner keeps level 0 rather than failing
  * the import — a cantrip mislabelled is better than a sheet refused.
  */
-function collectSpells(fields: PdfFormField[]): ImportCharacterRequest['sheet']['spells'] {
+function collectSpells(
+  fields: PdfFormField[],
+  onTruncate?: OnTruncate,
+): ImportCharacterRequest['sheet']['spells'] {
   const positioned = fields.filter(
     (field) => /^spellName\d+$/.test(field.name) || /^spellHeader\d+$/.test(field.name),
   );
@@ -171,9 +206,10 @@ function collectSpells(fields: PdfFormField[]): ImportCharacterRequest['sheet'][
     const attributes = index ? byIndex.get(index) : undefined;
     // Each cap is the schema's own, applied here so an over-long field is
     // trimmed rather than thrown at the uploader as a validation failure.
-    const optional = (key: string, max: number) => short(attributes?.get(key), max);
+    const optional = (key: string, max: number) =>
+      short(attributes?.get(key), max, `spell ${key.toLowerCase()}`, onTruncate);
     spells.push({
-      name: shortOr(field.value, 80, field.value.slice(0, 80)),
+      name: shortOr(field.value, 80, '', 'spell name', onTruncate),
       level,
       // "P" is prepared; "O" is known but unprepared, which every cantrip is.
       prepared: attributes?.get('Prepared') === 'P',
@@ -197,6 +233,12 @@ export function mapWotcCharacterSheet(
   for (const field of fields) if (!values.has(field.name)) values.set(field.name, field.value);
   const get = (name: string): string | undefined => values.get(name);
 
+  // Every cap in this file reports through here, so a shortened value reaches the
+  // uploader as a named report instead of a quietly mangled one (AC-6).
+  const shortened: string[] = [];
+  const onTruncate: OnTruncate = (label, max, original) =>
+    shortened.push(`${label} shortened to ${max} characters: "${original.slice(0, 60)}"`);
+
   const name = get(IDENTIFYING_FIELD);
   if (!name) {
     reject(
@@ -205,7 +247,7 @@ export function mapWotcCharacterSheet(
     );
   }
 
-  const classes = parseClassLine(get('CLASS LEVEL') ?? '');
+  const classes = parseClassLine(get('CLASS LEVEL') ?? '', onTruncate);
 
   const abilityScores = {} as Record<Ability, number>;
   for (const ability of ABILITIES) {
@@ -216,10 +258,13 @@ export function mapWotcCharacterSheet(
     abilityScores[ability] = score;
   }
 
-  // A marker of any kind means proficient: saves use "•" and skills use "P".
+  // Saves mark with "•" and skills with "P" — but an unticked box can carry an
+  // off-sentinel rather than being absent, so `isMarked` decides, not truthiness.
   const capitalised = (ability: Ability) => ability.charAt(0).toUpperCase() + ability.slice(1);
-  const saveProficiencies = ABILITIES.filter((ability) => get(`${capitalised(ability)}Prof`));
-  const skillProficiencies = SKILL_FIELDS.filter(([, stem]) => get(`${stem}Prof`)).map(
+  const saveProficiencies = ABILITIES.filter((ability) =>
+    isMarked(get(`${capitalised(ability)}Prof`)),
+  );
+  const skillProficiencies = SKILL_FIELDS.filter(([, stem]) => isMarked(get(`${stem}Prof`))).map(
     ([skill]) => skill,
   );
 
@@ -230,7 +275,7 @@ export function mapWotcCharacterSheet(
     const itemName = get(`Eq Name${index}`);
     if (itemName === undefined) continue;
     inventory.push({
-      name: shortOr(itemName, 120, itemName.slice(0, 120)),
+      name: shortOr(itemName, 120, '', 'item name', onTruncate),
       quantity: Math.min(Math.max(leadingInt(get(`Eq Qty${index}`)) ?? 1, 1), 9999),
       // The sheet has no equipped column; assuming "yes" would arm the character.
       equipped: false,
@@ -243,10 +288,10 @@ export function mapWotcCharacterSheet(
     const attackName = get(slot === 1 ? 'Wpn Name' : `Wpn Name ${slot}`);
     if (!attackName) continue;
     attacks.push({
-      name: shortOr(attackName, 60, attackName.slice(0, 60)),
+      name: shortOr(attackName, 60, '', 'attack name', onTruncate),
       attackBonus: leadingInt(get(`Wpn${slot} AtkBonus`)),
-      damage: short(get(`Wpn${slot} Damage`), 60),
-      notes: short(get(`Wpn Notes ${slot}`), 160),
+      damage: short(get(`Wpn${slot} Damage`), 60, 'attack damage', onTruncate),
+      notes: short(get(`Wpn Notes ${slot}`), 160, 'attack notes', onTruncate),
     });
   }
 
@@ -255,7 +300,7 @@ export function mapWotcCharacterSheet(
   const armorClass = leadingInt(get('AC'));
   if (armorClass === undefined) reject('MISSING_AC', 'The sheet has no armour class.');
 
-  const allSpells = collectSpells(fields);
+  const allSpells = collectSpells(fields, onTruncate);
   const overflow: string[] = [];
   const capped = <T>(list: T[], max: number, label: string): T[] => {
     if (list.length > max)
@@ -264,13 +309,13 @@ export function mapWotcCharacterSheet(
   };
 
   const draft = {
-    name: shortOr(name, 80, name.slice(0, 80)),
+    name: shortOr(name, 80, '', 'character name', onTruncate),
     sheet: {
       classes,
-      race: short(get('RACE'), 40),
-      background: short(get('BACKGROUND'), 60),
-      hitDice: short(get('Total'), 40),
-      senses: short(get('AdditionalSenses'), 80),
+      race: short(get('RACE'), 40, 'race', onTruncate),
+      background: short(get('BACKGROUND'), 60, 'background', onTruncate),
+      hitDice: short(get('Total'), 40, 'hit dice', onTruncate),
+      senses: short(get('AdditionalSenses'), 80, 'senses', onTruncate),
       abilityScores,
       skillProficiencies,
       saveProficiencies,
@@ -321,7 +366,7 @@ export function mapWotcCharacterSheet(
     });
   }
 
-  return { request, ignored: [...overflow, ...describeIgnored(values, request)] };
+  return { request, ignored: [...shortened, ...overflow, ...describeIgnored(values, request)] };
 }
 
 /** Everything the schema has no room for, named so the player can see the gap. */

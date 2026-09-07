@@ -172,6 +172,58 @@ describe('mapWotcCharacterSheet', () => {
   });
 });
 
+describe('mapWotcCharacterSheet caps and markers', () => {
+  /**
+   * The motivating case from the previous round: 42 characters against a cap of
+   * 40. Capping it made the value always "holdable", so the promised 422 never
+   * fired — and the subclass was silently mangled instead.
+   */
+  it('reports a class name it had to shorten instead of mangling it in silence', () => {
+    const long = 'Barbarian (Path of the Ancestral Guardian) 7';
+    const { request, ignored } = mapWotcCharacterSheet(replacing('CLASS LEVEL', long), 7);
+    expect(request.sheet.classes[0]?.name).toHaveLength(40);
+    expect(ignored.join(' | ')).toMatch(/class name shortened to 40 characters/);
+  });
+
+  it('reports a shortened item name', () => {
+    const long = `Reliquary ${'of the Seventh Dawn '.repeat(12)}`;
+    const { ignored } = mapWotcCharacterSheet(replacing('Eq Name0', long));
+    expect(ignored.join(' | ')).toMatch(/item name shortened to 120 characters/);
+  });
+
+  it('says nothing about shortening when nothing was shortened', () => {
+    expect(mapWotcCharacterSheet(FIELDS).ignored.join(' | ')).not.toMatch(/shortened/);
+  });
+
+  /**
+   * This sheet writes "Off" for unchecked death saves, so an exporter that did
+   * the same for proficiency boxes is not hypothetical — and "any non-empty
+   * value means proficient" would then mark every save and skill.
+   */
+  it('does not read an unchecked "Off" box as a proficiency', () => {
+    const withOff = FIELDS.concat(
+      ['Str', 'Dex', 'Wis', 'Cha'].map((ability) => ({
+        name: `${ability}Prof`,
+        value: 'Off',
+        page: 1,
+        x: 0,
+        y: 0,
+      })),
+      [{ name: 'ArcanaProf', value: 'Off', page: 1, x: 0, y: 0 }],
+    );
+    const { request } = mapWotcCharacterSheet(withOff);
+    // Unchanged from the real sheet: only the two that are genuinely ticked.
+    expect(request.sheet.saveProficiencies).toEqual(['con', 'int']);
+    expect(request.sheet.skillProficiencies).not.toContain('arcana');
+  });
+
+  it('still reads the markers this sheet actually uses', () => {
+    const { request } = mapWotcCharacterSheet(FIELDS);
+    expect(request.sheet.saveProficiencies).toEqual(['con', 'int']); // "•"
+    expect(request.sheet.skillProficiencies).toContain('perception'); // "P"
+  });
+});
+
 describe('mapWotcCharacterSheet refusals', () => {
   it('refuses a PDF that is not a character sheet', () => {
     expect(() => mapWotcCharacterSheet(without('CharacterName'))).toThrow(/no character-sheet/);
