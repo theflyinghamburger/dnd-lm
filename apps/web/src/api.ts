@@ -5,6 +5,7 @@ import type {
   CampaignTriggersResponse,
   CharacterSheet,
   DerivedSheet,
+  ImportCharacterRequest,
   InviteResponse,
   LoginRequest,
   PublicUser,
@@ -110,6 +111,10 @@ export const api = {
   createSession: (campaignId: string) =>
     post<SessionSnapshot>(`/campaigns/${campaignId}/sessions`, {}),
   characters: (campaignId: string) => call<CharacterView[]>(`/campaigns/${campaignId}/characters`),
+  /** A pregen sheet, posted whole (M4.2, D-3). The campaign is the route, never
+   *  the body — the body could otherwise name a campaign the guard did not check. */
+  importCharacter: (campaignId: string, body: ImportCharacterRequest) =>
+    post<CharacterView>(`/campaigns/${campaignId}/characters/import`, body),
   updateHp: (campaignId: string, characterId: string, body: UpdateHpRequest) =>
     patch<CharacterView>(`/campaigns/${campaignId}/characters/${characterId}/hp`, body),
 

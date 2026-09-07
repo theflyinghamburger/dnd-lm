@@ -174,6 +174,47 @@ describe.skipIf(!DATABASE_URL)('characters and dice', () => {
       const stranger = await signUp('stranger@example.com', 'Stranger');
       await importPregen(table, stranger, 'brann-ironfell.json').expect(403);
     });
+
+    /**
+     * #61's lobby chooser posts here on the importer's own cookie, and the
+     * lobby offers only characters whose `ownerUserId` is the viewer. Both
+     * halves of that are the server's answer, so both are pinned here.
+     */
+    it('owns the character to the importer, not the host (#61)', async () => {
+      const table = await stage();
+      const mine = await importPregen(table, table.player, 'aria-sunhollow.json').expect(201);
+      const theirs = await importPregen(table, table.host, 'brann-ironfell.json').expect(201);
+
+      // The id the lobby filters by, from the same place the lobby gets it.
+      const player = await api().get('/api/auth/me').set('Cookie', table.player).expect(200);
+      const playerId = player.body.id as string;
+
+      expect(mine.body.ownerUserId).toBe(playerId);
+      expect(theirs.body.ownerUserId).not.toBe(playerId);
+
+      const listed = await api()
+        .get(`/api/campaigns/${table.campaignId}/characters`)
+        .set('Cookie', table.player)
+        .expect(200);
+      const visible = listed.body as { id: string; ownerUserId: string }[];
+      // Both are listed; only one is the caller's, which is what the lobby offers.
+      expect(visible.map((c) => c.id).sort()).toEqual(
+        [mine.body.id as string, theirs.body.id as string].sort(),
+      );
+      expect(visible.filter((c) => c.ownerUserId === playerId).map((c) => c.id)).toEqual([
+        mine.body.id,
+      ]);
+    });
+
+    it('gives two characters for the same pregen imported twice (#61)', async () => {
+      const table = await stage();
+      const first = await importPregen(table, table.player, 'aria-sunhollow.json').expect(201);
+      const second = await importPregen(table, table.player, 'aria-sunhollow.json').expect(201);
+
+      expect(second.body.id).not.toBe(first.body.id);
+      expect(second.body.ownerUserId).toBe(first.body.ownerUserId);
+      expect(second.body.name).toBe(first.body.name);
+    });
   });
 
   describe('rolling (M4.4, M4.5, FR-301, FR-302)', () => {
