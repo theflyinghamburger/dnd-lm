@@ -106,8 +106,12 @@ AC-9  `pnpm test` green against live Postgres, typecheck / lint / format green.
 
 ## Verification
 
-Baseline before the change: 354 tests green against live Postgres. After: 359
-(+3 `pregens.test.ts`, +2 `characters.e2e.test.ts`).
+Baseline before the change: 354 tests green against live Postgres. After: **361**
+— seven new, five in `pregens.test.ts` and two in `characters.e2e.test.ts`. (The
+first version of this section said 359 against a three-test `pregens.test.ts`;
+the review-driven work in § Corrections added the vite-config scan and the
+cast-vs-parse scan, and D-9's "361" was written before the last of them landed.
+361 is the count at the head of this branch.)
 
 | AC | Covered by |
 |---|---|
@@ -119,7 +123,7 @@ Baseline before the change: 354 tests green against live Postgres. After: 359
 | AC-6 | `characters.e2e.test.ts` "owns the character to the importer, not the host (#61)" |
 | AC-7 | `characters.e2e.test.ts` "gives two characters for the same pregen imported twice (#61)" |
 | AC-8 | `apps/api/test/pregens.test.ts` untouched — not in the diff |
-| AC-9 | 359 tests green, typecheck / lint / format green |
+| AC-9 | 361 tests green, typecheck / lint / format green |
 
 The glob is pinned rather than assumed: restoring the issue's `../../` pattern
 turns "is every fixture on disk, and not an empty glob" red — verified locally
@@ -163,7 +167,8 @@ watching it.
   through `dist/index.js`'s transitive `export *`. The dev server therefore
   threw `SyntaxError: … does not provide an export named 'ImportCharacterRequest'`
   at module evaluation, and the whole app failed to load — while `pnpm build`,
-  `pnpm typecheck`, `pnpm lint` and all 361 tests stayed green. `vite build`
+  `pnpm typecheck`, `pnpm lint` and all 360 tests then in the suite stayed
+  green. `vite build`
   resolves the interop itself (the production bundle was confirmed to load), and
   vitest aliases contracts to source, so no check in this repo could see it.
 
@@ -187,3 +192,19 @@ watching it.
   taking down the whole app rather than the chooser is **accepted as-is**: it is
   the same blast radius the reviewer noted, CI validates every fixture, and
   wrapping it would trade a loud failure for a quiet one.
+- **D-11 — The re-review's suggested fix for its own medium finding does not
+  work, and the finding is still right.** It asked that `pregens.test.ts` read
+  the fixtures off disk, parse them, and compare to `PREGENS`, so that replacing
+  `pregens.ts`'s `.parse` with a cast would go red. That was built — and
+  measured: it stays **green**. Zod strips nothing from these six, so the parsed
+  value is structurally identical to the JSON on disk, and no assertion over
+  `PREGENS` can tell a parse from a cast. The difference appears only for a
+  fixture that fails the schema, which AC-8 guarantees cannot exist.
+
+  The disk comparison is kept — it pins disk → schema → what the chooser lists,
+  which re-parsing `PREGENS` did not. The validation itself is pinned the only
+  way it can be, by a source scan beside the `optimizeDeps` one; removing the
+  `.parse` turns that red, measured. Both low findings taken as written: the
+  fixture directory now resolves from `import.meta.dirname` like the config read
+  three lines away, and the counts above are reconciled against the run at this
+  commit.

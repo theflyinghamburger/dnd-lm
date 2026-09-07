@@ -10,7 +10,7 @@ import { PREGENS, byName } from './pregens';
  * empty object, and builds green. So this asserts against the directory on
  * disk, which is also what `apps/api/test/pregens.test.ts` reads.
  */
-const dir = join(process.cwd(), 'fixtures/pregens');
+const dir = join(import.meta.dirname, '../../../fixtures/pregens');
 const files = readdirSync(dir).filter((name) => name.endsWith('.json'));
 
 describe('the pregens the lobby offers', () => {
@@ -21,11 +21,21 @@ describe('the pregens the lobby offers', () => {
     expect(files).toHaveLength(6);
   });
 
-  it('parses each one as the request body the API accepts', () => {
-    for (const pregen of PREGENS) {
-      expect(() => ImportCharacterRequest.parse(pregen)).not.toThrow();
-      expect(pregen.name.length).toBeGreaterThan(0);
-    }
+  /**
+   * Read from disk and parsed here, then compared. Re-parsing `PREGENS` would
+   * assert nothing `pregens.ts` did not already assert at module scope — swap
+   * its `.parse` for a cast and that version stays green. This pins the whole
+   * path: the bytes on disk, through the schema, to what the chooser lists.
+   */
+  it('is those files, parsed through the schema the API accepts', () => {
+    const fromDisk = files
+      .map((file) =>
+        ImportCharacterRequest.parse(JSON.parse(readFileSync(join(dir, file), 'utf8'))),
+      )
+      .sort(byName);
+
+    expect(PREGENS).toEqual(fromDisk);
+    for (const pregen of PREGENS) expect(pregen.name.length).toBeGreaterThan(0);
   });
 
   it('offers them in a stable order, by the comparator the UI uses', () => {
@@ -45,5 +55,19 @@ describe('the dev server can resolve a value import from contracts', () => {
   it('pre-bundles @dnd-lm/contracts', () => {
     const config = readFileSync(join(import.meta.dirname, '../vite.config.ts'), 'utf8');
     expect(config).toMatch(/optimizeDeps:\s*{\s*include:\s*\[[^\]]*'@dnd-lm\/contracts'/);
+  });
+
+  /**
+   * The same technique for the same reason: no assertion over `PREGENS` can
+   * tell a `.parse` from a cast. Zod strips nothing from these six, so parsed
+   * output is structurally identical to the JSON on disk — swapping the parse
+   * for a cast was measured and left every value assertion green. The
+   * difference only appears for a fixture that *fails* the schema, which AC-8
+   * guarantees cannot exist. So the claim is about what the module does, not
+   * about a value it produces, and a source scan is what can hold it.
+   */
+  it('validates the fixtures rather than casting them', () => {
+    const source = readFileSync(join(import.meta.dirname, 'pregens.ts'), 'utf8');
+    expect(source).toContain('ImportCharacterRequest.parse');
   });
 });
