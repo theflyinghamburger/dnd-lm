@@ -358,6 +358,11 @@ function describeIgnored(values: Map<string, string>, request: ImportCharacterRe
   if (has('Eq Weight') || values.get('Weight Carried'))
     ignored.push('item weights and encumbrance');
   if (has('spellPage')) ignored.push('spell page references');
+  if (values.get('Inspiration') && values.get('Inspiration') !== 'Off') ignored.push('inspiration');
+  if (has('Check Box')) ignored.push('death saves');
+  // `PLAYER NAME` is deliberately not listed: it identifies the account that
+  // exported the sheet, not the character, and the importer's own account is
+  // the owner here. Nothing about the character is lost by dropping it.
 
   ignored.push(
     `all modifiers, saves and passive scores — recomputed from the ${request.sheet.classes.length > 1 ? 'classes' : 'class'} and ability scores rather than trusted (D-3)`,

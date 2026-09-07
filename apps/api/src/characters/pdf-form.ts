@@ -83,28 +83,38 @@ export async function readPdfFormFields(bytes: Uint8Array): Promise<PdfFormField
   }
 
   const fields: PdfFormField[] = [];
-  for (let page = 1; page <= pdf.numPages; page += 1) {
-    const annotations = (await (await pdf.getPage(page)).getAnnotations()) as Array<{
-      subtype?: string;
-      fieldName?: string;
-      fieldValue?: unknown;
-      rect?: number[];
-    }>;
+  // The page loop is inside the handler too: a document whose *structure* parses
+  // can still throw on a malformed page or annotation entry, and that would
+  // escape as an opaque 500 rather than the refusal this promises.
+  try {
+    for (let page = 1; page <= pdf.numPages; page += 1) {
+      const annotations = (await (await pdf.getPage(page)).getAnnotations()) as Array<{
+        subtype?: string;
+        fieldName?: string;
+        fieldValue?: unknown;
+        rect?: number[];
+      }>;
 
-    for (const annotation of annotations) {
-      if (annotation.subtype !== 'Widget' || !annotation.fieldName) continue;
-      const value = readValue(annotation.fieldValue).trim();
-      if (value === '') continue;
-      const rect = annotation.rect ?? [0, 0, 0, 0];
-      fields.push({
-        name: normaliseName(annotation.fieldName),
-        value,
-        page,
-        x: rect[0] ?? 0,
-        // The top edge, so that sorting by descending `y` reads down the page.
-        y: rect[3] ?? 0,
-      });
+      for (const annotation of annotations) {
+        if (annotation.subtype !== 'Widget' || !annotation.fieldName) continue;
+        const value = readValue(annotation.fieldValue).trim();
+        if (value === '') continue;
+        const rect = annotation.rect ?? [0, 0, 0, 0];
+        fields.push({
+          name: normaliseName(annotation.fieldName),
+          value,
+          page,
+          x: rect[0] ?? 0,
+          // The top edge, so that sorting by descending `y` reads down the page.
+          y: rect[3] ?? 0,
+        });
+      }
     }
+  } catch {
+    throw new UnprocessableEntityException({
+      code: 'PDF_UNREADABLE',
+      message: 'That PDF could not be read. It may be corrupt or password-protected.',
+    });
   }
 
   return fields;
