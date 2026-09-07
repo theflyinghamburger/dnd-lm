@@ -8,7 +8,8 @@
     "start:dev": "nest start --watch",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:check": "drizzle-kit check"
+    "db:check": "drizzle-kit check",
+    "admin:grant": "node --env-file=../../.env dist/scripts/grant-admin.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.123.0",
