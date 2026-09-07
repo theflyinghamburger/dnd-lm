@@ -4,8 +4,7 @@ import { resolveRollRequest } from './roll-request';
 
 const derived = deriveSheet(
   CharacterSheet.parse({
-    className: 'Cleric',
-    level: 5,
+    classes: [{ name: 'Cleric', level: 5 }],
     abilityScores: { str: 10, dex: 12, con: 14, int: 10, wis: 16, cha: 8 },
     skillProficiencies: ['perception'],
     saveProficiencies: ['wis'],

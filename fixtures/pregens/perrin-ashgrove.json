@@ -1,8 +1,12 @@
 {
   "name": "Perrin Ashgrove",
   "sheet": {
-    "className": "Bard",
-    "level": 3,
+    "classes": [
+      {
+        "name": "Bard",
+        "level": 3
+      }
+    ],
     "abilityScores": {
       "str": 10,
       "dex": 14,

@@ -1,8 +1,12 @@
 {
   "name": "Aria Sunhollow",
   "sheet": {
-    "className": "Cleric",
-    "level": 3,
+    "classes": [
+      {
+        "name": "Cleric",
+        "level": 3
+      }
+    ],
     "abilityScores": {
       "str": 10,
       "dex": 12,

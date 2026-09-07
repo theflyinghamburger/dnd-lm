@@ -64,6 +64,13 @@
       "when": 1788601719499,
       "tag": "0008_clever_purifiers",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1788747973747,
+      "tag": "0009_chief_norrin_radd",
+      "breakpoints": true
     }
   ]
 }

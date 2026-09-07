@@ -14,8 +14,7 @@ import {
 import { makeDeltaGate, type DmProvider } from './provider';
 
 const sheet: CharacterSheet = {
-  className: 'Fighter',
-  level: 3,
+  classes: [{ name: 'Fighter', level: 3 }],
   abilityScores: { str: 18, dex: 10, con: 14, int: 8, wis: 10, cha: 12 },
   skillProficiencies: ['athletics'],
   saveProficiencies: [],
@@ -25,6 +24,8 @@ const sheet: CharacterSheet = {
   speed: 30,
   inventory: [],
   currency: { cp: 0, sp: 0, gp: 0, pp: 0 },
+  attacks: [],
+  spells: [],
 };
 
 const reader: DmReadOnly = {
@@ -249,7 +250,7 @@ describe('buildDmGraph', () => {
     expect(state.proposal).not.toBeNull();
     expect(state.toolResults).toHaveLength(1);
     expect(state.toolResults[0]?.ok).toBe(true);
-    expect(state.toolResults[0]?.content).toContain('Aria — Fighter level 3');
+    expect(state.toolResults[0]?.content).toContain('Aria — Fighter 3');
     expect(prompts[1]).toContain('## Tool results from this turn');
   });
 

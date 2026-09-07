@@ -11,10 +11,11 @@ import {
   type ImportCharacterRequest,
   type UpdateHpRequest,
   deriveSheet,
+  parseStoredSheet,
 } from '@dnd-lm/contracts';
 import { and, eq, sql } from 'drizzle-orm';
 import { DB, type Db } from '../db/db.module';
-import { characters } from '../db/schema';
+import { characters, pendingActions, sessions } from '../db/schema';
 
 export type CharacterView = {
   id: string;
@@ -129,9 +130,63 @@ export class CharactersService {
     return this.toView(row);
   }
 
+  /**
+   * Deleting a character (M4.7 follow-up). Its owner or a host of the campaign;
+   * ownership alone is not enough for a host to clean up after a player, and a
+   * host's authority does not extend to other campaigns.
+   *
+   * Refused while the character is named in an **open** pending action:
+   * `pending_actions.authorized_character_ids` is a bare `uuid[]` with no foreign
+   * key, so deleting mid-request would leave an id pointing at nothing and a roll
+   * nobody can satisfy. `rolls.character_id` is `ON DELETE SET NULL` by contrast,
+   * so past rolls keep their modifier provenance and stay reconstructible (FR-302).
+   */
+  async remove(
+    characterId: string,
+    userId: string,
+    campaignId: string,
+    isHost: boolean,
+  ): Promise<void> {
+    const [row] = await this.db
+      .select({ id: characters.id, ownerUserId: characters.ownerUserId })
+      .from(characters)
+      .where(and(eq(characters.id, characterId), eq(characters.campaignId, campaignId)))
+      .limit(1);
+
+    // A character in another campaign reads the same as one owned by someone
+    // else, so neither is probeable (FR-105).
+    if (!row || (row.ownerUserId !== userId && !isHost)) {
+      throw new ForbiddenException({ code: 'NOT_YOUR_CHARACTER' });
+    }
+
+    // The guard is part of the write, not a check before it. Checking first and
+    // deleting second leaves a window in which a DM turn opens a pending action
+    // naming this character between the two statements — and the delete would
+    // then remove a character an open action still points at, which is exactly
+    // what this refuses.
+    const openAction = sql`
+      select 1 from ${pendingActions}
+      join ${sessions} on ${sessions.id} = ${pendingActions.sessionId}
+      where ${sessions.campaignId} = ${campaignId}
+        and ${pendingActions.status} = 'open'
+        and ${characterId}::uuid = any(${pendingActions.authorizedCharacterIds})
+    `;
+    const deleted = await this.db
+      .delete(characters)
+      .where(and(eq(characters.id, characterId), sql`not exists (${openAction})`))
+      .returning({ id: characters.id });
+
+    if (deleted.length === 0) {
+      throw new ConflictException({
+        code: 'CHARACTER_HAS_OPEN_ACTION',
+        message: 'That character is waiting on a roll. Resolve or cancel it first.',
+      });
+    }
+  }
+
   /** Derived values are recomputed on read and never persisted as truth (FR-401). */
   private toView(row: typeof characters.$inferSelect): CharacterView {
-    const sheet = row.sheet as CharacterSheet;
+    const sheet = parseStoredSheet(row.sheet);
     return {
       id: row.id,
       campaignId: row.campaignId,
