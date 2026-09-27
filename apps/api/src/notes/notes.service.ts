@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { and, desc, eq, isNull, lte, or, sql } from 'drizzle-orm';
+import type { RosterNpc } from '@dnd-lm/contracts';
 import { DB, type Db } from '../db/db.module';
 import { campaignNotes, noteSpoilerLevel } from '../db/schema';
 import { estimateTokens } from '../dm/context';
@@ -72,4 +73,39 @@ export class NotesService {
       .limit(MAX_CANDIDATES);
     return capNotes(ranked, input.tokenCap);
   }
+
+  /**
+   * The campaign's addressable NPCs for `@npc` routing (M8.4, MVP.md §4.3 rule 4).
+   *
+   * The same hard filters as `retrieve`, as `WHERE` predicates, at `player`
+   * level: the roster is served to every member (`GET …/roster`, the composer
+   * preview), so an NPC the party has not met must not be in it at all —
+   * addressing one then reads exactly like an unknown NPC (rule 2).
+   */
+  async npcs(campaignId: string, chapter: number): Promise<RosterNpc[]> {
+    const rows = await this.db
+      .select({
+        slug: campaignNotes.slug,
+        title: campaignNotes.title,
+        frontmatter: campaignNotes.frontmatter,
+      })
+      .from(campaignNotes)
+      .where(
+        and(
+          eq(campaignNotes.campaignId, campaignId),
+          eq(campaignNotes.type, 'npc'),
+          eq(campaignNotes.status, 'published'),
+          eq(campaignNotes.spoilerLevel, 'player'),
+          or(isNull(campaignNotes.chapter), lte(campaignNotes.chapter, chapter)),
+        ),
+      )
+      .orderBy(campaignNotes.slug);
+    return rows.map((r) => ({ id: r.slug, name: r.title, aliases: readAliases(r.frontmatter) }));
+  }
+}
+
+/** `frontmatter` is host-authored JSONB: a non-array, or a non-string entry, is dropped. */
+export function readAliases(frontmatter: unknown): string[] {
+  const aliases = (frontmatter as { aliases?: unknown } | null)?.aliases;
+  return Array.isArray(aliases) ? aliases.filter((a): a is string => typeof a === 'string') : [];
 }
