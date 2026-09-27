@@ -5,7 +5,7 @@ import { eq } from 'drizzle-orm';
 import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Db } from '../src/db/db.module';
-import { campaignNotes, campaignSources, campaigns } from '../src/db/schema';
+import { campaignNotes, campaignSources, campaigns, memberships, users } from '../src/db/schema';
 import { DATABASE_URL, createTestApp, truncateAll } from './app.harness';
 
 /** Not a valid document — nothing in P4.1.1 parses past the magic bytes. */
@@ -89,6 +89,24 @@ describe.skipIf(!DATABASE_URL)('campaign source upload (P4.1.1)', () => {
       .set('Cookie', host)
       .expect(200);
     expect(CampaignSource.strict().parse(one.body)).toEqual(source);
+  });
+
+  it('lets a campaign admin who is not the owner use every route', async () => {
+    const host = await signUp('host@example.com');
+    const admin = await signUp('admin@example.com');
+    const campaignId = await campaignFor(host);
+    // No route grants the admin role yet; it is a membership row (M1.3).
+    const [adminUser] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.email, 'admin@example.com'));
+    await db.insert(memberships).values({ campaignId, userId: adminUser!.id, role: 'admin' });
+    const base = `/api/campaigns/${campaignId}/sources`;
+
+    const sourceId = (await upload(campaignId, admin).expect(201)).body.id as string;
+    await api().get(base).set('Cookie', admin).expect(200);
+    await api().get(`${base}/${sourceId}`).set('Cookie', admin).expect(200);
+    await api().delete(`${base}/${sourceId}`).set('Cookie', admin).expect(204);
   });
 
   it('refuses a non-host member on every route (NFR-302)', async () => {
