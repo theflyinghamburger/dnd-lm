@@ -46,11 +46,14 @@ export function HostBar({
   /** Shows a rejection and reports whether the command went through. */
   function landed(result: Result): boolean {
     if (result === null) {
-      setFailure('Not connected — try again once the session reconnects.');
+      // Not a refusal: after a mid-flight drop the command may have landed.
+      setFailure(
+        'Connection lost — this may not have gone through. The session status above shows where things stand.',
+      );
       return false;
     }
     if ('code' in result) {
-      setFailure(`${result.code}: ${result.message}`);
+      setFailure(`Refused — ${result.code}: ${result.message}`);
       return false;
     }
     setFailure(null);
@@ -174,7 +177,7 @@ export function HostBar({
         </fieldset>
       </form>
 
-      {failure && <p role="alert">Refused — {failure}</p>}
+      {failure && <p role="alert">{failure}</p>}
     </section>
   );
 }
