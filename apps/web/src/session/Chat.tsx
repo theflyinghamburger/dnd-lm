@@ -190,6 +190,7 @@ export function Chat({
       {status && (role === 'host' || role === 'admin') && (
         <HostBar
           status={status}
+          connected={connected}
           campaignId={campaignId}
           onControl={hostControl}
           onRequestRoll={requestRoll}

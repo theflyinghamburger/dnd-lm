@@ -15,11 +15,13 @@ type Result = CommandAck | ServerError | null;
  */
 export function HostBar({
   status,
+  connected,
   campaignId,
   onControl,
   onRequestRoll,
 }: {
   status: SessionState;
+  connected: boolean;
   campaignId: string;
   onControl: (action: HostControlAction) => Promise<Result>;
   onRequestRoll: (prompt: string, expression: string, characterIds: string[]) => Promise<Result>;
@@ -37,6 +39,9 @@ export function HostBar({
     queryFn: () => api.characters(campaignId),
   });
   const allowed = hostActions(status);
+  // Offline, socket.io would buffer a press and keep the bar busy until
+  // reconnect, then send it against whatever state the table is in by then.
+  const idle = connected && !busy;
 
   /** Shows a rejection and reports whether the command went through. */
   function landed(result: Result): boolean {
@@ -77,14 +82,14 @@ export function HostBar({
       <p>
         <button
           type="button"
-          disabled={busy || !allowed.PAUSE}
+          disabled={!idle || !allowed.PAUSE}
           onClick={() => void control('PAUSE')}
         >
           Pause
         </button>{' '}
         <button
           type="button"
-          disabled={busy || !allowed.RESUME}
+          disabled={!idle || !allowed.RESUME}
           onClick={() => void control('RESUME')}
         >
           Resume
@@ -93,7 +98,7 @@ export function HostBar({
             this button is the only way to fire it. */}
         <button
           type="button"
-          disabled={busy || !allowed.FORCE_DM_TURN}
+          disabled={!idle || !allowed.FORCE_DM_TURN}
           onClick={() => void control('FORCE_DM_TURN')}
         >
           Force DM turn
@@ -104,7 +109,7 @@ export function HostBar({
             <span role="alert"> End this session for everyone? This cannot be undone. </span>
             <button
               type="button"
-              disabled={busy || !allowed.END}
+              disabled={!idle || !allowed.END}
               onClick={() => void control('END')}
             >
               Confirm end
@@ -116,7 +121,7 @@ export function HostBar({
         ) : (
           <button
             type="button"
-            disabled={busy || !allowed.END}
+            disabled={!idle || !allowed.END}
             onClick={() => setConfirmingEnd(true)}
           >
             End session
@@ -125,7 +130,7 @@ export function HostBar({
       </p>
 
       <form onSubmit={(event) => void onAsk(event)}>
-        <fieldset disabled={busy || !allowed.REQUEST_ROLL}>
+        <fieldset disabled={!idle || !allowed.REQUEST_ROLL}>
           <legend>Ask for a check</legend>
           <label htmlFor="check-prompt">Prompt</label>
           <input
@@ -163,7 +168,7 @@ export function HostBar({
             <p role="alert">Could not load characters: {describeApiError(characters.error)}</p>
           )}
           {characters.data?.length === 0 && <p>No characters in this campaign to ask.</p>}
-          <button type="submit" disabled={busy || chosen.length === 0}>
+          <button type="submit" disabled={!idle || chosen.length === 0}>
             Ask
           </button>
         </fieldset>

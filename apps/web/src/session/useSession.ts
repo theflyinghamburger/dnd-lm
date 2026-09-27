@@ -259,9 +259,9 @@ export function useSession(sessionId: string, characterId: string | null) {
   /**
    * Sends one mutating command with a fresh `command_id` and the current
    * version, and hands back the ack or the rejection for the caller to show.
-   * `null` means it was never answered: not connected (socket.io would buffer
-   * it and send a stale version on reconnect), or `emitWithAck` rejected
-   * because the socket dropped after sending (`_clearAcks` does that).
+   * `null` means it was never answered: no socket, or `emitWithAck` rejected
+   * because the socket dropped after sending (`_clearAcks` does that). While
+   * disconnected socket.io buffers the command and sends it on reconnect.
    * The payload is typed per command, so a wrong field name fails typecheck.
    */
   const command = useCallback(
@@ -270,7 +270,7 @@ export function useSession(sessionId: string, characterId: string | null) {
       payload: Extract<ClientCommand, { type: T }>['payload'],
     ) => {
       const socket = socketRef.current;
-      if (!socket?.connected) return null;
+      if (!socket) return null;
       const result = (await socket
         .emitWithAck('command', {
           command_id: crypto.randomUUID(),
