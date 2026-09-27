@@ -1,6 +1,7 @@
 import {
   type EventEnvelope,
   type RoutingDecision,
+  type SessionSnapshot,
   SessionState,
   acceptsMutations,
   isTerminal,
@@ -17,6 +18,20 @@ export function statusChange(event: EventEnvelope): SessionState | null {
   if (event.type !== 'SESSION_STATE_CHANGED') return null;
   const to = SessionState.safeParse(event.payload['to']);
   return to.success ? to.data : null;
+}
+
+/**
+ * The snapshot `resume` returned, unless a state change seen live postdates it.
+ * The socket joins the session's room before `resume` answers, so a change can
+ * arrive ahead of the snapshot; the snapshot must not roll it back.
+ */
+export function resumedSnapshot(
+  snapshot: SessionSnapshot,
+  live: { sequence: number; to: SessionState } | null,
+): SessionSnapshot {
+  return live && live.sequence > snapshot.last_sequence
+    ? { ...snapshot, status: live.to }
+    : snapshot;
 }
 
 /**

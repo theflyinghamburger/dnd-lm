@@ -1,6 +1,12 @@
-import { type EventEnvelope, TRIGGER_REGISTRY, buildRoster, parseMessage } from '@dnd-lm/contracts';
+import {
+  type EventEnvelope,
+  type SessionSnapshot,
+  TRIGGER_REGISTRY,
+  buildRoster,
+  parseMessage,
+} from '@dnd-lm/contracts';
 import { describe, expect, it } from 'vitest';
-import { canSend, statusChange, statusNotice } from './status';
+import { canSend, resumedSnapshot, statusChange, statusNotice } from './status';
 
 /**
  * U1.0: the composer's gate. Drafts go through the real router so the test
@@ -62,5 +68,26 @@ describe('statusChange', () => {
     expect(statusChange(envelope('MESSAGE_POSTED', { to: 'PAUSED' }))).toBeNull();
     expect(statusChange(envelope('SESSION_STATE_CHANGED', { to: 'NAPPING' }))).toBeNull();
     expect(statusChange(envelope('SESSION_STATE_CHANGED', {}))).toBeNull();
+  });
+});
+
+describe('resumedSnapshot', () => {
+  const snapshot = {
+    session_id: 's',
+    campaign_id: 'c',
+    status: 'WAITING_FOR_PLAYERS',
+    state_version: 4,
+    last_sequence: 10,
+    scene_id: null,
+  } satisfies SessionSnapshot;
+
+  it('keeps a live change that postdates the snapshot', () => {
+    expect(resumedSnapshot(snapshot, { sequence: 11, to: 'PAUSED' }).status).toBe('PAUSED');
+  });
+
+  it('takes the snapshot when the live change is already in it, or there is none', () => {
+    expect(resumedSnapshot(snapshot, { sequence: 10, to: 'PAUSED' })).toBe(snapshot);
+    expect(resumedSnapshot(snapshot, { sequence: 3, to: 'PAUSED' })).toBe(snapshot);
+    expect(resumedSnapshot(snapshot, null)).toBe(snapshot);
   });
 });

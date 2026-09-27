@@ -7,7 +7,7 @@ import type {
 } from '@dnd-lm/contracts';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { type Socket, io } from 'socket.io-client';
-import { statusChange } from './status';
+import { resumedSnapshot, statusChange } from './status';
 
 export type Delivery = 'sending' | 'delivered' | 'rejected';
 
@@ -57,11 +57,7 @@ export function useSession(sessionId: string, characterId: string | null) {
    * resolution does, which is exactly what the server enforces.
    */
   const stateVersion = useRef(0);
-  /**
-   * The newest state change seen live. The socket joins the session's room
-   * before `resume` answers, so a change can arrive ahead of the snapshot it
-   * postdates; the snapshot must not then roll the status back (U1.0).
-   */
+  /** The newest state change seen live, for `resumedSnapshot` (U1.0). */
   const liveStatus = useRef<{ sequence: number; to: SessionState } | null>(null);
   const [snapshot, setSnapshot] = useState<SessionSnapshot | null>(null);
   const [lines, setLines] = useState<ChatLine[]>([]);
@@ -168,12 +164,7 @@ export function useSession(sessionId: string, characterId: string | null) {
       void socket
         .emitWithAck('resume', { last_sequence: highWater.current })
         .then((response: { snapshot: SessionSnapshot; events: EventEnvelope[] }) => {
-          const live = liveStatus.current;
-          setSnapshot(
-            live && live.sequence > response.snapshot.last_sequence
-              ? { ...response.snapshot, status: live.to }
-              : response.snapshot,
-          );
+          setSnapshot(resumedSnapshot(response.snapshot, liveStatus.current));
           stateVersion.current = response.snapshot.state_version;
           for (const event of response.events) applyEvent(event);
         });
