@@ -2,7 +2,7 @@
 
 **Repo:** [theflyinghamburger/dnd-lm](https://github.com/theflyinghamburger/dnd-lm) (private)
 **As of:** 2026-09-27
-**Progress:** M0–M7 merged, M7 review follow-ups (#42–#45) closed, plus the admin bootstrap (#60) and the lobby pregen picker (#61). PR [#81](https://github.com/theflyinghamburger/dnd-lm/pull/81) (M4.7, character import from a sheet PDF) is open. M8 and M9 not started. Next open work: M8 (#48–#52), U1 (#72–#78), P4.1 (#64–#70), #79, M9 (#53–#57).
+**Progress:** M0–M7 merged, M7 review follow-ups (#42–#45) closed, plus the admin bootstrap (#60) and the lobby pregen picker (#61). PR [#81](https://github.com/theflyinghamburger/dnd-lm/pull/81) (M4.7, character import from a sheet PDF) merged 2026-09-27. M8 and M9 not started. Next open work: M8 (#48–#52), U1 (#72–#78), P4.1 (#64–#70), #79, M9 (#53–#57).
 
 ---
 
@@ -30,7 +30,7 @@
 | M7 review follow-ups (M7-FU2.1–2.3, FU3, FU4) | [#42](https://github.com/theflyinghamburger/dnd-lm/issues/42)–[#45](https://github.com/theflyinghamburger/dnd-lm/issues/45) | **merged** | [#39](https://github.com/theflyinghamburger/dnd-lm/pull/39), [#46](https://github.com/theflyinghamburger/dnd-lm/pull/46), [#47](https://github.com/theflyinghamburger/dnd-lm/pull/47), [#59](https://github.com/theflyinghamburger/dnd-lm/pull/59) |
 | Platform admin bootstrap (`admin:grant`) | [#60](https://github.com/theflyinghamburger/dnd-lm/issues/60) | **merged** | [#62](https://github.com/theflyinghamburger/dnd-lm/pull/62) |
 | Pregen character picker in the lobby | [#61](https://github.com/theflyinghamburger/dnd-lm/issues/61) | **merged** | [#63](https://github.com/theflyinghamburger/dnd-lm/pull/63) |
-| M4.7 — Import a character from a sheet PDF | — (work item `docs/changes/M4.7.md`) | PR open | [#81](https://github.com/theflyinghamburger/dnd-lm/pull/81) |
+| M4.7 — Import a character from a sheet PDF | — (work item `docs/changes/M4.7.md`) | **merged** | [#81](https://github.com/theflyinghamburger/dnd-lm/pull/81) |
 | M8 — Manual campaign notes and retrieval (M8.1–M8.5) | [#9](https://github.com/theflyinghamburger/dnd-lm/issues/9), [#48](https://github.com/theflyinghamburger/dnd-lm/issues/48)–[#52](https://github.com/theflyinghamburger/dnd-lm/issues/52) | not started | |
 | U1 — UI coverage: reach every shipped feature (U1.0–U1.5) | [#72](https://github.com/theflyinghamburger/dnd-lm/issues/72)–[#78](https://github.com/theflyinghamburger/dnd-lm/issues/78) | not started | |
 | P4.1 — Campaign PDF ingestion (P4.1.0–P4.1.5) | [#64](https://github.com/theflyinghamburger/dnd-lm/issues/64)–[#70](https://github.com/theflyinghamburger/dnd-lm/issues/70) | not started | |
