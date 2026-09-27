@@ -134,7 +134,7 @@ export function Chat({
             <li key={member.userId}>
               {member.displayName} @{member.handle} <span className="role">{member.role}</span>
             </li>
-          )) ?? <li>Loading…</li>}
+          )) ?? <li>{roster.isError ? 'Could not load who is here.' : 'Loading…'}</li>}
         </ul>
       </section>
 
