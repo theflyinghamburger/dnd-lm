@@ -2,6 +2,7 @@ import type { CampaignDmSettings, DmDifficulty, DmStyle, DmTone } from '@dnd-lm/
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { api, describeApiError } from './api';
+import { readChapter } from './note-form';
 
 /**
  * Campaign → Settings (M7.6, FR-506). A host picks a provider from the
@@ -99,7 +100,7 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
             style: value<DmStyle>('style'),
             tone: value<DmTone>('tone'),
             difficulty: value<DmDifficulty>('difficulty'),
-            progressionChapter: form.get('chapter') ? Number(form.get('chapter')) : null,
+            progressionChapter: readChapter(String(form.get('chapter') ?? '')),
           });
         }}
       >
@@ -132,6 +133,7 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
           name="chapter"
           type="number"
           min={0}
+          max={10000}
           step={1}
           placeholder="Not started"
           defaultValue={current.progressionChapter ?? ''}

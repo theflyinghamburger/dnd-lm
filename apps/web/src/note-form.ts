@@ -14,13 +14,24 @@ export type NoteFields = Pick<
  */
 export function readNoteForm(form: FormData): NoteFields {
   const text = (name: string) => String(form.get(name) ?? '');
-  const chapter = text('chapter').trim();
   return {
     type: text('type') as NoteFields['type'],
     title: text('title'),
     bodyMd: text('bodyMd'),
     spoilerLevel: text('spoilerLevel') as NoteFields['spoilerLevel'],
-    chapter: chapter === '' ? null : Number(chapter),
+    chapter: readChapter(text('chapter')),
     status: text('status') as NoteFields['status'],
   };
+}
+
+/**
+ * A chapter field: empty is `null`. A value `Number` cannot represent finitely
+ * (`1e999`) is sent as its raw string, because `JSON.stringify(Infinity)` is
+ * `null` and the server would read "ungated"/"cleared" instead of refusing it.
+ */
+export function readChapter(raw: string): number | null {
+  const trimmed = raw.trim();
+  if (trimmed === '') return null;
+  const value = Number(trimmed);
+  return Number.isFinite(value) ? value : (trimmed as unknown as number);
 }

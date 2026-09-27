@@ -197,6 +197,7 @@ function NoteForm({
         name="chapter"
         type="number"
         min={0}
+        max={10000}
         step={1}
         defaultValue={note?.chapter ?? ''}
       />

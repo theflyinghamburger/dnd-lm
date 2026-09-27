@@ -188,7 +188,11 @@ describe.skipIf(!DATABASE_URL)('campaign notes API (M8.5)', () => {
     });
 
     await api().delete(`/api/campaigns/${campaignId}/notes/klarg`).set('Cookie', host).expect(204);
-    await api().get(`/api/campaigns/${campaignId}/notes/klarg`).set('Cookie', host).expect(404);
+    const gone = await api()
+      .get(`/api/campaigns/${campaignId}/notes/klarg`)
+      .set('Cookie', host)
+      .expect(404);
+    expect(gone.body).toMatchObject({ code: 'NOTE_NOT_FOUND', slug: 'klarg' });
   });
 
   it('publishing a draft is a plain status update (the P4.1.5 review path)', async () => {

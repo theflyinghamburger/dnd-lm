@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CreateNoteRequest, UpdateNoteRequest } from '@dnd-lm/contracts';
-import { readNoteForm } from './note-form';
+import { readChapter, readNoteForm } from './note-form';
 
 const form = (fields: Record<string, string>) => {
   const data = new FormData();
@@ -33,5 +33,15 @@ describe('the note editor form (M8.5)', () => {
   it('leaves a bad chapter for the schema to refuse rather than guessing', () => {
     const fields = readNoteForm(form({ ...filled, chapter: '1.5' }));
     expect(UpdateNoteRequest.safeParse(fields).success).toBe(false);
+  });
+
+  it('an overflowing chapter is refused, not turned into null by JSON on the way', () => {
+    // Number('1e999') is Infinity, and JSON.stringify(Infinity) is null: the
+    // server would read "ungated" instead of refusing.
+    const sent = JSON.parse(JSON.stringify(readNoteForm(form({ ...filled, chapter: '1e999' }))));
+    expect(UpdateNoteRequest.safeParse(sent).success).toBe(false);
+    expect(readChapter('1e999')).not.toBeNull();
+    expect(readChapter('')).toBeNull();
+    expect(readChapter(' 3 ')).toBe(3);
   });
 });
