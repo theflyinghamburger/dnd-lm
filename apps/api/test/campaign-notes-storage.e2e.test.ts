@@ -76,7 +76,9 @@ describe.skipIf(!DATABASE_URL)('campaign notes storage (M8.1)', () => {
 
   it('rejects a duplicate slug within one campaign and accepts it across two', async () => {
     await note(campaignA, 'npc.klarg');
-    await expect(note(campaignA, 'npc.klarg')).rejects.toThrow();
+    await expect(note(campaignA, 'npc.klarg')).rejects.toMatchObject({
+      cause: { code: '23505', constraint_name: 'campaign_notes_campaign_slug_key' },
+    });
     await expect(note(campaignB, 'npc.klarg')).resolves.toHaveLength(1);
   });
 
