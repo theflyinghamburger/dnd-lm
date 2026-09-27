@@ -125,7 +125,10 @@ export function HostBar({
           <button
             type="button"
             disabled={!idle || !allowed.END}
-            onClick={() => setConfirmingEnd(true)}
+            onClick={() => {
+              setFailure(null);
+              setConfirmingEnd(true);
+            }}
           >
             End session
           </button>
