@@ -74,8 +74,12 @@ implicitly). Then enable the connection.
 pick the provider from the redacted list, set style/tone/difficulty. Without a
 provider the campaign has no DM and triggers go nowhere.
 
-**5. Get everyone a character.** There is no creation wizard in the MVP — import
-one of the six pregens, over the API:
+**5. Get everyone a character.** There is no creation wizard in the MVP. In the
+lobby, pick one of the six pregens from the dropdown next to the campaign and
+press **Add character** — or use **Import sheet PDF** to upload a form-fillable
+character sheet instead.
+
+A host scripting several seats can do the same import over the API:
 
 ```sh
 curl -c cookies.txt -X POST http://localhost:3000/api/auth/login \
