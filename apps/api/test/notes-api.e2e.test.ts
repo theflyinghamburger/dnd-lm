@@ -350,6 +350,19 @@ describe.skipIf(!DATABASE_URL)('campaign notes API (M8.5)', () => {
     expect(cleared.body.progressionChapter).toBeNull();
     expect(await read()).toEqual({ progression: { arc: 'kept' }, dm_tone: 'dark' });
 
+    // A `progression` that is not an object (hand-edited, or an older writer)
+    // is replaced, not concatenated into an array.
+    await db
+      .update(campaigns)
+      .set({ settings: { progression: null } })
+      .where(eq(campaigns.id, campaignId));
+    await api()
+      .patch(`/api/campaigns/${campaignId}/dm-settings`)
+      .set('Cookie', host)
+      .send({ progressionChapter: 2 })
+      .expect(200);
+    expect(await read()).toEqual({ progression: { chapter: 2 } });
+
     await api()
       .patch(`/api/campaigns/${campaignId}/dm-settings`)
       .set('Cookie', host)

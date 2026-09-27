@@ -255,13 +255,15 @@ export class CampaignsService {
 
     let settings = sql`${campaigns.settings} || ${JSON.stringify(columns)}::jsonb`;
     // M8.5: `progression.chapter` is the exact key retrieval gates on (M8.3).
-    // Merged into `progression` so any sibling key there survives; `null`
-    // removes it, which retrieval reads as "no chapter reached" (0).
+    // Merged into `progression` so any sibling key there survives; a
+    // non-object `progression` is replaced, since `||` would make it an
+    // array. `null` removes the key: retrieval reads that as chapter 0.
     const chapter = input.progressionChapter;
     if (chapter === null) settings = sql`(${settings}) #- '{progression,chapter}'`;
     if (typeof chapter === 'number') {
       settings = sql`(${settings}) || jsonb_build_object('progression',
-        coalesce(${campaigns.settings}->'progression', '{}'::jsonb)
+        case when jsonb_typeof(${campaigns.settings}->'progression') = 'object'
+          then ${campaigns.settings}->'progression' else '{}'::jsonb end
           || jsonb_build_object('chapter', ${chapter}::int))`;
     }
 
