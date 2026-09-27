@@ -7,6 +7,7 @@ import type {
 } from '@dnd-lm/contracts';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { type Socket, io } from 'socket.io-client';
+import { statusChange } from './status';
 
 export type Delivery = 'sending' | 'delivered' | 'rejected';
 
@@ -56,6 +57,12 @@ export function useSession(sessionId: string, characterId: string | null) {
    * resolution does, which is exactly what the server enforces.
    */
   const stateVersion = useRef(0);
+  /**
+   * The newest state change seen live. The socket joins the session's room
+   * before `resume` answers, so a change can arrive ahead of the snapshot it
+   * postdates; the snapshot must not then roll the status back (U1.0).
+   */
+  const liveStatus = useRef<{ sequence: number; to: SessionState } | null>(null);
   const [snapshot, setSnapshot] = useState<SessionSnapshot | null>(null);
   const [lines, setLines] = useState<ChatLine[]>([]);
   const [rolls, setRolls] = useState<RollLine[]>([]);
@@ -99,11 +106,10 @@ export function useSession(sessionId: string, characterId: string | null) {
       });
       return;
     }
-    if (event.type === 'SESSION_STATE_CHANGED') {
-      // U1.0 (NFR-205). The server's `to` is the truth — including where a
-      // resume lands, which only the server's `pausedFrom` knows.
-      const payload = event.payload as unknown as { to: SessionState };
-      setSnapshot((s) => s && { ...s, status: payload.to });
+    const to = statusChange(event);
+    if (to) {
+      liveStatus.current = { sequence: event.sequence, to };
+      setSnapshot((s) => s && { ...s, status: to });
       return;
     }
     if (event.type === 'DM_RESOLUTION_FAILED') {
@@ -162,7 +168,12 @@ export function useSession(sessionId: string, characterId: string | null) {
       void socket
         .emitWithAck('resume', { last_sequence: highWater.current })
         .then((response: { snapshot: SessionSnapshot; events: EventEnvelope[] }) => {
-          setSnapshot(response.snapshot);
+          const live = liveStatus.current;
+          setSnapshot(
+            live && live.sequence > response.snapshot.last_sequence
+              ? { ...response.snapshot, status: live.to }
+              : response.snapshot,
+          );
           stateVersion.current = response.snapshot.state_version;
           for (const event of response.events) applyEvent(event);
         });

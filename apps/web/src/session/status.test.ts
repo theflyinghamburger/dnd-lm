@@ -1,6 +1,6 @@
-import { TRIGGER_REGISTRY, buildRoster, parseMessage } from '@dnd-lm/contracts';
+import { type EventEnvelope, TRIGGER_REGISTRY, buildRoster, parseMessage } from '@dnd-lm/contracts';
 import { describe, expect, it } from 'vitest';
-import { canSend, statusNotice } from './status';
+import { canSend, statusChange, statusNotice } from './status';
 
 /**
  * U1.0: the composer's gate. Drafts go through the real router so the test
@@ -43,5 +43,24 @@ describe('statusNotice', () => {
     expect(statusNotice('PAUSED')).not.toBe(statusNotice('SESSION_ENDED'));
     expect(statusNotice('WAITING_FOR_PLAYERS')).toBeNull();
     expect(statusNotice('DM_GENERATING')).toBeNull();
+  });
+});
+
+describe('statusChange', () => {
+  const envelope = (type: string, payload: Record<string, unknown>) =>
+    ({ type, payload }) as unknown as EventEnvelope;
+
+  it("reads the server's `to` — the shape both emitters send", () => {
+    const paused = { action: 'PAUSE', from: 'WAITING_FOR_ROLL', to: 'PAUSED' };
+    expect(statusChange(envelope('SESSION_STATE_CHANGED', paused))).toBe('PAUSED');
+    // Resume lands wherever the server says, not on a client default.
+    const resumed = { action: 'RESUME', from: 'PAUSED', to: 'WAITING_FOR_ROLL' };
+    expect(statusChange(envelope('SESSION_STATE_CHANGED', resumed))).toBe('WAITING_FOR_ROLL');
+  });
+
+  it('ignores other events and a `to` that is not a state', () => {
+    expect(statusChange(envelope('MESSAGE_POSTED', { to: 'PAUSED' }))).toBeNull();
+    expect(statusChange(envelope('SESSION_STATE_CHANGED', { to: 'NAPPING' }))).toBeNull();
+    expect(statusChange(envelope('SESSION_STATE_CHANGED', {}))).toBeNull();
   });
 });

@@ -122,7 +122,7 @@ export function Chat({
 
       {notice && (
         <p role="status">
-          <strong>{status === 'PAUSED' ? 'Paused.' : 'Ended.'}</strong> {notice}
+          <strong>{notice}</strong>
         </p>
       )}
 
@@ -218,7 +218,15 @@ export function Chat({
                   · ★ This will wake the Dungeon Master ({preview.dmTrigger.definitionId})
                 </strong>
               )}
-              {status && !sendable && <strong> · Not while the session is {status}.</strong>}
+              {status && !sendable && (
+                <strong>
+                  {' '}
+                  ·{' '}
+                  {status === 'PAUSED'
+                    ? 'Not while paused — only table chat sends.'
+                    : 'The session has ended.'}
+                </strong>
+              )}
             </>
           )}
         </p>

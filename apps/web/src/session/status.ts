@@ -1,9 +1,23 @@
 import {
+  type EventEnvelope,
   type RoutingDecision,
-  type SessionState,
+  SessionState,
   acceptsMutations,
   isTerminal,
 } from '@dnd-lm/contracts';
+
+/**
+ * The state a `SESSION_STATE_CHANGED` event moves the session to, or `null`
+ * for any other event (U1.0, NFR-205). The server's `to` is the truth,
+ * including where a resume lands, which only its `pausedFrom` knows. A `to`
+ * that is not a known state is ignored rather than written into the snapshot,
+ * where it would silently break every gate below.
+ */
+export function statusChange(event: EventEnvelope): SessionState | null {
+  if (event.type !== 'SESSION_STATE_CHANGED') return null;
+  const to = SessionState.safeParse(event.payload['to']);
+  return to.success ? to.data : null;
+}
 
 /**
  * What the table is told about a state that refuses things, in words — a
