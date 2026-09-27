@@ -7,7 +7,7 @@ Design documents are the source of truth:
 - [`spec-doc.md`](spec-doc.md) — requirements (FR-xxx / NFR-xxx), journeys, delivery phases.
 - [`architecture.md`](architecture.md) — stack, modules, data model, runtime flows, trust boundaries.
 - [`MVP.md`](MVP.md) — the Phase 0–2 task plan (M0–M9). Issues in this repo mirror it one-to-one.
-- [`CLAUDE.md`](CLAUDE.md) — the invariants every change is measured against.
+- [`AGENTS.md`](AGENTS.md) — the invariants every change is measured against.
 
 ## Layout
 
