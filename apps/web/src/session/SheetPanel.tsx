@@ -65,10 +65,7 @@ export function SheetPanel({
   return (
     <aside aria-busy={busy}>
       <h2>
-        {character.name}{' '}
-        <span className="role">
-          {sheet.className} {sheet.level}
-        </span>
+        {character.name} <span className="role">{derived.className}</span>
       </h2>
 
       <p>

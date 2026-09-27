@@ -1,8 +1,12 @@
 {
   "name": "Torvald Greenmantle",
   "sheet": {
-    "className": "Ranger",
-    "level": 3,
+    "classes": [
+      {
+        "name": "Ranger",
+        "level": 3
+      }
+    ],
     "abilityScores": {
       "str": 13,
       "dex": 16,

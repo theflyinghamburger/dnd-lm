@@ -247,8 +247,14 @@ export const messages = pgTable(
 /* -------------------------------------------------------------------------- */
 
 /**
- * `sheet` holds inputs only (D-3). `level` is a generated column read straight
- * out of the JSONB rather than a second copy someone has to keep in step.
+ * `sheet` holds inputs only (D-3) — every derived value is recomputed on read by
+ * `deriveSheet`, never stored.
+ *
+ * There was a generated `level` column reading `sheet->>'level'`. M4.7 replaced
+ * that field with `classes[]`, which made the column permanently NULL, and a
+ * generated column cannot sum a JSONB array (that needs `jsonb_array_elements`,
+ * a set-returning function). Nothing read it, so it was dropped rather than
+ * repaired: the character's level is `characterLevel(sheet.classes)`.
  */
 export const characters = pgTable(
   'characters',
@@ -262,7 +268,6 @@ export const characters = pgTable(
       .references(() => users.id, { onDelete: 'cascade' }),
     name: text('name').notNull(),
     sheet: jsonb('sheet').notNull(),
-    level: integer('level').generatedAlwaysAs(sql`((sheet->>'level')::integer)`),
     stateVersion: integer('state_version').notNull().default(0),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
