@@ -47,6 +47,12 @@ function suite(read: typeof readPdf) {
     }
   });
 
+  it('refuses a well-formed PDF with zero pages instead of returning nothing', async () => {
+    expect(await refusal(read(fixture('zero-pages.pdf')))).toMatchObject({
+      code: 'PDF_UNREADABLE',
+    });
+  });
+
   // pdf.js detaches the ArrayBuffer it is handed (byteLength 0 afterwards);
   // P4.1.1 keeps the original bytes to re-run extraction (FR-611).
   it('leaves the caller’s buffer intact', async () => {

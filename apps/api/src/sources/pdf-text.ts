@@ -38,6 +38,9 @@ export async function readPdf(buffer: Uint8Array): Promise<PdfText> {
     // keeps the original to re-run extraction later (FR-611).
     const pdf = await getDocumentProxy(new Uint8Array(buffer));
     result = await extractText(pdf, { mergePages: false });
+    // A well-formed `/Count 0` document parses fine, and `0 < 0 * 50` would let
+    // it through as an empty success. Nothing to read is unreadable.
+    if (result.totalPages < 1) throw new Error('no pages');
   } catch {
     throw new UnprocessableEntityException({
       code: 'PDF_UNREADABLE',
