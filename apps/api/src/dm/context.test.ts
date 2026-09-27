@@ -140,6 +140,7 @@ describe('notes layer', () => {
     expect(pkg.layerTokens.notes).toBe(estimateTokens(block));
     expect(pkg.layerTokens.notes).toBeLessThanOrEqual(LAYER_BUDGET.notes);
     expect(pkg.notes.length).toBeLessThan(list.length);
+    expect(pkg.notes).toEqual(list.slice(0, pkg.notes.length)); // the weakest end drops
     expect(block.endsWith(END)).toBe(true);
   });
 
