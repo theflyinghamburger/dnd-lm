@@ -59,6 +59,16 @@ describe('applyPending', () => {
     expect(applyPending(open, requested(1, 'a'))).toBe(open);
   });
 
+  it('drops a request whose fields are not the shape both emitters send', () => {
+    const bad = (payload: Record<string, unknown>) =>
+      applyPending([], event(1, 'ROLL_REQUESTED', payload));
+    const good = requested(1, 'a').payload;
+    expect(bad({ ...good, prompt: 42 })).toEqual([]);
+    expect(bad({ ...good, expression: undefined })).toEqual([]);
+    expect(bad({ ...good, authorized_character_ids: 'c-aria' })).toEqual([]);
+    expect(bad({ ...good, authorized_character_ids: [7] })).toEqual([]);
+  });
+
   it('does not open a card from a completion that arrives before its request', () => {
     expect(applyPending([], completed(2, 'a'))).toEqual([]);
   });

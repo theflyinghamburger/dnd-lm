@@ -36,14 +36,15 @@ export function applyPending(current: PendingRoll[], event: EventEnvelope): Pend
   if (event.type !== 'ROLL_REQUESTED' || current.some((r) => r.pendingActionId === id)) {
     return current;
   }
-  const ids = p['authorized_character_ids'];
-  return [
-    ...current,
-    {
-      pendingActionId: id,
-      prompt: String(p['prompt'] ?? ''),
-      expression: String(p['expression'] ?? ''),
-      authorizedCharacterIds: Array.isArray(ids) ? ids.filter((c) => typeof c === 'string') : [],
-    },
-  ];
+  // Dropped rather than rendered half-empty, as `statusChange` drops a bad `to`.
+  const { prompt, expression, authorized_character_ids: ids } = p;
+  if (
+    typeof prompt !== 'string' ||
+    typeof expression !== 'string' ||
+    !Array.isArray(ids) ||
+    !ids.every((c) => typeof c === 'string')
+  ) {
+    return current;
+  }
+  return [...current, { pendingActionId: id, prompt, expression, authorizedCharacterIds: ids }];
 }
