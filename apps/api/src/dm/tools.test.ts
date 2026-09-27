@@ -26,7 +26,7 @@ const sheet: CharacterSheet = {
 const character: DmCharacterState = { id: 'c1', name: 'Aria', sheet };
 const world: ReadToolWorld = {
   characters: [character],
-  settings: { items: ['torch'], notes: ['The temple is cold and quiet.'] },
+  notes: [{ slug: 'temple', title: 'The temple', body: 'The temple is cold and quiet.' }],
 };
 
 describe('executeReadTool', () => {
@@ -48,7 +48,7 @@ describe('executeReadTool', () => {
     const hit = executeReadTool('search_campaign_notes', { query: 'temple' }, world);
     expect(hit.ok).toBe(true);
     expect(hit.content).toContain('untrusted data');
-    expect(hit.content).toContain('The temple is cold and quiet.');
+    expect(hit.content).toContain('### The temple (temple)\nThe temple is cold and quiet.');
     expect(executeReadTool('search_campaign_notes', { query: 'ocean' }, world).content).toContain(
       'No campaign notes match',
     );

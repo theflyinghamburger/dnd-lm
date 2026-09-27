@@ -30,7 +30,8 @@ const sheet: CharacterSheet = {
 
 const reader: DmReadOnly = {
   characters: async () => [{ id: 'c1', name: 'Aria', sheet }],
-  campaignSettings: async () => ({ items: [], notes: [] }),
+  campaignSettings: async () => ({ items: [], chapter: 0 }),
+  notes: async () => [],
   currentScene: async () => 'the crypt',
   unresolvedAction: async () => null,
   recentPublicMessages: async () => [],

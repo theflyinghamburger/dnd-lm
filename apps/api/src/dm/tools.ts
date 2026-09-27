@@ -17,7 +17,8 @@ import {
   parseDiceExpression,
 } from '@dnd-lm/contracts';
 import { z } from 'zod';
-import { type DmCampaignSettings, type DmCharacterState, renderCharacter } from './context';
+import { type RetrievedNote } from '../notes/notes.service';
+import { type DmCharacterState, renderCharacter, renderNote } from './context';
 
 const argsSchemas = {
   get_character_summary: z.object({ character_id: z.string().min(1) }),
@@ -47,7 +48,8 @@ export type ReadToolResult = {
  */
 export type ReadToolWorld = {
   characters: DmCharacterState[];
-  settings: DmCampaignSettings | null;
+  /** The notes the context layer retrieved for this turn (M8.3). */
+  notes: RetrievedNote[];
 };
 
 /**
@@ -78,11 +80,15 @@ export function executeReadTool(
   }
 
   if (name === 'search_campaign_notes') {
-    const notes = world.settings?.notes ?? [];
-    // ponytail: case-insensitive substring is the whole "retrieval" in M6;
-    // M8's campaign_notes table brings scoring. The ceiling is campaign size
-    // — fine while notes fit a page.
-    const hits = notes.filter((note) => note.toLowerCase().includes(String(a.query).toLowerCase()));
+    // ponytail: a substring filter over the notes the layer already retrieved
+    // for this turn — the tool loop holds no database handle (FR-503,
+    // campaign-pdf-ingestion.md §3.3). Ceiling: it cannot find a note the
+    // trigger text did not retrieve; a per-query retrieval needs a read seam
+    // outside the tool loop.
+    const query = String(a.query).toLowerCase();
+    const hits = world.notes
+      .filter((note) => `${note.title}\n${note.body}`.toLowerCase().includes(query))
+      .map(renderNote);
     return {
       name,
       ok: true,
