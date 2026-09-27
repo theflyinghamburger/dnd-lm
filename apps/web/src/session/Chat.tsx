@@ -10,6 +10,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { type FormEvent, useMemo, useState } from 'react';
 import { api } from '../api';
+import { PendingRollCard } from './PendingRollCard';
 import { SheetPanel } from './SheetPanel';
 import { canSend, statusNotice } from './status';
 import { useSession } from './useSession';
@@ -40,7 +41,7 @@ export function Chat({
   onLeave: () => void;
 }) {
   const [draft, setDraft] = useState('');
-  const { snapshot, lines, rolls, connected, dmNarration, send, roll } = useSession(
+  const { snapshot, lines, rolls, pending, connected, dmNarration, send, roll } = useSession(
     sessionId,
     characterId,
   );
@@ -98,6 +99,7 @@ export function Chat({
   const status = snapshot?.status ?? null;
   const notice = status && statusNotice(status);
   const sendable = status !== null && canSend(status, preview);
+  const canRoll = status !== null && acceptsMutations(status);
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -174,6 +176,15 @@ export function Chat({
         </section>
       )}
 
+      {/* U1.1: emptied once ended — END does not close the request, and nobody can roll. */}
+      <PendingRollCard
+        pending={status && isTerminal(status) ? [] : pending}
+        campaignId={campaignId}
+        characterId={characterId}
+        canRoll={canRoll}
+        onRoll={(expression) => void roll(expression)}
+      />
+
       <form onSubmit={onSubmit}>
         <label htmlFor="draft">Message</label>
         <input
@@ -239,7 +250,7 @@ export function Chat({
         user={user}
         campaignId={campaignId}
         characterId={characterId}
-        canRoll={status !== null && acceptsMutations(status)}
+        canRoll={canRoll}
         onRoll={(expression) => void roll(expression)}
       />
     </main>
