@@ -1,6 +1,7 @@
 import {
   type EventEnvelope,
   type SessionSnapshot,
+  SessionState,
   TRIGGER_REGISTRY,
   buildRoster,
   parseMessage,
@@ -104,8 +105,10 @@ describe('hostActions', () => {
   } as const;
 
   it('follows the transition table in every state (U1.2)', () => {
-    for (const [status, expected] of Object.entries(table)) {
-      const a = hostActions(status as keyof typeof table);
+    // Driven by the contracts enum, so a new state fails here until it is listed.
+    for (const status of SessionState.options) {
+      const expected = (table as Record<string, readonly boolean[]>)[status];
+      const a = hostActions(status);
       expect([a.PAUSE, a.RESUME, a.END, a.FORCE_DM_TURN, a.REQUEST_ROLL], status).toEqual(expected);
     }
   });

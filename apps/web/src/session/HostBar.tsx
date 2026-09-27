@@ -1,7 +1,7 @@
 import type { CommandAck, HostControlAction, ServerError, SessionState } from '@dnd-lm/contracts';
 import { useQuery } from '@tanstack/react-query';
 import { type FormEvent, useState } from 'react';
-import { api } from '../api';
+import { api, describeApiError } from '../api';
 import { hostActions } from './status';
 
 type Result = CommandAck | ServerError | null;
@@ -159,6 +159,10 @@ export function HostBar({
               {character.name}
             </label>
           ))}
+          {characters.isError && (
+            <p role="alert">Could not load characters: {describeApiError(characters.error)}</p>
+          )}
+          {characters.data?.length === 0 && <p>No characters in this campaign to ask.</p>}
           <button type="submit" disabled={busy || chosen.length === 0}>
             Ask
           </button>
