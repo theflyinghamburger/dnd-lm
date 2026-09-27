@@ -534,6 +534,17 @@ describe.skipIf(!DATABASE_URL)('the langgraph DM', () => {
     expect(first.system).not.toContain('rusted key');
     expect(first.payload.layer_tokens.notes).toBeGreaterThan(0);
 
+    // Junk reads as chapter 0, never as "everything" (FR-608).
+    for (const junk of ['2', -1, 2.5]) {
+      await main.db
+        .update(campaigns)
+        .set({ settings: { progression: { chapter: junk } } })
+        .where(eq(campaigns.id, table.campaignId));
+      expect((await turn(table, '@dm Aria searches the altar')).prompt).not.toContain(
+        'chapter two',
+      );
+    }
+
     // The chapter is the campaign row's `settings.progression.chapter`.
     await main.db
       .update(campaigns)
@@ -563,6 +574,8 @@ describe.skipIf(!DATABASE_URL)('the langgraph DM', () => {
     );
     expect(prompt.split(END)).toHaveLength(2); // the forged marker is not a marker
     expect(system).not.toContain('500gp');
+    // The provider is scripted, so the lines below prove the turn still
+    // commits normally; the boundary evidence is the marker and system checks.
     expect(payload.narration).toBe('Dust settles on the ledger.');
     expect(payload.proposed_state_changes).toEqual([]);
     expect(await sheetOf(main, table.ariaCharacter)).toEqual(before);
