@@ -153,6 +153,7 @@ describe.skipIf(!DATABASE_URL)('campaign source upload (P4.1.1)', () => {
 
     const res = await upload(campaignId, host, Buffer.from('<html>hi</html>')).expect(422);
     expect(res.body.code).toBe('NOT_A_PDF');
+    noContent(res.body);
   });
 
   it('refuses PDF bytes declared as another type — the MIME is checked too', async () => {
@@ -164,6 +165,7 @@ describe.skipIf(!DATABASE_URL)('campaign source upload (P4.1.1)', () => {
       contentType: 'text/html',
     }).expect(422);
     expect(res.body.code).toBe('NOT_A_PDF');
+    noContent(res.body);
   });
 
   it('refuses a 40 MB file with 413 and stores nothing', async () => {
@@ -207,18 +209,34 @@ describe.skipIf(!DATABASE_URL)('campaign source upload (P4.1.1)', () => {
     const campaignB = await campaignFor(hostB);
     const sourceA = (await upload(campaignA, hostA).expect(201)).body.id as string;
 
-    await api()
-      .get(`/api/campaigns/${campaignB}/sources/${sourceA}`)
-      .set('Cookie', hostB)
-      .expect(404);
-    await api()
-      .delete(`/api/campaigns/${campaignB}/sources/${sourceA}`)
-      .set('Cookie', hostB)
-      .expect(404);
+    for (const res of [
+      await api().get(`/api/campaigns/${campaignB}/sources/${sourceA}`).set('Cookie', hostB),
+      await api().delete(`/api/campaigns/${campaignB}/sources/${sourceA}`).set('Cookie', hostB),
+    ]) {
+      expect(res.status).toBe(404);
+      noContent(res.body);
+    }
     const list = await api().get(`/api/campaigns/${campaignB}/sources`).set('Cookie', hostB);
     expect(list.body).toEqual([]);
     // A malformed id is a 400 from the pipe, not a Postgres cast error.
-    await api().get(`/api/campaigns/${campaignA}/sources/nope`).set('Cookie', hostA).expect(400);
+    const bad = await api()
+      .get(`/api/campaigns/${campaignA}/sources/nope`)
+      .set('Cookie', hostA)
+      .expect(400);
+    noContent(bad.body);
+  });
+
+  it('refuses a multipart request with no file part', async () => {
+    const host = await signUp('host@example.com');
+    const campaignId = await campaignFor(host);
+
+    const res = await api()
+      .post(`/api/campaigns/${campaignId}/sources`)
+      .set('Cookie', host)
+      .field('note', 'forgot the file')
+      .expect(400);
+    expect(res.body.code).toBe('NO_FILE');
+    noContent(res.body);
   });
 
   it('deleting a source keeps its notes and clears their source_id', async () => {
