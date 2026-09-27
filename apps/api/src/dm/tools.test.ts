@@ -9,8 +9,7 @@ import {
 } from './tools';
 
 const sheet: CharacterSheet = {
-  className: 'Fighter',
-  level: 3,
+  classes: [{ name: 'Fighter', level: 3 }],
   abilityScores: { str: 18, dex: 10, con: 14, int: 8, wis: 10, cha: 12 },
   skillProficiencies: ['athletics'],
   saveProficiencies: ['str', 'con'],
@@ -20,6 +19,8 @@ const sheet: CharacterSheet = {
   speed: 30,
   inventory: [{ name: 'longsword', quantity: 1, equipped: true }],
   currency: { cp: 0, sp: 0, gp: 7, pp: 0 },
+  attacks: [],
+  spells: [],
 };
 
 const character: DmCharacterState = { id: 'c1', name: 'Aria', sheet };
@@ -32,7 +33,7 @@ describe('executeReadTool', () => {
   it('renders a character summary from the read handle, not the database', () => {
     const result = executeReadTool('get_character_summary', { character_id: 'c1' }, world);
     expect(result.ok).toBe(true);
-    expect(result.content).toContain('Aria — Fighter level 3');
+    expect(result.content).toContain('Aria — Fighter 3');
     expect(result.content).toContain('HP 26/32');
   });
 

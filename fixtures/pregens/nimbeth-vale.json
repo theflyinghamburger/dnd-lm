@@ -1,8 +1,12 @@
 {
   "name": "Nimbeth Vale",
   "sheet": {
-    "className": "Wizard",
-    "level": 3,
+    "classes": [
+      {
+        "name": "Wizard",
+        "level": 3
+      }
+    ],
     "abilityScores": {
       "str": 8,
       "dex": 14,

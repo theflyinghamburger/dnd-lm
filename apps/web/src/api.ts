@@ -75,7 +75,12 @@ async function call<T>(path: string, init?: RequestInit): Promise<T> {
     ...init,
     // The session lives in an httpOnly cookie; nothing here ever sees a token.
     credentials: 'include',
-    headers: init?.body ? { 'content-type': 'application/json' } : undefined,
+    // A FormData body must set its own multipart boundary; forcing JSON here
+    // would make the browser send a content-type multer cannot parse.
+    headers:
+      init?.body && !(init.body instanceof FormData)
+        ? { 'content-type': 'application/json' }
+        : undefined,
   });
 
   if (!res.ok) {
@@ -115,6 +120,21 @@ export const api = {
    *  the body — the body could otherwise name a campaign the guard did not check. */
   importCharacter: (campaignId: string, body: ImportCharacterRequest) =>
     post<CharacterView>(`/campaigns/${campaignId}/characters/import`, body),
+  /**
+   * `confirmLevel` is set only after a `LEVEL_MISMATCH`, echoing back the level
+   * that refusal named — so importing anyway needs someone to have read it.
+   */
+  importCharacterPdf: (campaignId: string, file: File, confirmLevel?: number) => {
+    const form = new FormData();
+    form.append('file', file);
+    const query = confirmLevel === undefined ? '' : `?confirmLevel=${confirmLevel}`;
+    return call<{ character: CharacterView; ignored: string[] }>(
+      `/campaigns/${campaignId}/characters/import-pdf${query}`,
+      { method: 'POST', body: form },
+    );
+  },
+  deleteCharacter: (campaignId: string, characterId: string) =>
+    del(`/campaigns/${campaignId}/characters/${characterId}`),
   updateHp: (campaignId: string, characterId: string, body: UpdateHpRequest) =>
     patch<CharacterView>(`/campaigns/${campaignId}/characters/${characterId}/hp`, body),
 

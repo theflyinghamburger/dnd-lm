@@ -1,0 +1,2704 @@
+[
+  {
+    "name": "CharacterName",
+    "value": "Varric Ironwright",
+    "page": 1,
+    "x": 47.5,
+    "y": 731.2
+  },
+  {
+    "name": "CLASS LEVEL",
+    "value": "Artificer 5 / Wizard 2",
+    "page": 1,
+    "x": 270.7,
+    "y": 742.4
+  },
+  {
+    "name": "PLAYER NAME",
+    "value": "FlyingHamburger",
+    "page": 1,
+    "x": 470.3,
+    "y": 742.4
+  },
+  {
+    "name": "RACE",
+    "value": "Custom Lineage",
+    "page": 1,
+    "x": 270.7,
+    "y": 716.4
+  },
+  {
+    "name": "BACKGROUND",
+    "value": "Guild Artisan / Guild Merchant",
+    "page": 1,
+    "x": 383.5,
+    "y": 716.4
+  },
+  {
+    "name": "EXPERIENCE POINTS",
+    "value": "(Milestone)",
+    "page": 1,
+    "x": 480.2,
+    "y": 716.4
+  },
+  {
+    "name": "STR",
+    "value": "6",
+    "page": 1,
+    "x": 36.8,
+    "y": 634.8
+  },
+  {
+    "name": "STRmod",
+    "value": "-2",
+    "page": 1,
+    "x": 46.4,
+    "y": 602.3
+  },
+  {
+    "name": "DEX",
+    "value": "14",
+    "page": 1,
+    "x": 36.8,
+    "y": 557.8
+  },
+  {
+    "name": "DEXmod",
+    "value": "+2",
+    "page": 1,
+    "x": 46.4,
+    "y": 525.3
+  },
+  {
+    "name": "CON",
+    "value": "16",
+    "page": 1,
+    "x": 36.8,
+    "y": 481.5
+  },
+  {
+    "name": "CONmod",
+    "value": "+3",
+    "page": 1,
+    "x": 46.4,
+    "y": 449
+  },
+  {
+    "name": "INT",
+    "value": "20",
+    "page": 1,
+    "x": 36.8,
+    "y": 404.5
+  },
+  {
+    "name": "INTmod",
+    "value": "+5",
+    "page": 1,
+    "x": 46.4,
+    "y": 372
+  },
+  {
+    "name": "WIS",
+    "value": "14",
+    "page": 1,
+    "x": 36.8,
+    "y": 328.3
+  },
+  {
+    "name": "WISmod",
+    "value": "+2",
+    "page": 1,
+    "x": 46.4,
+    "y": 295.7
+  },
+  {
+    "name": "CHA",
+    "value": "10",
+    "page": 1,
+    "x": 36.8,
+    "y": 252
+  },
+  {
+    "name": "CHamod",
+    "value": "+0",
+    "page": 1,
+    "x": 46.4,
+    "y": 219.5
+  },
+  {
+    "name": "ST Strength",
+    "value": "-2",
+    "page": 1,
+    "x": 113,
+    "y": 658.9
+  },
+  {
+    "name": "ST Dexterity",
+    "value": "+2",
+    "page": 1,
+    "x": 113,
+    "y": 645.4
+  },
+  {
+    "name": "ConProf",
+    "value": "•",
+    "page": 1,
+    "x": 99.6,
+    "y": 632.1
+  },
+  {
+    "name": "ST Constitution",
+    "value": "+6",
+    "page": 1,
+    "x": 113,
+    "y": 631.9
+  },
+  {
+    "name": "IntProf",
+    "value": "•",
+    "page": 1,
+    "x": 99.6,
+    "y": 618.5
+  },
+  {
+    "name": "ST Intelligence",
+    "value": "+8",
+    "page": 1,
+    "x": 113,
+    "y": 618.4
+  },
+  {
+    "name": "ST Wisdom",
+    "value": "+2",
+    "page": 1,
+    "x": 113,
+    "y": 604.9
+  },
+  {
+    "name": "ST Charisma",
+    "value": "+0",
+    "page": 1,
+    "x": 113,
+    "y": 591.5
+  },
+  {
+    "name": "Acrobatics",
+    "value": "+2",
+    "page": 1,
+    "x": 112,
+    "y": 489.4
+  },
+  {
+    "name": "AcrobaticsMod",
+    "value": "DEX",
+    "page": 1,
+    "x": 164.9,
+    "y": 488.6
+  },
+  {
+    "name": "Animal",
+    "value": "+2",
+    "page": 1,
+    "x": 112,
+    "y": 475.9
+  },
+  {
+    "name": "AnimalMod",
+    "value": "WIS",
+    "page": 1,
+    "x": 183.9,
+    "y": 475.1
+  },
+  {
+    "name": "Arcana",
+    "value": "+5",
+    "page": 1,
+    "x": 112,
+    "y": 462.3
+  },
+  {
+    "name": "ArcanaMod",
+    "value": "INT",
+    "page": 1,
+    "x": 153.9,
+    "y": 461.6
+  },
+  {
+    "name": "Athletics",
+    "value": "-2",
+    "page": 1,
+    "x": 112,
+    "y": 448.9
+  },
+  {
+    "name": "AthleticsMod",
+    "value": "STR",
+    "page": 1,
+    "x": 159.9,
+    "y": 448.1
+  },
+  {
+    "name": "Deception",
+    "value": "+0",
+    "page": 1,
+    "x": 112,
+    "y": 435.3
+  },
+  {
+    "name": "DeceptionMod",
+    "value": "CHA",
+    "page": 1,
+    "x": 164.9,
+    "y": 434.6
+  },
+  {
+    "name": "History",
+    "value": "+5",
+    "page": 1,
+    "x": 112,
+    "y": 421.8
+  },
+  {
+    "name": "HistoryMod",
+    "value": "INT",
+    "page": 1,
+    "x": 155.9,
+    "y": 421
+  },
+  {
+    "name": "InsightProf",
+    "value": "P",
+    "page": 1,
+    "x": 99.7,
+    "y": 407.7
+  },
+  {
+    "name": "Insight",
+    "value": "+5",
+    "page": 1,
+    "x": 112,
+    "y": 408.3
+  },
+  {
+    "name": "InsightMod",
+    "value": "WIS",
+    "page": 1,
+    "x": 154.9,
+    "y": 407.6
+  },
+  {
+    "name": "Intimidation",
+    "value": "+0",
+    "page": 1,
+    "x": 112,
+    "y": 394.9
+  },
+  {
+    "name": "IntimidationMod",
+    "value": "CHA",
+    "page": 1,
+    "x": 169.9,
+    "y": 394.1
+  },
+  {
+    "name": "InvestigationProf",
+    "value": "P",
+    "page": 1,
+    "x": 99.7,
+    "y": 380.6
+  },
+  {
+    "name": "Investigation",
+    "value": "+8",
+    "page": 1,
+    "x": 112,
+    "y": 381.3
+  },
+  {
+    "name": "InvestigationMod",
+    "value": "INT",
+    "page": 1,
+    "x": 170.9,
+    "y": 380.5
+  },
+  {
+    "name": "Medicine",
+    "value": "+2",
+    "page": 1,
+    "x": 112,
+    "y": 367.9
+  },
+  {
+    "name": "MedicineMod",
+    "value": "WIS",
+    "page": 1,
+    "x": 160.9,
+    "y": 367.1
+  },
+  {
+    "name": "Nature",
+    "value": "+5",
+    "page": 1,
+    "x": 112,
+    "y": 354.3
+  },
+  {
+    "name": "NatureMod",
+    "value": "INT",
+    "page": 1,
+    "x": 154.9,
+    "y": 353.5
+  },
+  {
+    "name": "PerceptionProf",
+    "value": "P",
+    "page": 1,
+    "x": 99.7,
+    "y": 339.9
+  },
+  {
+    "name": "Perception",
+    "value": "+5",
+    "page": 1,
+    "x": 112,
+    "y": 340.8
+  },
+  {
+    "name": "PerceptionMod",
+    "value": "WIS",
+    "page": 1,
+    "x": 164.9,
+    "y": 340
+  },
+  {
+    "name": "Performance",
+    "value": "+0",
+    "page": 1,
+    "x": 112,
+    "y": 327.3
+  },
+  {
+    "name": "PerformanceMod",
+    "value": "CHA",
+    "page": 1,
+    "x": 170.9,
+    "y": 326.6
+  },
+  {
+    "name": "PersuasionProf",
+    "value": "P",
+    "page": 1,
+    "x": 99.7,
+    "y": 312.9
+  },
+  {
+    "name": "Persuasion",
+    "value": "+3",
+    "page": 1,
+    "x": 112,
+    "y": 313.8
+  },
+  {
+    "name": "PersuasionMod",
+    "value": "CHA",
+    "page": 1,
+    "x": 166.9,
+    "y": 313
+  },
+  {
+    "name": "Religion",
+    "value": "+5",
+    "page": 1,
+    "x": 112,
+    "y": 300.3
+  },
+  {
+    "name": "SleightofHand",
+    "value": "+2",
+    "page": 1,
+    "x": 112,
+    "y": 286.9
+  },
+  {
+    "name": "Stealth",
+    "value": "+2",
+    "page": 1,
+    "x": 112,
+    "y": 273.3
+  },
+  {
+    "name": "Survival",
+    "value": "+2",
+    "page": 1,
+    "x": 112,
+    "y": 259.8
+  },
+  {
+    "name": "Passive1",
+    "value": "15",
+    "page": 1,
+    "x": 38.8,
+    "y": 165.6
+  },
+  {
+    "name": "Passive2",
+    "value": "15",
+    "page": 1,
+    "x": 38.8,
+    "y": 135.6
+  },
+  {
+    "name": "Passive3",
+    "value": "18",
+    "page": 1,
+    "x": 39,
+    "y": 104.7
+  },
+  {
+    "name": "AdditionalSenses",
+    "value": "Darkvision 60 ft.",
+    "page": 1,
+    "x": 37.8,
+    "y": 79.3
+  },
+  {
+    "name": "Init",
+    "value": "+7",
+    "page": 1,
+    "x": 238,
+    "y": 645.8
+  },
+  {
+    "name": "AC",
+    "value": "18",
+    "page": 1,
+    "x": 334.3,
+    "y": 643.4
+  },
+  {
+    "name": "ProfBonus",
+    "value": "+3",
+    "page": 1,
+    "x": 227.8,
+    "y": 482
+  },
+  {
+    "name": "Speed",
+    "value": "30 ft. (Walking)",
+    "page": 1,
+    "x": 236.2,
+    "y": 401.7
+  },
+  {
+    "name": "MaxHP",
+    "value": "57",
+    "page": 1,
+    "x": 426.8,
+    "y": 640.8
+  },
+  {
+    "name": "TempHP",
+    "value": "--",
+    "page": 1,
+    "x": 531.9,
+    "y": 641.4
+  },
+  {
+    "name": "Total",
+    "value": "5d8 + 2d6",
+    "page": 1,
+    "x": 438.4,
+    "y": 586.3
+  },
+  {
+    "name": "Check Box 12",
+    "value": "Off",
+    "page": 1,
+    "x": 537.4,
+    "y": 581.6
+  },
+  {
+    "name": "Check Box 13",
+    "value": "Off",
+    "page": 1,
+    "x": 550.2,
+    "y": 581.6
+  },
+  {
+    "name": "Check Box 14",
+    "value": "Off",
+    "page": 1,
+    "x": 563.1,
+    "y": 581.6
+  },
+  {
+    "name": "Check Box 15",
+    "value": "Off",
+    "page": 1,
+    "x": 537.3,
+    "y": 566.5
+  },
+  {
+    "name": "Check Box 16",
+    "value": "Off",
+    "page": 1,
+    "x": 550.2,
+    "y": 566.5
+  },
+  {
+    "name": "Check Box 17",
+    "value": "Off",
+    "page": 1,
+    "x": 563.1,
+    "y": 566.5
+  },
+  {
+    "name": "ProficienciesLang",
+    "value": "[rules text elided from the fixture]",
+    "page": 1,
+    "x": 414,
+    "y": 512.9
+  },
+  {
+    "name": "ReligionMod",
+    "value": "INT",
+    "page": 1,
+    "x": 157.9,
+    "y": 299.6
+  },
+  {
+    "name": "SleightofHandMod",
+    "value": "DEX",
+    "page": 1,
+    "x": 179.9,
+    "y": 286.1
+  },
+  {
+    "name": "StealthMod",
+    "value": "DEX",
+    "page": 1,
+    "x": 154.9,
+    "y": 272.5
+  },
+  {
+    "name": "SurvivalMod",
+    "value": "WIS",
+    "page": 1,
+    "x": 157.9,
+    "y": 259
+  },
+  {
+    "name": "Actions1",
+    "value": "[rules text elided from the fixture]",
+    "page": 1,
+    "x": 226,
+    "y": 329.2
+  },
+  {
+    "name": "Actions2",
+    "value": "[rules text elided from the fixture]",
+    "page": 1,
+    "x": 404.8,
+    "y": 329.4
+  },
+  {
+    "name": "Wpn Name",
+    "value": "Longsword",
+    "page": 1,
+    "x": 225,
+    "y": 160.7
+  },
+  {
+    "name": "Wpn1 AtkBonus",
+    "value": "+1",
+    "page": 1,
+    "x": 342.3,
+    "y": 160.7
+  },
+  {
+    "name": "Wpn1 Damage",
+    "value": "1d8-2 Slashing",
+    "page": 1,
+    "x": 378.3,
+    "y": 160.7
+  },
+  {
+    "name": "Wpn Notes 1",
+    "value": "Martial, Versatile, Sap",
+    "page": 1,
+    "x": 443.8,
+    "y": 160.7
+  },
+  {
+    "name": "Wpn Name 2",
+    "value": "Fire Bolt",
+    "page": 1,
+    "x": 225,
+    "y": 140.6
+  },
+  {
+    "name": "Wpn2 AtkBonus",
+    "value": "+9",
+    "page": 1,
+    "x": 342.3,
+    "y": 140.6
+  },
+  {
+    "name": "Wpn2 Damage",
+    "value": "2d10 Fire",
+    "page": 1,
+    "x": 378.3,
+    "y": 140.6
+  },
+  {
+    "name": "Wpn Notes 2",
+    "value": "V/S",
+    "page": 1,
+    "x": 443.8,
+    "y": 140.5
+  },
+  {
+    "name": "Wpn Name 3",
+    "value": "Ray of Frost",
+    "page": 1,
+    "x": 225,
+    "y": 119.7
+  },
+  {
+    "name": "Wpn3 AtkBonus",
+    "value": "+8",
+    "page": 1,
+    "x": 342.3,
+    "y": 119.7
+  },
+  {
+    "name": "Wpn3 Damage",
+    "value": "2d8 Cold",
+    "page": 1,
+    "x": 378.3,
+    "y": 119.7
+  },
+  {
+    "name": "Wpn Notes 3",
+    "value": "V/S",
+    "page": 1,
+    "x": 443.8,
+    "y": 119.6
+  },
+  {
+    "name": "Wpn Name 4",
+    "value": "Unarmed Strike",
+    "page": 1,
+    "x": 225.2,
+    "y": 99.3
+  },
+  {
+    "name": "Wpn4 AtkBonus",
+    "value": "+1",
+    "page": 1,
+    "x": 342.5,
+    "y": 99.3
+  },
+  {
+    "name": "Wpn4 Damage",
+    "value": "0 Bludgeoning",
+    "page": 1,
+    "x": 378.5,
+    "y": 99.3
+  },
+  {
+    "name": "Inspiration",
+    "value": "Off",
+    "page": 1,
+    "x": 229.7,
+    "y": 519.7
+  },
+  {
+    "name": "CharacterName2",
+    "value": "Varric Ironwright",
+    "page": 2,
+    "x": 47.3,
+    "y": 732.2
+  },
+  {
+    "name": "CLASS LEVEL2",
+    "value": "Artificer 5 / Wizard 2",
+    "page": 2,
+    "x": 270.6,
+    "y": 743.4
+  },
+  {
+    "name": "PLAYER NAME2",
+    "value": "FlyingHamburger",
+    "page": 2,
+    "x": 470.1,
+    "y": 743.4
+  },
+  {
+    "name": "RACE2",
+    "value": "Custom Lineage",
+    "page": 2,
+    "x": 270.6,
+    "y": 717.4
+  },
+  {
+    "name": "BACKGROUND2",
+    "value": "Guild Artisan / Guild Merchant",
+    "page": 2,
+    "x": 383.4,
+    "y": 717.4
+  },
+  {
+    "name": "EXPERIENCE POINTS2",
+    "value": "(Milestone)",
+    "page": 2,
+    "x": 480.1,
+    "y": 717.4
+  },
+  {
+    "name": "FeaturesTraits1",
+    "value": "[rules text elided from the fixture]",
+    "page": 2,
+    "x": 36.1,
+    "y": 655.9
+  },
+  {
+    "name": "FeaturesTraits2",
+    "value": "[rules text elided from the fixture]",
+    "page": 2,
+    "x": 218.6,
+    "y": 656.1
+  },
+  {
+    "name": "FeaturesTraits3",
+    "value": "[rules text elided from the fixture]",
+    "page": 2,
+    "x": 400,
+    "y": 656.4
+  },
+  {
+    "name": "CP",
+    "value": "0",
+    "page": 2,
+    "x": 38.1,
+    "y": 267.7
+  },
+  {
+    "name": "SP",
+    "value": "0",
+    "page": 2,
+    "x": 38.4,
+    "y": 238.8
+  },
+  {
+    "name": "EP",
+    "value": "0",
+    "page": 2,
+    "x": 38.4,
+    "y": 210
+  },
+  {
+    "name": "GP",
+    "value": "33",
+    "page": 2,
+    "x": 38.2,
+    "y": 181.4
+  },
+  {
+    "name": "PP",
+    "value": "0",
+    "page": 2,
+    "x": 37.9,
+    "y": 152.6
+  },
+  {
+    "name": "Weight Carried",
+    "value": "187 lb.",
+    "page": 2,
+    "x": 37.3,
+    "y": 115.3
+  },
+  {
+    "name": "Encumbered",
+    "value": "90 lb.",
+    "page": 2,
+    "x": 37.2,
+    "y": 87.2
+  },
+  {
+    "name": "PushDragLift",
+    "value": "180 lb.",
+    "page": 2,
+    "x": 37.4,
+    "y": 57.9
+  },
+  {
+    "name": "Eq Name0",
+    "value": "All-Purpose Tool, +1",
+    "page": 2,
+    "x": 112.2,
+    "y": 267
+  },
+  {
+    "name": "Eq Qty0",
+    "value": "1",
+    "page": 2,
+    "x": 271.8,
+    "y": 267
+  },
+  {
+    "name": "Eq Weight0",
+    "value": "--",
+    "page": 2,
+    "x": 306,
+    "y": 267
+  },
+  {
+    "name": "Eq Name1",
+    "value": "Scale Mail",
+    "page": 2,
+    "x": 112.2,
+    "y": 252.1
+  },
+  {
+    "name": "Eq Qty1",
+    "value": "1",
+    "page": 2,
+    "x": 271.8,
+    "y": 252.1
+  },
+  {
+    "name": "Eq Weight1",
+    "value": "45 lb.",
+    "page": 2,
+    "x": 306,
+    "y": 252.1
+  },
+  {
+    "name": "Eq Name2",
+    "value": "Shield",
+    "page": 2,
+    "x": 112.2,
+    "y": 237.2
+  },
+  {
+    "name": "Eq Qty2",
+    "value": "1",
+    "page": 2,
+    "x": 271.8,
+    "y": 237.2
+  },
+  {
+    "name": "Eq Weight2",
+    "value": "6 lb.",
+    "page": 2,
+    "x": 306,
+    "y": 237.2
+  },
+  {
+    "name": "Eq Name3",
+    "value": "Ember Reactor",
+    "page": 2,
+    "x": 112.2,
+    "y": 222.3
+  },
+  {
+    "name": "Eq Qty3",
+    "value": "1",
+    "page": 2,
+    "x": 271.8,
+    "y": 222.3
+  },
+  {
+    "name": "Eq Weight3",
+    "value": "2 lb.",
+    "page": 2,
+    "x": 306,
+    "y": 222.3
+  },
+  {
+    "name": "Eq Name4",
+    "value": "Dagger",
+    "page": 2,
+    "x": 112.2,
+    "y": 207.5
+  },
+  {
+    "name": "Eq Qty4",
+    "value": "1",
+    "page": 2,
+    "x": 271.8,
+    "y": 207.5
+  },
+  {
+    "name": "Eq Weight4",
+    "value": "1 lb.",
+    "page": 2,
+    "x": 306,
+    "y": 207.5
+  },
+  {
+    "name": "Eq Name5",
+    "value": "Longsword",
+    "page": 2,
+    "x": 112.2,
+    "y": 192.6
+  },
+  {
+    "name": "Eq Qty5",
+    "value": "1",
+    "page": 2,
+    "x": 271.8,
+    "y": 192.6
+  },
+  {
+    "name": "Eq Weight5",
+    "value": "3 lb.",
+    "page": 2,
+    "x": 306,
+    "y": 192.6
+  },
+  {
+    "name": "Eq Name6",
+    "value": "Light Hammer",
+    "page": 2,
+    "x": 112.2,
+    "y": 177.7
+  },
+  {
+    "name": "Eq Qty6",
+    "value": "1",
+    "page": 2,
+    "x": 271.8,
+    "y": 177.7
+  },
+  {
+    "name": "Eq Weight6",
+    "value": "2 lb.",
+    "page": 2,
+    "x": 306,
+    "y": 177.7
+  },
+  {
+    "name": "Eq Name7",
+    "value": "Crossbow, Light",
+    "page": 2,
+    "x": 112.2,
+    "y": 162.8
+  },
+  {
+    "name": "Eq Qty7",
+    "value": "1",
+    "page": 2,
+    "x": 271.8,
+    "y": 162.8
+  },
+  {
+    "name": "Eq Weight7",
+    "value": "5 lb.",
+    "page": 2,
+    "x": 306,
+    "y": 162.8
+  },
+  {
+    "name": "Eq Name8",
+    "value": "Crossbow Bolts",
+    "page": 2,
+    "x": 112.2,
+    "y": 147.9
+  },
+  {
+    "name": "Eq Qty8",
+    "value": "20",
+    "page": 2,
+    "x": 271.8,
+    "y": 147.9
+  },
+  {
+    "name": "Eq Weight8",
+    "value": "1.5 lb.",
+    "page": 2,
+    "x": 306,
+    "y": 147.9
+  },
+  {
+    "name": "Eq Name9",
+    "value": "Backpack",
+    "page": 2,
+    "x": 112.2,
+    "y": 133.1
+  },
+  {
+    "name": "Eq Qty9",
+    "value": "1",
+    "page": 2,
+    "x": 271.8,
+    "y": 133.1
+  },
+  {
+    "name": "Eq Weight9",
+    "value": "5 lb.",
+    "page": 2,
+    "x": 306,
+    "y": 133.1
+  },
+  {
+    "name": "Eq Name10",
+    "value": "Clothes, Common",
+    "page": 2,
+    "x": 112.2,
+    "y": 118.2
+  },
+  {
+    "name": "Eq Qty10",
+    "value": "1",
+    "page": 2,
+    "x": 271.8,
+    "y": 118.2
+  },
+  {
+    "name": "Eq Weight10",
+    "value": "3 lb.",
+    "page": 2,
+    "x": 306,
+    "y": 118.2
+  },
+  {
+    "name": "Eq Name11",
+    "value": "Thieves' Tools",
+    "page": 2,
+    "x": 112.2,
+    "y": 103.3
+  },
+  {
+    "name": "Eq Qty11",
+    "value": "1",
+    "page": 2,
+    "x": 271.8,
+    "y": 103.3
+  },
+  {
+    "name": "Eq Weight11",
+    "value": "1 lb.",
+    "page": 2,
+    "x": 306,
+    "y": 103.3
+  },
+  {
+    "name": "Eq Name12",
+    "value": "Bedroll",
+    "page": 2,
+    "x": 112.2,
+    "y": 88.4
+  },
+  {
+    "name": "Eq Qty12",
+    "value": "1",
+    "page": 2,
+    "x": 271.8,
+    "y": 88.4
+  },
+  {
+    "name": "Eq Weight12",
+    "value": "7 lb.",
+    "page": 2,
+    "x": 306,
+    "y": 88.4
+  },
+  {
+    "name": "Eq Name13",
+    "value": "Mess Kit",
+    "page": 2,
+    "x": 112.2,
+    "y": 73.5
+  },
+  {
+    "name": "Eq Qty13",
+    "value": "1",
+    "page": 2,
+    "x": 271.8,
+    "y": 73.5
+  },
+  {
+    "name": "Eq Weight13",
+    "value": "1 lb.",
+    "page": 2,
+    "x": 306,
+    "y": 73.5
+  },
+  {
+    "name": "Eq Name14",
+    "value": "Rations (1 day)",
+    "page": 2,
+    "x": 112.2,
+    "y": 58.7
+  },
+  {
+    "name": "Eq Qty14",
+    "value": "10",
+    "page": 2,
+    "x": 271.8,
+    "y": 58.7
+  },
+  {
+    "name": "Eq Weight14",
+    "value": "20 lb.",
+    "page": 2,
+    "x": 306,
+    "y": 58.7
+  },
+  {
+    "name": "Eq Name15",
+    "value": "Rope, Hempen (50 feet)",
+    "page": 2,
+    "x": 349.5,
+    "y": 267
+  },
+  {
+    "name": "Eq Qty15",
+    "value": "1",
+    "page": 2,
+    "x": 509.5,
+    "y": 267
+  },
+  {
+    "name": "Eq Weight15",
+    "value": "10 lb.",
+    "page": 2,
+    "x": 543.7,
+    "y": 267
+  },
+  {
+    "name": "Eq Name16",
+    "value": "Tinderbox",
+    "page": 2,
+    "x": 349.5,
+    "y": 252.1
+  },
+  {
+    "name": "Eq Qty16",
+    "value": "1",
+    "page": 2,
+    "x": 509.5,
+    "y": 252.1
+  },
+  {
+    "name": "Eq Weight16",
+    "value": "1 lb.",
+    "page": 2,
+    "x": 543.7,
+    "y": 252.1
+  },
+  {
+    "name": "Eq Name17",
+    "value": "Torch",
+    "page": 2,
+    "x": 349.5,
+    "y": 237.2
+  },
+  {
+    "name": "Eq Qty17",
+    "value": "10",
+    "page": 2,
+    "x": 509.5,
+    "y": 237.2
+  },
+  {
+    "name": "Eq Weight17",
+    "value": "10 lb.",
+    "page": 2,
+    "x": 543.7,
+    "y": 237.2
+  },
+  {
+    "name": "Eq Name18",
+    "value": "Waterskin",
+    "page": 2,
+    "x": 349.5,
+    "y": 222.3
+  },
+  {
+    "name": "Eq Qty18",
+    "value": "1",
+    "page": 2,
+    "x": 509.5,
+    "y": 222.3
+  },
+  {
+    "name": "Eq Weight18",
+    "value": "5 lb.",
+    "page": 2,
+    "x": 543.7,
+    "y": 222.3
+  },
+  {
+    "name": "Eq Name19",
+    "value": "Crowbar",
+    "page": 2,
+    "x": 349.5,
+    "y": 207.5
+  },
+  {
+    "name": "Eq Qty19",
+    "value": "1",
+    "page": 2,
+    "x": 509.5,
+    "y": 207.5
+  },
+  {
+    "name": "Eq Weight19",
+    "value": "5 lb.",
+    "page": 2,
+    "x": 543.7,
+    "y": 207.5
+  },
+  {
+    "name": "Eq Name20",
+    "value": "Hammer",
+    "page": 2,
+    "x": 349.5,
+    "y": 192.6
+  },
+  {
+    "name": "Eq Qty20",
+    "value": "1",
+    "page": 2,
+    "x": 509.5,
+    "y": 192.6
+  },
+  {
+    "name": "Eq Weight20",
+    "value": "3 lb.",
+    "page": 2,
+    "x": 543.7,
+    "y": 192.6
+  },
+  {
+    "name": "Eq Name21",
+    "value": "Piton",
+    "page": 2,
+    "x": 349.5,
+    "y": 177.7
+  },
+  {
+    "name": "Eq Qty21",
+    "value": "10",
+    "page": 2,
+    "x": 509.5,
+    "y": 177.7
+  },
+  {
+    "name": "Eq Weight21",
+    "value": "2.5 lb.",
+    "page": 2,
+    "x": 543.7,
+    "y": 177.7
+  },
+  {
+    "name": "Eq Name22",
+    "value": "Rations (1 day)",
+    "page": 2,
+    "x": 349.5,
+    "y": 162.8
+  },
+  {
+    "name": "Eq Qty22",
+    "value": "10",
+    "page": 2,
+    "x": 509.5,
+    "y": 162.8
+  },
+  {
+    "name": "Eq Weight22",
+    "value": "20 lb.",
+    "page": 2,
+    "x": 543.7,
+    "y": 162.8
+  },
+  {
+    "name": "Eq Name23",
+    "value": "Rope, Hempen (50 feet)",
+    "page": 2,
+    "x": 349.5,
+    "y": 147.9
+  },
+  {
+    "name": "Eq Qty23",
+    "value": "1",
+    "page": 2,
+    "x": 509.5,
+    "y": 147.9
+  },
+  {
+    "name": "Eq Weight23",
+    "value": "10 lb.",
+    "page": 2,
+    "x": 543.7,
+    "y": 147.9
+  },
+  {
+    "name": "Eq Name24",
+    "value": "Tinderbox",
+    "page": 2,
+    "x": 349.5,
+    "y": 133.1
+  },
+  {
+    "name": "Eq Qty24",
+    "value": "1",
+    "page": 2,
+    "x": 509.5,
+    "y": 133.1
+  },
+  {
+    "name": "Eq Weight24",
+    "value": "1 lb.",
+    "page": 2,
+    "x": 543.7,
+    "y": 133.1
+  },
+  {
+    "name": "Eq Name25",
+    "value": "Torch",
+    "page": 2,
+    "x": 349.5,
+    "y": 118.2
+  },
+  {
+    "name": "Eq Qty25",
+    "value": "10",
+    "page": 2,
+    "x": 509.5,
+    "y": 118.2
+  },
+  {
+    "name": "Eq Weight25",
+    "value": "10 lb.",
+    "page": 2,
+    "x": 543.7,
+    "y": 118.2
+  },
+  {
+    "name": "Attuned Name1",
+    "value": "All-Purpose Tool, +1",
+    "page": 2,
+    "x": 349.5,
+    "y": 88.3
+  },
+  {
+    "name": "Attuned Qty1",
+    "value": "1",
+    "page": 2,
+    "x": 509.5,
+    "y": 88.3
+  },
+  {
+    "name": "Attuned Weight1",
+    "value": "--",
+    "page": 2,
+    "x": 543.7,
+    "y": 88.3
+  },
+  {
+    "name": "CharacterName3",
+    "value": "Varric Ironwright",
+    "page": 3,
+    "x": 47.3,
+    "y": 732.2
+  },
+  {
+    "name": "CLASS LEVEL3",
+    "value": "Artificer 5 / Wizard 2",
+    "page": 3,
+    "x": 270.6,
+    "y": 743.4
+  },
+  {
+    "name": "PLAYER NAME3",
+    "value": "FlyingHamburger",
+    "page": 3,
+    "x": 470.1,
+    "y": 743.4
+  },
+  {
+    "name": "RACE3",
+    "value": "Custom Lineage",
+    "page": 3,
+    "x": 270.6,
+    "y": 717.4
+  },
+  {
+    "name": "BACKGROUND3",
+    "value": "Guild Artisan / Guild Merchant",
+    "page": 3,
+    "x": 383.4,
+    "y": 717.4
+  },
+  {
+    "name": "EXPERIENCE POINTS3",
+    "value": "(Milestone)",
+    "page": 3,
+    "x": 480.1,
+    "y": 717.4
+  },
+  {
+    "name": "FeaturesTraits4",
+    "value": "[rules text elided from the fixture]",
+    "page": 3,
+    "x": 36.1,
+    "y": 655.9
+  },
+  {
+    "name": "FeaturesTraits5",
+    "value": "[rules text elided from the fixture]",
+    "page": 3,
+    "x": 218.6,
+    "y": 656.1
+  },
+  {
+    "name": "CharacterName3",
+    "value": "Varric Ironwright",
+    "page": 4,
+    "x": 47.3,
+    "y": 732.2
+  },
+  {
+    "name": "CLASS LEVEL3",
+    "value": "Artificer 5 / Wizard 2",
+    "page": 4,
+    "x": 270.6,
+    "y": 743.4
+  },
+  {
+    "name": "PLAYER NAME3",
+    "value": "FlyingHamburger",
+    "page": 4,
+    "x": 470.1,
+    "y": 743.4
+  },
+  {
+    "name": "RACE3",
+    "value": "Custom Lineage",
+    "page": 4,
+    "x": 270.6,
+    "y": 717.4
+  },
+  {
+    "name": "BACKGROUND3",
+    "value": "Guild Artisan / Guild Merchant",
+    "page": 4,
+    "x": 383.4,
+    "y": 717.4
+  },
+  {
+    "name": "EXPERIENCE POINTS3",
+    "value": "(Milestone)",
+    "page": 4,
+    "x": 480.1,
+    "y": 717.4
+  },
+  {
+    "name": "Eq Name26",
+    "value": "Waterskin",
+    "page": 4,
+    "x": 36.5,
+    "y": 267
+  },
+  {
+    "name": "Eq Qty26",
+    "value": "1",
+    "page": 4,
+    "x": 235.8,
+    "y": 267
+  },
+  {
+    "name": "Eq Weight26",
+    "value": "5 lb.",
+    "page": 4,
+    "x": 270,
+    "y": 267
+  },
+  {
+    "name": "Eq Name27",
+    "value": "Ember Reactor",
+    "page": 4,
+    "x": 36.5,
+    "y": 252.1
+  },
+  {
+    "name": "Eq Qty27",
+    "value": "1",
+    "page": 4,
+    "x": 235.8,
+    "y": 252.1
+  },
+  {
+    "name": "Eq Weight27",
+    "value": "2 lb.",
+    "page": 4,
+    "x": 270,
+    "y": 252.1
+  },
+  {
+    "name": "CharacterName4",
+    "value": "Varric Ironwright",
+    "page": 5,
+    "x": 49.3,
+    "y": 731.7
+  },
+  {
+    "name": "SIZE",
+    "value": "Medium",
+    "page": 5,
+    "x": 398.6,
+    "y": 747.6
+  },
+  {
+    "name": "ALIGNMENT",
+    "value": "Chaotic Good",
+    "page": 5,
+    "x": 265.8,
+    "y": 721.4
+  },
+  {
+    "name": "FAITH",
+    "value": "God of Life",
+    "page": 5,
+    "x": 337.1,
+    "y": 721.4
+  },
+  {
+    "name": "PersonalityTraits",
+    "value": "[rules text elided from the fixture]",
+    "page": 5,
+    "x": 418.6,
+    "y": 661.6
+  },
+  {
+    "name": "Ideals",
+    "value": "[rules text elided from the fixture]",
+    "page": 5,
+    "x": 418.6,
+    "y": 592.5
+  },
+  {
+    "name": "Bonds",
+    "value": "[rules text elided from the fixture]",
+    "page": 5,
+    "x": 418.6,
+    "y": 537.1
+  },
+  {
+    "name": "Flaws",
+    "value": "[rules text elided from the fixture]",
+    "page": 5,
+    "x": 418.6,
+    "y": 482.3
+  },
+  {
+    "name": "spellCastingAbility0",
+    "value": "INT / INT",
+    "page": 6,
+    "x": 283.8,
+    "y": 735.8
+  },
+  {
+    "name": "spellSaveDC0",
+    "value": "17 / 16",
+    "page": 6,
+    "x": 384.5,
+    "y": 735.8
+  },
+  {
+    "name": "spellAtkBonus0",
+    "value": "+9 / +8",
+    "page": 6,
+    "x": 488.3,
+    "y": 735.8
+  },
+  {
+    "name": "spellCastingClass0",
+    "value": "Artificer / Wizard",
+    "page": 6,
+    "x": 47.5,
+    "y": 726.8
+  },
+  {
+    "name": "spellHeader0",
+    "value": "=== CANTRIPS ===",
+    "page": 6,
+    "x": 42,
+    "y": 640.1
+  },
+  {
+    "name": "spellSlotHeader0",
+    "value": "(At Will)",
+    "page": 6,
+    "x": 149,
+    "y": 640.1
+  },
+  {
+    "name": "spellPrepared0",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 628.4
+  },
+  {
+    "name": "spellName0",
+    "value": "Fire Bolt",
+    "page": 6,
+    "x": 41.9,
+    "y": 628.4
+  },
+  {
+    "name": "spellSource0",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 628.4
+  },
+  {
+    "name": "spellSaveHit0",
+    "value": "+9",
+    "page": 6,
+    "x": 231.7,
+    "y": 628.4
+  },
+  {
+    "name": "spellCastingTime0",
+    "value": "1A",
+    "page": 6,
+    "x": 257.7,
+    "y": 628.4
+  },
+  {
+    "name": "spellRange0",
+    "value": "120 ft.",
+    "page": 6,
+    "x": 277.5,
+    "y": 628.4
+  },
+  {
+    "name": "spellComponents0",
+    "value": "V,S",
+    "page": 6,
+    "x": 320.1,
+    "y": 628.4
+  },
+  {
+    "name": "spellDuration0",
+    "value": "Instantaneous",
+    "page": 6,
+    "x": 342.7,
+    "y": 628.4
+  },
+  {
+    "name": "spellPage0",
+    "value": "PHB 242",
+    "page": 6,
+    "x": 388.8,
+    "y": 628.4
+  },
+  {
+    "name": "spellNotes0",
+    "value": "V/S",
+    "page": 6,
+    "x": 422.6,
+    "y": 628.4
+  },
+  {
+    "name": "spellPrepared1",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 616.6
+  },
+  {
+    "name": "spellName1",
+    "value": "Mending",
+    "page": 6,
+    "x": 41.9,
+    "y": 616.6
+  },
+  {
+    "name": "spellSource1",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 616.6
+  },
+  {
+    "name": "spellSaveHit1",
+    "value": "--",
+    "page": 6,
+    "x": 231.7,
+    "y": 616.6
+  },
+  {
+    "name": "spellCastingTime1",
+    "value": "1m",
+    "page": 6,
+    "x": 257.7,
+    "y": 616.6
+  },
+  {
+    "name": "spellRange1",
+    "value": "Touch",
+    "page": 6,
+    "x": 277.5,
+    "y": 616.6
+  },
+  {
+    "name": "spellComponents1",
+    "value": "V,S,M",
+    "page": 6,
+    "x": 320.1,
+    "y": 616.6
+  },
+  {
+    "name": "spellDuration1",
+    "value": "Instantaneous",
+    "page": 6,
+    "x": 342.7,
+    "y": 616.6
+  },
+  {
+    "name": "spellPage1",
+    "value": "PHB 259",
+    "page": 6,
+    "x": 388.8,
+    "y": 616.6
+  },
+  {
+    "name": "spellNotes1",
+    "value": "V/S/M",
+    "page": 6,
+    "x": 422.6,
+    "y": 616.7
+  },
+  {
+    "name": "spellPrepared2",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 604.8
+  },
+  {
+    "name": "spellName2",
+    "value": "Toll the Dead",
+    "page": 6,
+    "x": 41.9,
+    "y": 604.8
+  },
+  {
+    "name": "spellSource2",
+    "value": "Wizard",
+    "page": 6,
+    "x": 149,
+    "y": 604.8
+  },
+  {
+    "name": "spellSaveHit2",
+    "value": "WIS 16",
+    "page": 6,
+    "x": 231.7,
+    "y": 604.8
+  },
+  {
+    "name": "spellCastingTime2",
+    "value": "1A",
+    "page": 6,
+    "x": 257.7,
+    "y": 604.8
+  },
+  {
+    "name": "spellRange2",
+    "value": "60 ft.",
+    "page": 6,
+    "x": 277.5,
+    "y": 604.8
+  },
+  {
+    "name": "spellComponents2",
+    "value": "V,S",
+    "page": 6,
+    "x": 320.1,
+    "y": 604.8
+  },
+  {
+    "name": "spellDuration2",
+    "value": "Instantaneous",
+    "page": 6,
+    "x": 342.7,
+    "y": 604.8
+  },
+  {
+    "name": "spellPage2",
+    "value": "XGtE 169",
+    "page": 6,
+    "x": 388.8,
+    "y": 604.8
+  },
+  {
+    "name": "spellNotes2",
+    "value": "V/S",
+    "page": 6,
+    "x": 423,
+    "y": 604.9
+  },
+  {
+    "name": "spellHeader1",
+    "value": "=== 1st LEVEL ===",
+    "page": 6,
+    "x": 41.9,
+    "y": 557.8
+  },
+  {
+    "name": "spellSlotHeader1",
+    "value": "4 Slots OOOO",
+    "page": 6,
+    "x": 149,
+    "y": 557.8
+  },
+  {
+    "name": "spellPrepared5",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 546.1
+  },
+  {
+    "name": "spellName5",
+    "value": "Cure Wounds",
+    "page": 6,
+    "x": 41.9,
+    "y": 546.1
+  },
+  {
+    "name": "spellSource5",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 546.1
+  },
+  {
+    "name": "spellSaveHit5",
+    "value": "--",
+    "page": 6,
+    "x": 231.7,
+    "y": 546.1
+  },
+  {
+    "name": "spellCastingTime5",
+    "value": "1A",
+    "page": 6,
+    "x": 257.7,
+    "y": 546.1
+  },
+  {
+    "name": "spellRange5",
+    "value": "Touch",
+    "page": 6,
+    "x": 277.5,
+    "y": 546.2
+  },
+  {
+    "name": "spellComponents5",
+    "value": "V,S",
+    "page": 6,
+    "x": 320.1,
+    "y": 546.1
+  },
+  {
+    "name": "spellDuration5",
+    "value": "Instantaneous",
+    "page": 6,
+    "x": 342.7,
+    "y": 546.1
+  },
+  {
+    "name": "spellPage5",
+    "value": "PHB 230",
+    "page": 6,
+    "x": 388.8,
+    "y": 546.1
+  },
+  {
+    "name": "spellNotes5",
+    "value": "V/S",
+    "page": 6,
+    "x": 422.6,
+    "y": 546.1
+  },
+  {
+    "name": "spellPrepared6",
+    "value": "O",
+    "page": 6,
+    "x": 29,
+    "y": 534.3
+  },
+  {
+    "name": "spellName6",
+    "value": "Faerie Fire",
+    "page": 6,
+    "x": 41.9,
+    "y": 534.3
+  },
+  {
+    "name": "spellSource6",
+    "value": "Artificer",
+    "page": 6,
+    "x": 149,
+    "y": 534.3
+  },
+  {
+    "name": "spellSaveHit6",
+    "value": "DEX 17",
+    "page": 6,
+    "x": 231.7,
+    "y": 534.3
+  },
+  {
+    "name": "spellCastingTime6",
+    "value": "1A",
+    "page": 6,
+    "x": 257.7,
+    "y": 534.3
+  },
+  {
+    "name": "spellRange6",
+    "value": "60 ft./20 ft. Cube",
+    "page": 6,
+    "x": 277.5,
+    "y": 534.3
+  },
+  {
+    "name": "spellComponents6",
+    "value": "V",
+    "page": 6,
+    "x": 320.1,
+    "y": 534.3
+  },
+  {
+    "name": "spellDuration6",
+    "value": "Concentration, up to 1 minute",
+    "page": 6,
+    "x": 342.7,
+    "y": 534.3
+  },
+  {
+    "name": "spellPage6",
+    "value": "PHB 239",
+    "page": 6,
+    "x": 388.8,
+    "y": 534.3
+  },
+  {
+    "name": "spellNotes6",
+    "value": "D: 1m, 20 ft. Cube, V",
+    "page": 6,
+    "x": 422.6,
+    "y": 534.4
+  },
+  {
+    "name": "spellPrepared10",
+    "value": "P",
+    "page": 6,
+    "x": 29.1,
+    "y": 487.3
+  },
+  {
+    "name": "spellName10",
+    "value": "Shield",
+    "page": 6,
+    "x": 41.9,
+    "y": 487.3
+  },
+  {
+    "name": "spellSource10",
+    "value": "Artificer (Always Prepared)",
+    "page": 6,
+    "x": 148.9,
+    "y": 487.3
+  },
+  {
+    "name": "spellSaveHit10",
+    "value": "--",
+    "page": 6,
+    "x": 231.7,
+    "y": 487.3
+  },
+  {
+    "name": "spellCastingTime10",
+    "value": "1R",
+    "page": 6,
+    "x": 257.7,
+    "y": 487.3
+  },
+  {
+    "name": "spellRange10",
+    "value": "Self",
+    "page": 6,
+    "x": 277.5,
+    "y": 487.3
+  },
+  {
+    "name": "spellComponents10",
+    "value": "V,S",
+    "page": 6,
+    "x": 320.1,
+    "y": 487.3
+  },
+  {
+    "name": "spellDuration10",
+    "value": "1 round",
+    "page": 6,
+    "x": 342.7,
+    "y": 487.3
+  },
+  {
+    "name": "spellPage10",
+    "value": "PHB 275",
+    "page": 6,
+    "x": 388.8,
+    "y": 487.3
+  },
+  {
+    "name": "spellNotes10",
+    "value": "D: 1Rnd, V/S",
+    "page": 6,
+    "x": 422.6,
+    "y": 487.3
+  },
+  {
+    "name": "spellPrepared11",
+    "value": "P",
+    "page": 6,
+    "x": 29,
+    "y": 475.6
+  },
+  {
+    "name": "spellName11",
+    "value": "Heroism",
+    "page": 6,
+    "x": 41.9,
+    "y": 475.6
+  },
+  {
+    "name": "spellSource11",
+    "value": "Artificer (Always Prepared)",
+    "page": 6,
+    "x": 149,
+    "y": 475.6
+  },
+  {
+    "name": "spellSaveHit11",
+    "value": "--",
+    "page": 6,
+    "x": 231.7,
+    "y": 475.6
+  },
+  {
+    "name": "spellCastingTime11",
+    "value": "1A",
+    "page": 6,
+    "x": 257.7,
+    "y": 475.6
+  },
+  {
+    "name": "spellRange11",
+    "value": "Touch",
+    "page": 6,
+    "x": 277.5,
+    "y": 475.6
+  },
+  {
+    "name": "spellComponents11",
+    "value": "V,S",
+    "page": 6,
+    "x": 320.1,
+    "y": 475.6
+  },
+  {
+    "name": "spellDuration11",
+    "value": "Concentration, up to 1 minute",
+    "page": 6,
+    "x": 342.7,
+    "y": 475.6
+  },
+  {
+    "name": "spellPage11",
+    "value": "PHB 250",
+    "page": 6,
+    "x": 388.8,
+    "y": 475.6
+  },
+  {
+    "name": "spellNotes11",
+    "value": "D: 1m, V/S",
+    "page": 6,
+    "x": 422.6,
+    "y": 475.6
+  },
+  {
+    "name": "spellCastingAbility0",
+    "value": "INT / INT",
+    "page": 7,
+    "x": 283.8,
+    "y": 735.8
+  },
+  {
+    "name": "spellSaveDC0",
+    "value": "17 / 16",
+    "page": 7,
+    "x": 384.5,
+    "y": 735.8
+  },
+  {
+    "name": "spellAtkBonus0",
+    "value": "+9 / +8",
+    "page": 7,
+    "x": 488.3,
+    "y": 735.8
+  },
+  {
+    "name": "spellCastingClass0",
+    "value": "Artificer / Wizard",
+    "page": 7,
+    "x": 47.5,
+    "y": 726.8
+  },
+  {
+    "name": "spellPrepared47",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 640.1
+  },
+  {
+    "name": "spellName47",
+    "value": "Longstrider",
+    "page": 7,
+    "x": 42,
+    "y": 640.1
+  },
+  {
+    "name": "spellSource47",
+    "value": "Wizard",
+    "page": 7,
+    "x": 149,
+    "y": 640.1
+  },
+  {
+    "name": "spellSaveHit47",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 640.1
+  },
+  {
+    "name": "spellCastingTime47",
+    "value": "1A",
+    "page": 7,
+    "x": 257.5,
+    "y": 640.1
+  },
+  {
+    "name": "spellRange47",
+    "value": "Touch",
+    "page": 7,
+    "x": 277.5,
+    "y": 640.1
+  },
+  {
+    "name": "spellComponents47",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 640.1
+  },
+  {
+    "name": "spellDuration47",
+    "value": "1 hour",
+    "page": 7,
+    "x": 342.7,
+    "y": 640.1
+  },
+  {
+    "name": "spellPage47",
+    "value": "PHB 256",
+    "page": 7,
+    "x": 388.8,
+    "y": 640.1
+  },
+  {
+    "name": "spellNotes47",
+    "value": "D: 1h, V/S/M",
+    "page": 7,
+    "x": 422.6,
+    "y": 640.2
+  },
+  {
+    "name": "spellPrepared48",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 628.4
+  },
+  {
+    "name": "spellName48",
+    "value": "Find Familiar [R]",
+    "page": 7,
+    "x": 41.9,
+    "y": 628.4
+  },
+  {
+    "name": "spellSource48",
+    "value": "Wizard",
+    "page": 7,
+    "x": 149,
+    "y": 628.4
+  },
+  {
+    "name": "spellSaveHit48",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 628.4
+  },
+  {
+    "name": "spellCastingTime48",
+    "value": "1h + 10m",
+    "page": 7,
+    "x": 257.7,
+    "y": 628.4
+  },
+  {
+    "name": "spellRange48",
+    "value": "10 ft.",
+    "page": 7,
+    "x": 277.5,
+    "y": 628.4
+  },
+  {
+    "name": "spellComponents48",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 628.4
+  },
+  {
+    "name": "spellDuration48",
+    "value": "Instantaneous",
+    "page": 7,
+    "x": 342.7,
+    "y": 628.4
+  },
+  {
+    "name": "spellPage48",
+    "value": "PHB 240",
+    "page": 7,
+    "x": 388.8,
+    "y": 628.4
+  },
+  {
+    "name": "spellNotes48",
+    "value": "V/S/M",
+    "page": 7,
+    "x": 422.6,
+    "y": 628.4
+  },
+  {
+    "name": "spellHeader2",
+    "value": "=== 2nd LEVEL ===",
+    "page": 7,
+    "x": 41.9,
+    "y": 593.1
+  },
+  {
+    "name": "spellSlotHeader2",
+    "value": "3 Slots OOO",
+    "page": 7,
+    "x": 149,
+    "y": 593.1
+  },
+  {
+    "name": "spellPrepared50",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 581.3
+  },
+  {
+    "name": "spellName50",
+    "value": "Heat Metal",
+    "page": 7,
+    "x": 41.9,
+    "y": 581.3
+  },
+  {
+    "name": "spellSource50",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 581.3
+  },
+  {
+    "name": "spellSaveHit50",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 581.3
+  },
+  {
+    "name": "spellCastingTime50",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 581.3
+  },
+  {
+    "name": "spellRange50",
+    "value": "60 ft.",
+    "page": 7,
+    "x": 277.5,
+    "y": 581.3
+  },
+  {
+    "name": "spellComponents50",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 581.3
+  },
+  {
+    "name": "spellDuration50",
+    "value": "Concentration, up to 1 minute",
+    "page": 7,
+    "x": 342.7,
+    "y": 581.3
+  },
+  {
+    "name": "spellPage50",
+    "value": "PHB 250",
+    "page": 7,
+    "x": 388.8,
+    "y": 581.3
+  },
+  {
+    "name": "spellNotes50",
+    "value": "D: 1m, V/S/M",
+    "page": 7,
+    "x": 422.6,
+    "y": 581.4
+  },
+  {
+    "name": "spellPrepared51",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 569.6
+  },
+  {
+    "name": "spellName51",
+    "value": "Invisibility",
+    "page": 7,
+    "x": 41.9,
+    "y": 569.6
+  },
+  {
+    "name": "spellSource51",
+    "value": "Artificer",
+    "page": 7,
+    "x": 149,
+    "y": 569.6
+  },
+  {
+    "name": "spellSaveHit51",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 569.6
+  },
+  {
+    "name": "spellCastingTime51",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 569.6
+  },
+  {
+    "name": "spellRange51",
+    "value": "Touch",
+    "page": 7,
+    "x": 277.5,
+    "y": 569.6
+  },
+  {
+    "name": "spellComponents51",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 569.6
+  },
+  {
+    "name": "spellDuration51",
+    "value": "Concentration, up to 1 hour",
+    "page": 7,
+    "x": 342.7,
+    "y": 569.5
+  },
+  {
+    "name": "spellPage51",
+    "value": "PHB 254",
+    "page": 7,
+    "x": 388.8,
+    "y": 569.6
+  },
+  {
+    "name": "spellNotes51",
+    "value": "D: 1h, V/S/M",
+    "page": 7,
+    "x": 422.6,
+    "y": 569.7
+  },
+  {
+    "name": "spellPrepared52",
+    "value": "P",
+    "page": 7,
+    "x": 29,
+    "y": 557.8
+  },
+  {
+    "name": "spellName52",
+    "value": "Branding Smite",
+    "page": 7,
+    "x": 41.9,
+    "y": 557.8
+  },
+  {
+    "name": "spellSource52",
+    "value": "Artificer (Always Prepared)",
+    "page": 7,
+    "x": 149,
+    "y": 557.8
+  },
+  {
+    "name": "spellSaveHit52",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 557.8
+  },
+  {
+    "name": "spellCastingTime52",
+    "value": "1BA",
+    "page": 7,
+    "x": 257.7,
+    "y": 557.8
+  },
+  {
+    "name": "spellRange52",
+    "value": "Self",
+    "page": 7,
+    "x": 277.5,
+    "y": 557.8
+  },
+  {
+    "name": "spellComponents52",
+    "value": "V",
+    "page": 7,
+    "x": 320.1,
+    "y": 557.8
+  },
+  {
+    "name": "spellDuration52",
+    "value": "Concentration, up to 1 minute",
+    "page": 7,
+    "x": 342.7,
+    "y": 557.8
+  },
+  {
+    "name": "spellPage52",
+    "value": "PHB 219",
+    "page": 7,
+    "x": 388.8,
+    "y": 557.8
+  },
+  {
+    "name": "spellNotes52",
+    "value": "D: 1m, V",
+    "page": 7,
+    "x": 422.6,
+    "y": 557.9
+  },
+  {
+    "name": "spellPrepared53",
+    "value": "P",
+    "page": 7,
+    "x": 29,
+    "y": 546.1
+  },
+  {
+    "name": "spellName53",
+    "value": "Warding Bond",
+    "page": 7,
+    "x": 41.9,
+    "y": 546.1
+  },
+  {
+    "name": "spellSource53",
+    "value": "Artificer (Always Prepared)",
+    "page": 7,
+    "x": 149,
+    "y": 546.1
+  },
+  {
+    "name": "spellSaveHit53",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 546.1
+  },
+  {
+    "name": "spellCastingTime53",
+    "value": "1A",
+    "page": 7,
+    "x": 257.7,
+    "y": 546.1
+  },
+  {
+    "name": "spellRange53",
+    "value": "Touch",
+    "page": 7,
+    "x": 277.5,
+    "y": 546.2
+  },
+  {
+    "name": "spellComponents53",
+    "value": "V,S,M",
+    "page": 7,
+    "x": 320.1,
+    "y": 546.1
+  },
+  {
+    "name": "spellDuration53",
+    "value": "1 hour",
+    "page": 7,
+    "x": 342.7,
+    "y": 546.1
+  },
+  {
+    "name": "spellPage53",
+    "value": "PHB 287",
+    "page": 7,
+    "x": 388.8,
+    "y": 546.1
+  },
+  {
+    "name": "spellNotes53",
+    "value": "D: 1h, V/S/M",
+    "page": 7,
+    "x": 422.6,
+    "y": 546.1
+  },
+  {
+    "name": "spellPrepared94",
+    "value": "O",
+    "page": 7,
+    "x": 29,
+    "y": 64.2
+  },
+  {
+    "name": "spellName94",
+    "value": "Misty Step",
+    "page": 7,
+    "x": 41.9,
+    "y": 64.2
+  },
+  {
+    "name": "spellSource94",
+    "value": "Fey Touched",
+    "page": 7,
+    "x": 149,
+    "y": 64.2
+  },
+  {
+    "name": "spellSaveHit94",
+    "value": "--",
+    "page": 7,
+    "x": 231.7,
+    "y": 64.2
+  },
+  {
+    "name": "spellCastingTime94",
+    "value": "1BA",
+    "page": 7,
+    "x": 257.7,
+    "y": 64.2
+  },
+  {
+    "name": "spellRange94",
+    "value": "Self",
+    "page": 7,
+    "x": 277.5,
+    "y": 64.2
+  },
+  {
+    "name": "spellComponents94",
+    "value": "V",
+    "page": 7,
+    "x": 320.1,
+    "y": 64.2
+  },
+  {
+    "name": "spellDuration94",
+    "value": "Instantaneous",
+    "page": 7,
+    "x": 342.7,
+    "y": 64.2
+  },
+  {
+    "name": "spellPage94",
+    "value": "PHB 260",
+    "page": 7,
+    "x": 388.8,
+    "y": 64.2
+  },
+  {
+    "name": "spellNotes94",
+    "value": "1/LR, V",
+    "page": 7,
+    "x": 422.6,
+    "y": 64.3
+  },
+  {
+    "name": "spellCastingAbility0",
+    "value": "INT / INT",
+    "page": 8,
+    "x": 283.8,
+    "y": 735.8
+  },
+  {
+    "name": "spellSaveDC0",
+    "value": "17 / 16",
+    "page": 8,
+    "x": 384.5,
+    "y": 735.8
+  },
+  {
+    "name": "spellAtkBonus0",
+    "value": "+9 / +8",
+    "page": 8,
+    "x": 488.3,
+    "y": 735.8
+  },
+  {
+    "name": "spellCastingClass0",
+    "value": "Artificer / Wizard",
+    "page": 8,
+    "x": 47.5,
+    "y": 726.8
+  }
+]
