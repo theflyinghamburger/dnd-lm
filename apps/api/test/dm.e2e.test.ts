@@ -575,7 +575,7 @@ describe.skipIf(!DATABASE_URL)('the langgraph DM', () => {
     const none = await turn(table, '@dm Aria looks at the sky');
     expect(none.prompt).not.toContain('Campaign notes');
     expect(none.prompt).not.toContain(BEGIN);
-    expect(none.payload.layer_tokens.notes ?? 0).toBe(0);
+    expect(none.payload.layer_tokens.notes).toBeUndefined();
 
     // 40 matching notes of ~250 tokens each: ten times the layer's ceiling.
     await seedNotes(
