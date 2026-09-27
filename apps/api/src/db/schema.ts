@@ -523,7 +523,11 @@ export const campaignNotes = pgTable(
       sql`setweight(to_tsvector('english', coalesce(title, '')), 'A') || setweight(to_tsvector('english', coalesce(body_md, '')), 'B')`,
     ),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      // Client-side: every drizzle update() stamps it, so a writer cannot forget.
+      .$onUpdate(() => new Date()),
   },
   (t) => [
     uniqueIndex('campaign_notes_campaign_slug_key').on(t.campaignId, t.slug),

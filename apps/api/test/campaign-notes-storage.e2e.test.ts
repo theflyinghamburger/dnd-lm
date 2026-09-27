@@ -120,4 +120,18 @@ describe.skipIf(!DATABASE_URL)('campaign notes storage (M8.1)', () => {
       frontmatter: {},
     });
   });
+
+  it('an UPDATE that omits updated_at still moves it, and recomputes tsv', async () => {
+    const [n] = await note(campaignA, 'npc.klarg');
+    await db.execute(sql`UPDATE campaign_notes SET updated_at = '2000-01-01' WHERE id = ${n!.id}`);
+    await db
+      .update(campaignNotes)
+      .set({ title: 'Klarg the Bugbear' })
+      .where(eq(campaignNotes.id, n!.id));
+    const [row] = await db.execute<{ moved: boolean; hit: boolean }>(
+      sql`SELECT updated_at > '2000-01-01' AS moved, tsv @@ plainto_tsquery('english', 'bugbear') AS hit
+          FROM campaign_notes WHERE id = ${n!.id}`,
+    );
+    expect(row).toEqual({ moved: true, hit: true });
+  });
 });
