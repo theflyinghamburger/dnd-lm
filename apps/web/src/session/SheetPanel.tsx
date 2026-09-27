@@ -8,6 +8,7 @@ import {
 } from '@dnd-lm/contracts';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { type CharacterView, api } from '../api';
+import { attackRoll, levelName, spellsByLevel } from './sheet-lists';
 
 const sign = (value: number): string => (value >= 0 ? `+${value}` : `${value}`);
 
@@ -154,6 +155,60 @@ export function SheetPanel({
           </li>
         ))}
       </ul>
+
+      <h3>Attacks</h3>
+      <ul>
+        {sheet.attacks.length === 0 && <li>No attacks.</li>}
+        {sheet.attacks.map((attack, index) => {
+          const expression = attackRoll(attack.attackBonus);
+          return (
+            <li key={index}>
+              {attack.name}{' '}
+              {expression === null ? (
+                <span>(no attack bonus)</span>
+              ) : (
+                <button
+                  type="button"
+                  className="linkish"
+                  disabled={!mine}
+                  onClick={() => onRoll(expression)}
+                  aria-label={`Roll ${attack.name} attack, ${sign(attack.attackBonus!)}`}
+                >
+                  {sign(attack.attackBonus!)}
+                </button>
+              )}
+              {attack.damage && ` · ${attack.damage}`}
+              {attack.notes && <em> — {attack.notes}</em>}
+            </li>
+          );
+        })}
+      </ul>
+
+      <h3>Spells</h3>
+      {sheet.spells.length === 0 ? <p>No spells.</p> : <p aria-hidden="true">● prepared</p>}
+      {spellsByLevel(sheet.spells).map(([level, spells]) => (
+        // 95 spells on the M4.7 example sheet and up to 400 allowed: only
+        // cantrips and level 1 start open, so the rest of the panel stays usable.
+        <details key={level} open={level <= 1}>
+          <summary>
+            {levelName(level)} ({spells.length})
+          </summary>
+          <ul>
+            {spells.map((spell, index) => (
+              <li key={index}>
+                {spell.name}
+                {/* Prepared: a glyph and words, never colour alone (NFR-403). */}
+                {spell.prepared && (
+                  <>
+                    <span aria-hidden="true"> ●</span>
+                    <span className="visually-hidden">, prepared</span>
+                  </>
+                )}
+              </li>
+            ))}
+          </ul>
+        </details>
+      ))}
 
       <h3>Inventory</h3>
       <ul>

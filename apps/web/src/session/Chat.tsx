@@ -126,6 +126,18 @@ export function Chat({
         </p>
       )}
 
+      {/* The roster the autocomplete already fetched; no second query (#77). */}
+      <section>
+        <h2>At the table</h2>
+        <ul>
+          {roster.data?.members.map((member) => (
+            <li key={member.userId}>
+              {member.displayName} @{member.handle} <span className="role">{member.role}</span>
+            </li>
+          )) ?? <li>Loading…</li>}
+        </ul>
+      </section>
+
       <ol className="transcript" aria-live="polite">
         {lines.map((line) => {
           const badge = VISIBILITY[line.recipientType] ?? VISIBILITY['table']!;
