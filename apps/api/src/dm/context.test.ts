@@ -100,24 +100,29 @@ describe('notes layer', () => {
     return prompt.slice(start, next === -1 ? undefined : next);
   };
 
-  it('queries with the trigger text at dm level and the campaign chapter, under the layer cap', async () => {
-    const { r, calls } = withNotes([note('altar', 'A key lies under the altar.')], 3);
-    const pkg = await buildContextPackage(arg({ reader: r, triggerText: 'I search the altar' }));
-    expect(calls).toHaveLength(1);
-    expect(calls[0]).toMatchObject({
-      campaignId: 'camp',
-      query: 'I search the altar',
-      maxSpoilerLevel: 'dm',
-      chapter: 3,
-    });
-    expect(calls[0]!.tokenCap).toBeLessThan(LAYER_BUDGET.notes);
-    const block = notesBlock(pkg.prompt);
-    expect(block).toContain(`${BEGIN}`);
-    expect(block).toContain('### Title altar (altar)\nA key lies under the altar.');
-    expect(block.trimEnd().endsWith(END)).toBe(true);
-    expect(pkg.layerTokens.notes).toBe(estimateTokens(block.trimEnd()));
-    expect(pkg.notes).toEqual([note('altar', 'A key lies under the altar.')]);
-  });
+  it.each(['resolve_action', 'npc_dialogue'])(
+    'a %s turn queries with the trigger text at dm level and the campaign chapter, under the layer cap',
+    async (profile) => {
+      const { r, calls } = withNotes([note('altar', 'A key lies under the altar.')], 3);
+      const pkg = await buildContextPackage(
+        arg({ reader: r, profile, triggerText: 'I search the altar' }),
+      );
+      expect(calls).toHaveLength(1);
+      expect(calls[0]).toMatchObject({
+        campaignId: 'camp',
+        query: 'I search the altar',
+        maxSpoilerLevel: 'dm',
+        chapter: 3,
+      });
+      expect(calls[0]!.tokenCap).toBeLessThan(LAYER_BUDGET.notes);
+      const block = notesBlock(pkg.prompt);
+      expect(block).toContain(`${BEGIN}`);
+      expect(block).toContain('### Title altar (altar)\nA key lies under the altar.');
+      expect(block.trimEnd().endsWith(END)).toBe(true);
+      expect(pkg.layerTokens.notes).toBe(estimateTokens(block.trimEnd()));
+      expect(pkg.notes).toEqual([note('altar', 'A key lies under the altar.')]);
+    },
+  );
 
   it('emits no layer, not an empty untrusted block, when nothing matches', async () => {
     const pkg = await buildContextPackage(arg({ reader: withNotes([]).r }));

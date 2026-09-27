@@ -153,7 +153,7 @@ describe.skipIf(!DATABASE_URL)('notes retrieval (M8.2)', () => {
     ]);
     expect(await slugs({ query: '@dm I search the altar for the key' })).toEqual(['altar', 'door']);
     // Stop words only, or punctuation only: no lexemes, no match, no error.
-    expect(await slugs({ query: 'I am the one' })).toEqual([]);
+    expect(await slugs({ query: 'I am the' })).toEqual([]);
     expect(await slugs({ query: "!!! & | ' :*" })).toEqual([]);
   });
 
