@@ -25,8 +25,6 @@ import { classifyProviderError, type ProviderFailureClass } from './provider-err
 import { ProviderSecrets } from './provider-secrets.service';
 
 const TESTS_PER_MINUTE = 5;
-/** A handful of tokens: enough for one sentence and the smallest legal block. */
-const TEST_MAX_TOKENS = 256;
 /** The endpoint writes this detail into our row; it does not get to choose how much. */
 const DETAIL_MAX = 500;
 
@@ -161,7 +159,10 @@ export class ConnectionTestService {
       const completion = await sourced.provider.generate({
         system: TEST_SYSTEM,
         prompt: TEST_PROMPT,
-        maxTokens: TEST_MAX_TOKENS,
+        // P4.1.0: 0 inherits the row's max_tokens, as a DM turn does. A smaller
+        // test ceiling would be shared with Anthropic's adaptive thinking and
+        // could truncate the block into a false `structuredOutput: false`.
+        maxTokens: 0,
       });
       const latencyMs = Date.now() - started;
 

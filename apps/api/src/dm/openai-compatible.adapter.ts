@@ -41,7 +41,9 @@ export class OpenAICompatibleProvider implements DmProvider {
   async generate(req: DmRequest, onDelta?: (chunk: string) => void): Promise<DmCompletion> {
     const stream = await this.client.chat.completions.create({
       model: this.config.model,
-      max_tokens: this.config.maxTokens,
+      // P4.1.0 (#65): the row's max_tokens is the host's setting and the default;
+      // a non-turn caller's request may raise or lower it (0/absent falls back).
+      max_tokens: req.maxTokens || this.config.maxTokens,
       stream: true,
       stream_options: { include_usage: true },
       messages: [
