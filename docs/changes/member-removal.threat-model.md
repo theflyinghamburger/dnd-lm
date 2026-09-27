@@ -30,7 +30,12 @@ characters, and the ability to post into a live session.
 
 - **In-flight commands.** A command already inside `onCommand` when the removal
   lands can still commit. It started while they were a member; the window is one
-  request.
+  request. Likewise, a socket whose removal committed between its handshake read
+  and its room join can send commands during the one-query window before the
+  post-join re-check disconnects it (Nest binds message handlers without
+  waiting for `handleConnection`). Closing that would need a membership read on
+  every frame, which the chat latency budget (NFR-101) is why the gateway does
+  not do.
 - **Multi-instance.** `disconnectSockets` on a room is adapter-wide, so Phase 3's
   Redis adapter keeps eviction correct. The roster cache is per-process (existing
   `ponytail:` note in `SessionContextService`), so a second instance could route

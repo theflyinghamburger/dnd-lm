@@ -187,7 +187,10 @@ export class SessionGateway implements OnGatewayInit, OnGatewayConnection {
         memberRoom(campaignId, userId),
       ]);
       member = (await this.memberships.roleFor(campaignId, userId)) !== null;
-    } catch {
+    } catch (error) {
+      this.logger.warn(
+        `membership re-check failed for user ${userId} in session ${sessionId}; disconnecting: ${String(error)}`,
+      );
       member = false;
     }
     if (!member) socket.disconnect(true);
