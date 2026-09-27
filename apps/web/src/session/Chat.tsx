@@ -10,6 +10,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { type FormEvent, useMemo, useState } from 'react';
 import { api } from '../api';
+import { HostBar } from './HostBar';
 import { PendingRollCard } from './PendingRollCard';
 import { SheetPanel } from './SheetPanel';
 import { canSend, statusNotice } from './status';
@@ -41,10 +42,18 @@ export function Chat({
   onLeave: () => void;
 }) {
   const [draft, setDraft] = useState('');
-  const { snapshot, lines, rolls, pending, connected, dmNarration, send, roll } = useSession(
-    sessionId,
-    characterId,
-  );
+  const {
+    snapshot,
+    lines,
+    rolls,
+    pending,
+    connected,
+    dmNarration,
+    send,
+    roll,
+    hostControl,
+    requestRoll,
+  } = useSession(sessionId, characterId);
 
   const roster = useQuery({
     queryKey: ['roster', campaignId],
@@ -61,16 +70,17 @@ export function Chat({
     return triggers.data ? TRIGGER_REGISTRY.filter((d) => enabled.has(d.id)) : [];
   }, [triggers.data]);
 
+  /** The viewer's roster role: the routing preview's scope and the host bar's gate. */
+  const role = roster.data?.members.find((m) => m.userId === user.id)?.role ?? 'player';
+
   /**
    * The same pure function the server runs (M3.1). The badge and the DM warning
    * are therefore a preview of the real decision, not a second guess at it.
    */
   const preview = useMemo(() => {
     if (!roster.data || draft.trim().length === 0) return null;
-    return parseMessage(draft, roster.data as Roster, registry, {
-      role: roster.data.members.find((m) => m.userId === user.id)?.role ?? 'player',
-    });
-  }, [draft, roster.data, registry, user.id]);
+    return parseMessage(draft, roster.data as Roster, registry, { role });
+  }, [draft, roster.data, registry, role]);
 
   const suggestions = useMemo(() => {
     const token = draft.slice(draft.lastIndexOf(' ') + 1).toLowerCase();
@@ -174,6 +184,17 @@ export function Chat({
             ))}
           </ul>
         </section>
+      )}
+
+      {/* U1.2: courtesy only — the server refuses a non-host with NOT_THE_HOST. */}
+      {status && (role === 'host' || role === 'admin') && (
+        <HostBar
+          status={status}
+          connected={connected}
+          campaignId={campaignId}
+          onControl={hostControl}
+          onRequestRoll={requestRoll}
+        />
       )}
 
       {/* U1.1: emptied once ended — END does not close the request, and nobody can roll. */}

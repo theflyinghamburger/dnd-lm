@@ -1,12 +1,13 @@
 import {
   type EventEnvelope,
   type SessionSnapshot,
+  SessionState,
   TRIGGER_REGISTRY,
   buildRoster,
   parseMessage,
 } from '@dnd-lm/contracts';
 import { describe, expect, it } from 'vitest';
-import { canSend, resumedSnapshot, statusChange, statusNotice } from './status';
+import { canSend, hostActions, resumedSnapshot, statusChange, statusNotice } from './status';
 
 /**
  * U1.0: the composer's gate. Drafts go through the real router so the test
@@ -90,5 +91,25 @@ describe('resumedSnapshot', () => {
     expect(resumedSnapshot(snapshot, { sequence: 10, to: 'PAUSED' })).toBe(snapshot);
     expect(resumedSnapshot(snapshot, { sequence: 3, to: 'PAUSED' })).toBe(snapshot);
     expect(resumedSnapshot(snapshot, null)).toBe(snapshot);
+  });
+});
+
+describe('hostActions', () => {
+  // Columns: PAUSE, RESUME, END, FORCE_DM_TURN, REQUEST_ROLL.
+  const table = {
+    WAITING_FOR_PLAYERS: [true, false, true, true, true],
+    DM_GENERATING: [false, false, true, true, true],
+    WAITING_FOR_ROLL: [true, false, true, true, false],
+    PAUSED: [false, true, true, false, false],
+    SESSION_ENDED: [false, false, false, false, false],
+  } as const;
+
+  it('follows the transition table in every state (U1.2)', () => {
+    // Driven by the contracts enum, so a new state fails here until it is listed.
+    for (const status of SessionState.options) {
+      const expected = (table as Record<string, readonly boolean[]>)[status];
+      const a = hostActions(status);
+      expect([a.PAUSE, a.RESUME, a.END, a.FORCE_DM_TURN, a.REQUEST_ROLL], status).toEqual(expected);
+    }
   });
 });
