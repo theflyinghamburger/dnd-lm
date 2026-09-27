@@ -99,7 +99,7 @@ importers:
         specifier: ^8.10.1
         version: 8.10.1
       unpdf:
-        specifier: ^1.8.1
+        specifier: 1.8.1
         version: 1.8.1
       zod:
         specifier: ^4.5.4
