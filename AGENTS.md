@@ -14,6 +14,8 @@ socket.io, LangGraphJS bounded inside the DM turn.
 - `architecture.md` — stack, module responsibilities, data model, context design, trust boundaries.
 - `SDLC.md` — the change workflow and CI gate. Read it before starting a change; the
   procedure itself is `.claude/skills/sdlc-change/SKILL.md`.
+- `docs/campaign-pdf-ingestion.md` — design for uploading a campaign PDF and extracting
+  notes, NPCs and quests from it. The first Phase 4 slice, built on M8; issues `P4.1*`.
 
 Cite the requirement ID a change satisfies (`FR-206`, `NFR-202`) in comments and commits — that is
 the codebase's convention. Contradictions between the docs are real bugs: flag them, don't silently
@@ -24,9 +26,9 @@ pick one.
 ```sh
 pnpm install
 docker compose up -d          # Postgres 16 on :5432
-cp .env.example .env          # DATABASE_URL
+cp .env.example .env          # DATABASE_URL; set PROVIDER_KEY_ENCRYPTION_KEY (64 hex) or the API won't boot
 pnpm db:migrate               # drizzle commands read .env; vitest does not
-pnpm test                     # unit + integration (64 of the latter), ~20s
+pnpm test                     # unit + integration, ~20s
 ```
 
 | Command | Notes |
@@ -36,10 +38,10 @@ pnpm test                     # unit + integration (64 of the latter), ~20s
 | `pnpm build` | `packages/contracts` emits `dist/` both apps consume — needed before `start:dev`, **not** before `pnpm test` (vitest aliases contracts to source) |
 | `pnpm typecheck` / `pnpm lint` / `pnpm format` | all must pass (`tsc --noEmit` / eslint / prettier `--check`) |
 | `pnpm db:generate` / `pnpm db:check` | regenerate migrations from `apps/api/src/db/schema.ts` / verify no drift |
-| `pnpm --filter @dnd-lm/api start:dev` | API on :3000 |
+| `pnpm --filter @dnd-lm/api start:dev` | API on :3000; it does **not** read `.env` — `set -a; . ./.env; set +a` first |
 | `pnpm --filter @dnd-lm/web dev` | web on :5173, proxies `/api` and `/ws` to :3000 |
 
-**Integration tests need a live Postgres.** Without `DATABASE_URL` in the environment the 64
+**Integration tests need a live Postgres.** Without `DATABASE_URL` in the environment the
 integration tests **silently skip** (CI sets it and fails rather than skips). Run the full suite
 against real Postgres before pushing any gateway or transaction change — unit tests have repeatedly
 passed while the same code was broken end to end.
