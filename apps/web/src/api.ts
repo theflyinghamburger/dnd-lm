@@ -19,6 +19,7 @@ import type {
   UpdateConnectionRequest,
   UpdateDmSettingsRequest,
   UpdateHpRequest,
+  UpdateTriggersRequest,
 } from '@dnd-lm/contracts';
 
 /** Thrown for any non-2xx; `code` is the server's typed error code when it sent one. */
@@ -112,6 +113,9 @@ export const api = {
   roster: (campaignId: string) => call<RosterResponse>(`/campaigns/${campaignId}/roster`),
   triggers: (campaignId: string) =>
     call<CampaignTriggersResponse>(`/campaigns/${campaignId}/triggers`),
+  /** Host/admin only (M3.2); unlisted ids keep their current setting. */
+  updateTriggers: (campaignId: string, body: UpdateTriggersRequest) =>
+    patch<CampaignTriggersResponse>(`/campaigns/${campaignId}/triggers`, body),
   sessions: (campaignId: string) => call<SessionSnapshot[]>(`/campaigns/${campaignId}/sessions`),
   createSession: (campaignId: string) =>
     post<SessionSnapshot>(`/campaigns/${campaignId}/sessions`, {}),

@@ -2,6 +2,7 @@ import type { CampaignDmSettings, DmDifficulty, DmStyle, DmTone } from '@dnd-lm/
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { api, describeApiError } from './api';
+import { TriggerToggles } from './TriggerToggles';
 
 /**
  * Campaign → Settings (M7.6, FR-506). A host picks a provider from the
@@ -133,6 +134,8 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
           {describeApiError(failure)}
         </p>
       )}
+
+      <TriggerToggles campaignId={campaignId} />
     </section>
   );
 }

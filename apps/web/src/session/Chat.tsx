@@ -1,8 +1,6 @@
 import {
-  TRIGGER_REGISTRY,
   type PublicUser,
   type Roster,
-  type TriggerDefinition,
   acceptsMutations,
   isTerminal,
   parseMessage,
@@ -10,6 +8,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { type FormEvent, useMemo, useState } from 'react';
 import { api } from '../api';
+import { enabledRegistry } from '../triggers';
 import { SheetPanel } from './SheetPanel';
 import { canSend, statusNotice } from './status';
 import { useSession } from './useSession';
@@ -55,10 +54,7 @@ export function Chat({
   });
 
   /** Only the triggers this campaign has enabled — a disabled tag must not be advertised. */
-  const registry = useMemo<TriggerDefinition[]>(() => {
-    const enabled = new Set(triggers.data?.triggers.filter((t) => t.enabled).map((t) => t.id));
-    return triggers.data ? TRIGGER_REGISTRY.filter((d) => enabled.has(d.id)) : [];
-  }, [triggers.data]);
+  const registry = useMemo(() => enabledRegistry(triggers.data), [triggers.data]);
 
   /**
    * The same pure function the server runs (M3.1). The badge and the DM warning
