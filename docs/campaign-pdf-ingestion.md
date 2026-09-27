@@ -117,13 +117,16 @@ WHERE campaign_id = $1
   AND status = 'published'
   AND spoiler_level <= $2
   AND (chapter IS NULL OR chapter <= $3)
-  AND tsv @@ websearch_to_tsquery('english', $4)
+  AND tsv @@ replace(plainto_tsquery('english', $4)::text, ' & ', ' | ')::tsquery
 ORDER BY ts_rank(tsv, …) DESC
 LIMIT n
 ```
 
 The filters are `WHERE` predicates in the **same statement** as the ranking, not
-a post-filter over ranked rows (MVP.md M8.2, architecture.md §7.3). That is the
+a post-filter over ranked rows (MVP.md M8.2, architecture.md §7.3). The query
+matches ANY meaningful word, ranked by `ts_rank` (M8.3): the key is free
+trigger text, which an AND-of-all-words query (`plainto_`/`websearch_to_tsquery`)
+would almost never match. That is the
 structural habit that makes Part B's spoiler guarantee hold without new work.
 Results are capped with the existing `estimateTokens` and carry
 `{title, slug, source.book, source.pages}` as the citation (FR-609, FR-508).

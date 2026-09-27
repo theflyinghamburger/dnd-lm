@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { and, desc, eq, isNull, lte, or, sql } from 'drizzle-orm';
 import { DB, type Db } from '../db/db.module';
 import { campaignNotes, noteSpoilerLevel } from '../db/schema';
-import { estimateTokens } from '../dm/context';
+import { estimateTokens } from '../dm/tokens';
 
 export type NoteSpoilerLevel = (typeof noteSpoilerLevel.enumValues)[number];
 
@@ -55,7 +55,13 @@ export class NotesService {
     // ponytail: a note is its own chunk — hand-written notes are small and the
     // layer cap is the real ceiling; heading-level splitting arrives with
     // Phase 4 ingestion, which is also when notes get big enough to need it.
-    const q = sql`plainto_tsquery('english', ${input.query})`;
+    // M8.3: ANY meaningful word matches, ts_rank orders by how many and
+    // where. plainto_tsquery (and the design doc's websearch_to_tsquery) AND
+    // every word, and free trigger text ("I search the altar for the key")
+    // almost never has all its words in one note. plainto still does the
+    // stemming, stop words and quoting; its `&` becomes `|`. A compound word's
+    // `<->` phrase stays a phrase.
+    const q = sql`replace(plainto_tsquery('english', ${input.query})::text, ' & ', ' | ')::tsquery`;
     const ranked = await this.db
       .select({ slug: campaignNotes.slug, title: campaignNotes.title, body: campaignNotes.bodyMd })
       .from(campaignNotes)

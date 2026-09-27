@@ -144,6 +144,19 @@ describe.skipIf(!DATABASE_URL)('notes retrieval (M8.2)', () => {
     expect(await slugs({ query: 'ruling' })).toEqual(['rules']);
   });
 
+  it('matches ANY meaningful word of a free trigger sentence, ranked by how many (M8.3)', async () => {
+    // No note holds every word of the sentence; AND semantics would return [].
+    await seed([
+      { slug: 'altar', title: 'The altar', bodyMd: 'A rusted key lies beneath the altar stone.' },
+      { slug: 'door', title: 'North door', bodyMd: 'Locked. The key is elsewhere.' },
+      { slug: 'town', title: 'Phandalin', bodyMd: 'A frontier town.' },
+    ]);
+    expect(await slugs({ query: '@dm I search the altar for the key' })).toEqual(['altar', 'door']);
+    // Stop words only, or punctuation only: no lexemes, no match, no error.
+    expect(await slugs({ query: 'I am the' })).toEqual([]);
+    expect(await slugs({ query: "!!! & | ' :*" })).toEqual([]);
+  });
+
   it('holds the token cap and keeps the highest-ranked notes (FR-609)', async () => {
     // Descending match strength: n0 says klarg most often.
     const rows = Array.from({ length: 5 }, (_, i) => ({

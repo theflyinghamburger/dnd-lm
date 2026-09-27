@@ -65,13 +65,24 @@ describe.skipIf(!DATABASE_URL)('campaign notes storage (M8.1)', () => {
     await note(campaignA, 'location.cragmaw_hideout');
     // A two-row table always seq-scans; disabling that in one transaction
     // proves the index is usable for the predicate, which is the property.
-    const plan = await db.transaction(async (tx) => {
-      await tx.execute(sql`SET LOCAL enable_seqscan = off`);
-      return tx.execute<{ 'QUERY PLAN': string }>(
-        sql`EXPLAIN SELECT id FROM campaign_notes WHERE tsv @@ plainto_tsquery('english', 'cragmaw')`,
-      );
-    });
-    expect(plan.map((r) => r['QUERY PLAN']).join('\n')).toContain('campaign_notes_tsv_idx');
+    const explain = (query: ReturnType<typeof sql>) =>
+      db.transaction(async (tx) => {
+        await tx.execute(sql`SET LOCAL enable_seqscan = off`);
+        const plan = await tx.execute<{ 'QUERY PLAN': string }>(
+          sql`EXPLAIN SELECT id FROM campaign_notes WHERE tsv @@ ${query}`,
+        );
+        return plan.map((r) => r['QUERY PLAN']).join('\n');
+      });
+    expect(await explain(sql`plainto_tsquery('english', 'cragmaw')`)).toContain(
+      'campaign_notes_tsv_idx',
+    );
+    // M8.3's any-word shape, exactly as NotesService.retrieve writes it.
+    const words = 'cragmaw hideout';
+    expect(
+      await explain(
+        sql`replace(plainto_tsquery('english', ${words})::text, ' & ', ' | ')::tsquery`,
+      ),
+    ).toContain('campaign_notes_tsv_idx');
   });
 
   it('rejects a duplicate slug within one campaign and accepts it across two', async () => {
