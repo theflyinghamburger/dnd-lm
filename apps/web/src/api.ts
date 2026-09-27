@@ -133,6 +133,8 @@ export const api = {
       { method: 'POST', body: form },
     );
   },
+  removeMember: (campaignId: string, userId: string) =>
+    del(`/campaigns/${campaignId}/members/${userId}`),
   deleteCharacter: (campaignId: string, characterId: string) =>
     del(`/campaigns/${campaignId}/characters/${characterId}`),
   updateHp: (campaignId: string, characterId: string, body: UpdateHpRequest) =>

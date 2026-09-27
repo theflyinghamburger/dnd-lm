@@ -83,6 +83,9 @@ async function insertMessageRow(
 const room = (sessionId: string): string => `session:${sessionId}`;
 /** Per-user room, so a private event is addressed rather than filtered client-side. */
 const userRoom = (sessionId: string, userId: string): string => `session:${sessionId}:u:${userId}`;
+/** Every socket one member holds in one campaign, across its sessions — what removal evicts (#79). */
+const memberRoom = (campaignId: string, userId: string): string =>
+  `campaign:${campaignId}:u:${userId}`;
 
 /** No `cookie` dependency for three lines of parsing. */
 function readCookie(header: string | undefined, name: string): string | undefined {
@@ -169,9 +172,38 @@ export class SessionGateway implements OnGatewayInit, OnGatewayConnection {
     };
   }
 
-  handleConnection(socket: SessionSocket): void {
-    const { sessionId, userId } = socket.data;
-    void socket.join([room(sessionId), userRoom(sessionId, userId)]);
+  async handleConnection(socket: SessionSocket): Promise<void> {
+    const { sessionId, userId, campaignId } = socket.data;
+    // Closes the handshake race with `evict` (#79): a removal that commits
+    // after `authenticate` read the membership but before the join would
+    // evict an empty room and leave this socket live. The join is awaited
+    // (it is async under some adapters) and only then is membership re-read,
+    // so one of the two always sees the other. Fails closed.
+    let member: boolean;
+    try {
+      await socket.join([
+        room(sessionId),
+        userRoom(sessionId, userId),
+        memberRoom(campaignId, userId),
+      ]);
+      member = (await this.memberships.roleFor(campaignId, userId)) !== null;
+    } catch (error) {
+      this.logger.warn(
+        `membership re-check failed for user ${userId} in session ${sessionId}; disconnecting: ${String(error)}`,
+      );
+      member = false;
+    }
+    if (!member) socket.disconnect(true);
+  }
+
+  /**
+   * Drop every socket a removed member holds in the campaign (#79, FR-102).
+   * Identity is settled once, at handshake, and no frame re-checks it — so
+   * without this a removed member keeps playing until they happen to
+   * reconnect, and that reconnect is what the handshake then refuses.
+   */
+  evict(campaignId: string, userId: string): void {
+    this.server.in(memberRoom(campaignId, userId)).disconnectSockets(true);
   }
 
   @SubscribeMessage('command')

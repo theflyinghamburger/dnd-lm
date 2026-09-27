@@ -4,7 +4,7 @@ import { CampaignsModule } from '../campaigns/campaigns.module';
 import { CharactersModule } from '../characters/characters.module';
 import { DmModule } from '../dm/dm.module';
 import { RouterModule } from '../router/router.module';
-import { SessionController } from './session.controller';
+import { MembersController, SessionController } from './session.controller';
 import { SessionGateway } from './session.gateway';
 import { SessionService } from './session.service';
 
@@ -18,7 +18,7 @@ import { SessionService } from './session.service';
     CharactersModule,
     forwardRef(() => DmModule),
   ],
-  controllers: [SessionController],
+  controllers: [SessionController, MembersController],
   providers: [SessionService, SessionGateway],
   exports: [SessionService],
 })

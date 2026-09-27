@@ -9,6 +9,6 @@ import { MembershipService } from './membership.service';
   imports: [RouterModule],
   controllers: [CampaignsController, InvitesController],
   providers: [CampaignsService, MembershipService, CampaignMemberGuard],
-  exports: [MembershipService, CampaignMemberGuard],
+  exports: [CampaignsService, MembershipService, CampaignMemberGuard],
 })
 export class CampaignsModule {}
