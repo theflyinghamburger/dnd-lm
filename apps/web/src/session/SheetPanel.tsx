@@ -19,11 +19,14 @@ export function SheetPanel({
   user,
   campaignId,
   characterId,
+  canRoll,
   onRoll,
 }: {
   user: PublicUser;
   campaignId: string;
   characterId: string | null;
+  /** False while the session refuses mutations — a roll is one (M5.6). */
+  canRoll: boolean;
   onRoll: (expression: string) => void;
 }) {
   const queryClient = useQueryClient();
@@ -117,7 +120,7 @@ export function SheetPanel({
                 <button
                   type="button"
                   className="linkish"
-                  disabled={!mine}
+                  disabled={!mine || !canRoll}
                   onClick={() => onRoll(`${ability} save`)}
                 >
                   {sign(derived.saveModifiers[ability])}
@@ -136,7 +139,7 @@ export function SheetPanel({
             <button
               type="button"
               className="linkish"
-              disabled={!mine}
+              disabled={!mine || !canRoll}
               onClick={() => onRoll(skill)}
               // Proficiency is marked with a glyph and stated in the label,
               // never by colour alone (NFR-403).
