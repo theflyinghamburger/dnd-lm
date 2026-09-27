@@ -7,6 +7,7 @@ import type {
 } from '@dnd-lm/contracts';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { type Socket, io } from 'socket.io-client';
+import { type PendingRoll, applyPending, isFresh } from './pending';
 import { resumedSnapshot, statusChange } from './status';
 
 export type Delivery = 'sending' | 'delivered' | 'rejected';
@@ -63,6 +64,8 @@ export function useSession(sessionId: string, characterId: string | null) {
   const [lines, setLines] = useState<ChatLine[]>([]);
   const [rolls, setRolls] = useState<RollLine[]>([]);
   const [connected, setConnected] = useState(false);
+  /** Open roll requests, folded from the log — no snapshot field (U1.1). */
+  const [pending, setPending] = useState<PendingRoll[]>([]);
   /**
    * Provisional DM narration, keyed by resolution (M6.6). The stream carries
    * only what the delta gate allows; the committed DM_NARRATION event replaces
@@ -71,9 +74,11 @@ export function useSession(sessionId: string, characterId: string | null) {
   const [dmNarration, setDmNarration] = useState<Record<string, string>>({});
 
   const applyEvent = useCallback((event: EventEnvelope) => {
-    if (event.sequence <= highWater.current) return;
+    if (!isFresh(event, highWater.current)) return;
     highWater.current = event.sequence;
     stateVersion.current = Math.max(stateVersion.current, event.state_version);
+    // U1.1: returns the same array for every other event, so React bails out.
+    setPending((current) => applyPending(current, event));
     if (event.type === 'ROLL_RESULT') {
       const roll = event.payload as unknown as RollLine;
       setRolls((current) => [...current, { ...roll, key: event.event_id }]);
@@ -267,5 +272,5 @@ export function useSession(sessionId: string, characterId: string | null) {
     [sessionId, characterId, absorb],
   );
 
-  return { snapshot, lines, rolls, connected, dmNarration, send, roll };
+  return { snapshot, lines, rolls, pending, connected, dmNarration, send, roll };
 }
