@@ -4,7 +4,7 @@ id: member-removal
 title: Remove a member from a campaign (FR-102's missing half)
 type: feature
 profile: high-assurance
-state: verifying
+state: reviewing
 source: github:theflyinghamburger/dnd-lm#79
 intent:
   objective: clear
