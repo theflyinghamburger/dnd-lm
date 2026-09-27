@@ -3,7 +3,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { campaignNotes, campaigns, users } from '../src/db/schema';
 import type { Db } from '../src/db/db.module';
 import { estimateTokens } from '../src/dm/context';
-import { NotesService, type RetrieveInput } from '../src/notes/notes.service';
+import { MAX_CANDIDATES, NotesService, type RetrieveInput } from '../src/notes/notes.service';
 import { DATABASE_URL, createTestApp, truncateAll } from './app.harness';
 
 /**
@@ -105,37 +105,43 @@ describe.skipIf(!DATABASE_URL)('notes retrieval (M8.2)', () => {
   });
 
   it('filters before ranking: out-of-scope best matches never crowd out an in-scope note', async () => {
-    // More out-of-scope best matches than the candidate limit. A filter applied
-    // after rank-and-limit would see only these and return nothing.
-    const hidden = Array.from({ length: 30 }, (_, i) => ({ slug: `hidden.${i}`, ...BEST }));
+    // Each exclusion alone supplies more best matches than the candidate
+    // limit. A filter applied after rank-and-limit would see only these.
+    const over = (tag: string, extra: Partial<typeof campaignNotes.$inferInsert>) =>
+      Array.from({ length: MAX_CANDIDATES + 1 }, (_, i) => ({
+        slug: `${tag}.${i}`,
+        ...BEST,
+        ...extra,
+      }));
     await seed([
-      ...hidden.slice(0, 10).map((h) => ({ ...h, spoilerLevel: 'dm' as const })),
-      ...hidden.slice(10, 20).map((h) => ({ ...h, chapter: 5 })),
-      ...hidden.slice(20).map((h) => ({ ...h, status: 'draft' as const })),
+      ...over('dm', { spoilerLevel: 'dm' }),
+      ...over('future', { chapter: 5 }),
+      ...over('draft', { status: 'draft' }),
+      ...over('other', { campaignId: campaignB }),
       { slug: 'visible', ...WEAK },
     ]);
-    await db.insert(campaignNotes).values(
-      Array.from({ length: 30 }, (_, i) => ({
-        campaignId: campaignB,
-        slug: `other.${i}`,
-        type: 'lore' as const,
-        spoilerLevel: 'player' as const,
-        ...BEST,
-      })),
-    );
     expect(await slugs()).toEqual(['visible']);
   });
 
   it('ranks a title match above a body match and carries slug + title as citations (FR-609)', async () => {
+    // One occurrence each, so only the A/B weight separates them; the body
+    // note has the smaller slug, so a weight collapse flips the order.
+    const title = { title: 'Klarg', bodyMd: 'A bugbear chief.' };
+    const body = { title: 'Cragmaw Hideout', bodyMd: 'Its boss is Klarg.' };
     await seed([
-      { slug: 'body', ...WEAK },
-      { slug: 'title', ...BEST },
+      { slug: 'a.body', ...body },
+      { slug: 'b.title', ...title },
       { slug: 'unrelated', title: 'Phandalin', bodyMd: 'A frontier town.' },
     ]);
     expect(await ask()).toEqual([
-      { slug: 'title', title: BEST.title, body: BEST.bodyMd },
-      { slug: 'body', title: WEAK.title, body: WEAK.bodyMd },
+      { slug: 'b.title', title: title.title, body: title.bodyMd },
+      { slug: 'a.body', title: body.title, body: body.bodyMd },
     ]);
+  });
+
+  it('stems the query with the same english config as the tsv column', async () => {
+    await seed([{ slug: 'rules', title: 'Goblin rules', bodyMd: 'The rules of the cave.' }]);
+    expect(await slugs({ query: 'ruling' })).toEqual(['rules']);
   });
 
   it('holds the token cap and keeps the highest-ranked notes (FR-609)', async () => {

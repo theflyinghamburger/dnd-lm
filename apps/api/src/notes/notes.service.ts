@@ -22,7 +22,7 @@ export type RetrieveInput = {
 };
 
 /** Top-N before the token cap; the cap is the real ceiling, this bounds the fetch. */
-const MAX_CANDIDATES = 20;
+export const MAX_CANDIDATES = 20;
 
 /**
  * Keep notes in rank order while their running `estimateTokens(title + body)`
