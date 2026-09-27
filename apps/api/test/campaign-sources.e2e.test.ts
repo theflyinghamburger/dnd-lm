@@ -73,6 +73,11 @@ describe.skipIf(!DATABASE_URL)('campaign source upload (P4.1.1)', () => {
       notesExtracted: 0,
       finishedAt: null,
     });
+    const [hostUser] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.email, 'host@example.com'));
+    expect(source.uploadedBy).toBe(hostUser!.id);
 
     const [row] = await db
       .select({ content: campaignSources.content })
@@ -103,7 +108,9 @@ describe.skipIf(!DATABASE_URL)('campaign source upload (P4.1.1)', () => {
     await db.insert(memberships).values({ campaignId, userId: adminUser!.id, role: 'admin' });
     const base = `/api/campaigns/${campaignId}/sources`;
 
-    const sourceId = (await upload(campaignId, admin).expect(201)).body.id as string;
+    const uploaded = await upload(campaignId, admin).expect(201);
+    expect(uploaded.body.uploadedBy).toBe(adminUser!.id);
+    const sourceId = uploaded.body.id as string;
     await api().get(base).set('Cookie', admin).expect(200);
     await api().get(`${base}/${sourceId}`).set('Cookie', admin).expect(200);
     await api().delete(`${base}/${sourceId}`).set('Cookie', admin).expect(204);
