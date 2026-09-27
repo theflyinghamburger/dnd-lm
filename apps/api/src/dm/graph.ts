@@ -329,7 +329,7 @@ export function buildDmGraph(deps: DmGraphDeps, checkpointer: BaseCheckpointSave
   const executeReadTools = (state: DmGraphState) => {
     const world: ReadToolWorld = {
       characters: state.contextPackage?.characters ?? [],
-      settings: state.contextPackage?.campaignSettings ?? null,
+      notes: state.contextPackage?.notes ?? [],
     };
     const results = (state.readRequests ?? []).map((request) =>
       executeReadTool(request.name, request.args, world),
