@@ -52,6 +52,8 @@ describe.skipIf(!DATABASE_URL)('test connection (M7.5)', () => {
   /** Makes the mock's error body enormous, the way a hostile endpoint would. */
   let long = false;
   let calls = 0;
+  /** The `max_tokens` the last request put on the wire. */
+  let sentMaxTokens: number | undefined;
   let server: Server;
   let base: string;
   let app: TestApp;
@@ -80,6 +82,7 @@ describe.skipIf(!DATABASE_URL)('test connection (M7.5)', () => {
       req.on('data', (c) => (body += c));
       req.on('end', async () => {
         calls += 1;
+        sentMaxTokens = (JSON.parse(body || '{}') as { max_tokens?: number }).max_tokens;
         if (hold) {
           const gate = hold;
           hold = null;
@@ -129,6 +132,7 @@ describe.skipIf(!DATABASE_URL)('test connection (M7.5)', () => {
     await truncateAll(app.db);
     mode = 'dm-json';
     calls = 0;
+    sentMaxTokens = undefined;
     hold = null;
   });
 
@@ -214,6 +218,18 @@ describe.skipIf(!DATABASE_URL)('test connection (M7.5)', () => {
     expect(result.latencyMs).toBeGreaterThanOrEqual(0);
     expect(result.detail).toBeNull();
     expect(calls).toBe(1);
+  });
+
+  it("sends the connection's own max_tokens, not a smaller test ceiling (P4.1.0)", async () => {
+    // A ceiling below the row's would be shared with Anthropic's adaptive
+    // thinking and could truncate the dm-json block into a false
+    // structuredOutput: false. The test inherits the row, as a turn does.
+    const admin = await makeAdmin('admin@example.com');
+    const connection = await connect(admin, { maxTokens: 777 });
+
+    await test(admin, connection.id);
+
+    expect(sentMaxTokens).toBe(777);
   });
 
   it('a rejected key fails authentication and nothing else (AC-2)', async () => {
