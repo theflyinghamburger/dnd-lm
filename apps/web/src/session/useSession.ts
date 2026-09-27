@@ -1,4 +1,10 @@
-import type { CommandAck, EventEnvelope, ServerError, SessionSnapshot } from '@dnd-lm/contracts';
+import type {
+  CommandAck,
+  EventEnvelope,
+  ServerError,
+  SessionSnapshot,
+  SessionState,
+} from '@dnd-lm/contracts';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { type Socket, io } from 'socket.io-client';
 
@@ -91,6 +97,13 @@ export function useSession(sessionId: string, characterId: string | null) {
         delete rest[payload.resolution_id];
         return rest;
       });
+      return;
+    }
+    if (event.type === 'SESSION_STATE_CHANGED') {
+      // U1.0 (NFR-205). The server's `to` is the truth — including where a
+      // resume lands, which only the server's `pausedFrom` knows.
+      const payload = event.payload as unknown as { to: SessionState };
+      setSnapshot((s) => s && { ...s, status: payload.to });
       return;
     }
     if (event.type === 'DM_RESOLUTION_FAILED') {

@@ -3,12 +3,15 @@ import {
   type PublicUser,
   type Roster,
   type TriggerDefinition,
+  acceptsMutations,
+  isTerminal,
   parseMessage,
 } from '@dnd-lm/contracts';
 import { useQuery } from '@tanstack/react-query';
 import { type FormEvent, useMemo, useState } from 'react';
 import { api } from '../api';
 import { SheetPanel } from './SheetPanel';
+import { canSend, statusNotice } from './status';
 import { useSession } from './useSession';
 
 /** Label and icon, never colour alone (NFR-403). */
@@ -90,10 +93,16 @@ export function Chat({
         ? 'The Dungeon Master'
         : (roster.data?.members.find((m) => m.userId === userId)?.displayName ?? 'Someone');
 
+  // U1.0: every gate reads the live status, which SESSION_STATE_CHANGED keeps
+  // current. Nothing is offered before the first snapshot says where we are.
+  const status = snapshot?.status ?? null;
+  const notice = status && statusNotice(status);
+  const sendable = status !== null && canSend(status, preview);
+
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const content = draft.trim();
-    if (content.length === 0) return;
+    if (content.length === 0 || !sendable) return;
     setDraft('');
     void send(content);
   }
@@ -110,6 +119,12 @@ export function Chat({
           </button>
         </p>
       </header>
+
+      {notice && (
+        <p role="status">
+          <strong>{status === 'PAUSED' ? 'Paused.' : 'Ended.'}</strong> {notice}
+        </p>
+      )}
 
       <ol className="transcript" aria-live="polite">
         {lines.map((line) => {
@@ -137,6 +152,11 @@ export function Chat({
               <em>{text}…</em>
             </li>
           ))}
+        {status === 'DM_GENERATING' && (
+          <li data-delivery="provisional">
+            <em>The Dungeon Master is thinking…</em>
+          </li>
+        )}
       </ol>
 
       {rolls.length > 0 && (
@@ -161,6 +181,7 @@ export function Chat({
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
           autoComplete="off"
+          disabled={status !== null && isTerminal(status)}
           placeholder="Say something, or @dm to act"
         />
 
@@ -197,11 +218,12 @@ export function Chat({
                   · ★ This will wake the Dungeon Master ({preview.dmTrigger.definitionId})
                 </strong>
               )}
+              {status && !sendable && <strong> · Not while the session is {status}.</strong>}
             </>
           )}
         </p>
 
-        <button type="submit" disabled={preview?.kind !== 'route'}>
+        <button type="submit" disabled={!sendable}>
           Send
         </button>
       </form>
@@ -209,6 +231,7 @@ export function Chat({
         user={user}
         campaignId={campaignId}
         characterId={characterId}
+        canRoll={status !== null && acceptsMutations(status)}
         onRoll={(expression) => void roll(expression)}
       />
     </main>
