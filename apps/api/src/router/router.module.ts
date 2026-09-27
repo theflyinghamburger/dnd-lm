@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { NotesModule } from '../notes/notes.module';
 import { SessionContextService } from './session-context.service';
 
 /**
@@ -7,6 +8,7 @@ import { SessionContextService } from './session-context.service';
  * the other would close a cycle.
  */
 @Module({
+  imports: [NotesModule],
   providers: [SessionContextService],
   exports: [SessionContextService],
 })
