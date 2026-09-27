@@ -49,6 +49,7 @@ describe('statusNotice', () => {
     expect(statusNotice('PAUSED')).not.toBe(statusNotice('SESSION_ENDED'));
     expect(statusNotice('WAITING_FOR_PLAYERS')).toBeNull();
     expect(statusNotice('DM_GENERATING')).toBeNull();
+    expect(statusNotice('WAITING_FOR_ROLL')).toBeNull();
   });
 });
 
