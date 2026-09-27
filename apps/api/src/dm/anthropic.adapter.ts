@@ -46,7 +46,9 @@ export class AnthropicProvider implements DmProvider {
     }
     const stream = await this.client.messages.create({
       model: this.config.model,
-      max_tokens: this.config.maxTokens,
+      // P4.1.0 (#65): the row's max_tokens is the host's setting and the default;
+      // a non-turn caller's request may raise or lower it (0/absent falls back).
+      max_tokens: req.maxTokens || this.config.maxTokens,
       thinking: { type: 'adaptive' },
       // One cache break at the end of the stable prefix: everything before the
       // per-turn prompt is byte-identical across a session's turns.

@@ -18,7 +18,12 @@ import { DATABASE_URL, createTestApp, truncateAll, type TestApp } from './app.ha
  * OpenAI-compatible SSE server behind the M7.3 wall (`ALLOW_LOCAL_PROVIDERS`).
  */
 describe.skipIf(!DATABASE_URL)('DM adapter wiring from connections (M7.7)', () => {
-  type Rec = { auth: string | undefined; model: string | undefined; path: string };
+  type Rec = {
+    auth: string | undefined;
+    model: string | undefined;
+    maxTokens: number | undefined;
+    path: string;
+  };
   type Mock = { port: number; recs: Rec[]; close: () => Promise<void> };
 
   // One dm-json reply, streamed as SSE. Split per source line so every `data:`
@@ -41,8 +46,13 @@ describe.skipIf(!DATABASE_URL)('DM adapter wiring from connections (M7.7)', () =
       let data = '';
       req.on('data', (c) => (data += c));
       req.on('end', () => {
-        const body = JSON.parse(data || '{}') as { model?: string };
-        recs.push({ auth: req.headers.authorization, model: body.model, path: req.url ?? '' });
+        const body = JSON.parse(data || '{}') as { model?: string; max_tokens?: number };
+        recs.push({
+          auth: req.headers.authorization,
+          model: body.model,
+          maxTokens: body.max_tokens,
+          path: req.url ?? '',
+        });
         res.writeHead(200, { 'content-type': 'text/event-stream' });
         const chunk = (content?: string, usage?: unknown) =>
           JSON.stringify({
@@ -224,6 +234,7 @@ describe.skipIf(!DATABASE_URL)('DM adapter wiring from connections (M7.7)', () =
       baseUrl: localBase(mock.port),
       apiKey: 'sk-key-a',
       modelId: 'local-llama',
+      maxTokens: 777,
     });
     await pick(app, table.host, table.campaignId, connId);
 
@@ -242,6 +253,9 @@ describe.skipIf(!DATABASE_URL)('DM adapter wiring from connections (M7.7)', () =
     expect(mock.recs[0]).toMatchObject({
       auth: 'Bearer sk-key-a',
       model: 'local-llama',
+      // P4.1.0 (#65): the adapter now honours the request's ceiling, and a DM
+      // turn requests the row's own value, so a turn's max_tokens is unchanged.
+      maxTokens: 777,
       path: '/v1/chat/completions',
     });
   });
@@ -388,10 +402,20 @@ describe.skipIf(!DATABASE_URL)('DM adapter wiring from connections (M7.7)', () =
       // turn; without that, a predicate matching nothing would pass this too.
 
       expect(mock.recs).toEqual([
-        { auth: 'Bearer sk-key-a', model: 'model-a', path: '/v1/chat/completions' },
+        {
+          auth: 'Bearer sk-key-a',
+          model: 'model-a',
+          maxTokens: 1024,
+          path: '/v1/chat/completions',
+        },
       ]);
       expect(other.recs).toEqual([
-        { auth: 'Bearer sk-key-b', model: 'model-b', path: '/v1/chat/completions' },
+        {
+          auth: 'Bearer sk-key-b',
+          model: 'model-b',
+          maxTokens: 1024,
+          path: '/v1/chat/completions',
+        },
       ]);
     } finally {
       await other.close();
