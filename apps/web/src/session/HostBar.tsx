@@ -26,6 +26,8 @@ export function HostBar({
 }) {
   const [confirmingEnd, setConfirmingEnd] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
+  /** One command at a time: a double press would quote a stale version. */
+  const [busy, setBusy] = useState(false);
   const [prompt, setPrompt] = useState('');
   const [expression, setExpression] = useState('');
   const [chosen, setChosen] = useState<string[]>([]);
@@ -52,34 +54,46 @@ export function HostBar({
 
   async function control(action: HostControlAction) {
     setConfirmingEnd(false);
+    setBusy(true);
     landed(await onControl(action));
+    setBusy(false);
   }
 
   async function onAsk(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     // Caps (200-char prompt, 12 characters) are the server's to enforce and explain.
+    setBusy(true);
     if (landed(await onRequestRoll(prompt.trim(), expression.trim(), chosen))) {
       setPrompt('');
       setExpression('');
       setChosen([]);
     }
+    setBusy(false);
   }
 
   return (
     <section aria-label="Host controls">
       <h2>Host</h2>
       <p>
-        <button type="button" disabled={!allowed.PAUSE} onClick={() => void control('PAUSE')}>
+        <button
+          type="button"
+          disabled={busy || !allowed.PAUSE}
+          onClick={() => void control('PAUSE')}
+        >
           Pause
         </button>{' '}
-        <button type="button" disabled={!allowed.RESUME} onClick={() => void control('RESUME')}>
+        <button
+          type="button"
+          disabled={busy || !allowed.RESUME}
+          onClick={() => void control('RESUME')}
+        >
           Resume
         </button>{' '}
         {/* host_turn is the one trigger with no chat tag (contracts router.ts):
             this button is the only way to fire it. */}
         <button
           type="button"
-          disabled={!allowed.FORCE_DM_TURN}
+          disabled={busy || !allowed.FORCE_DM_TURN}
           onClick={() => void control('FORCE_DM_TURN')}
         >
           Force DM turn
@@ -88,7 +102,11 @@ export function HostBar({
         {confirmingEnd ? (
           <>
             <span role="alert"> End this session for everyone? This cannot be undone. </span>
-            <button type="button" disabled={!allowed.END} onClick={() => void control('END')}>
+            <button
+              type="button"
+              disabled={busy || !allowed.END}
+              onClick={() => void control('END')}
+            >
               Confirm end
             </button>{' '}
             <button type="button" onClick={() => setConfirmingEnd(false)}>
@@ -96,14 +114,18 @@ export function HostBar({
             </button>
           </>
         ) : (
-          <button type="button" disabled={!allowed.END} onClick={() => setConfirmingEnd(true)}>
+          <button
+            type="button"
+            disabled={busy || !allowed.END}
+            onClick={() => setConfirmingEnd(true)}
+          >
             End session
           </button>
         )}
       </p>
 
       <form onSubmit={(event) => void onAsk(event)}>
-        <fieldset disabled={!allowed.REQUEST_ROLL}>
+        <fieldset disabled={busy || !allowed.REQUEST_ROLL}>
           <legend>Ask for a check</legend>
           <label htmlFor="check-prompt">Prompt</label>
           <input
@@ -137,7 +159,7 @@ export function HostBar({
               {character.name}
             </label>
           ))}
-          <button type="submit" disabled={chosen.length === 0}>
+          <button type="submit" disabled={busy || chosen.length === 0}>
             Ask
           </button>
         </fieldset>

@@ -259,19 +259,23 @@ export function useSession(sessionId: string, characterId: string | null) {
   /**
    * Sends one mutating command with a fresh `command_id` and the current
    * version, and hands back the ack or the rejection for the caller to show.
+   * `null` means it never got an answer: no socket, or `emitWithAck` rejected
+   * because the socket dropped mid-flight (it always does on disconnect).
    */
   const command = useCallback(
     async (type: ClientCommand['type'], payload: Record<string, unknown>) => {
       const socket = socketRef.current;
       if (!socket) return null;
-      const result = (await socket.emitWithAck('command', {
-        command_id: crypto.randomUUID(),
-        type,
-        session_id: sessionId,
-        expected_state_version: stateVersion.current,
-        payload,
-      })) as CommandAck | ServerError;
-      absorb(result);
+      const result = (await socket
+        .emitWithAck('command', {
+          command_id: crypto.randomUUID(),
+          type,
+          session_id: sessionId,
+          expected_state_version: stateVersion.current,
+          payload,
+        })
+        .catch(() => null)) as CommandAck | ServerError | null;
+      if (result) absorb(result);
       return result;
     },
     [sessionId, absorb],
