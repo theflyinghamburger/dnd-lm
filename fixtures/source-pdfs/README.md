@@ -1,6 +1,6 @@
 # Campaign source PDFs
 
-Test inputs for `readPdf` (`apps/api/src/sources/pdf-text.ts`, P4.1.2). Both are
+Test inputs for `readPdf` (`apps/api/src/sources/pdf-text.ts`, P4.1.2). All three are
 hand-built, uncompressed PDF 1.4, so `cat` shows exactly what is in them.
 
 - `two-page-text.pdf` — two pages of Helvetica text. "Klarg the bugbear" is on
