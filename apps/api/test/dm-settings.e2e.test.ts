@@ -68,6 +68,7 @@ describe.skipIf(!DATABASE_URL)('campaign DM settings (M7.6)', () => {
       style: null,
       tone: null,
       difficulty: null,
+      progressionChapter: null,
     });
 
     const saved = await api()
@@ -80,6 +81,7 @@ describe.skipIf(!DATABASE_URL)('campaign DM settings (M7.6)', () => {
       style: 'gritty',
       tone: 'dark',
       difficulty: 'deadly',
+      progressionChapter: null,
     });
   });
 
@@ -193,6 +195,7 @@ describe.skipIf(!DATABASE_URL)('campaign DM settings (M7.6)', () => {
       style: null,
       tone: 'light',
       difficulty: null,
+      progressionChapter: null,
     });
     const triggers = await api()
       .get(`/api/campaigns/${campaignId}/triggers`)
@@ -213,6 +216,7 @@ describe.skipIf(!DATABASE_URL)('campaign DM settings (M7.6)', () => {
       style: null,
       tone: null,
       difficulty: null,
+      progressionChapter: null,
     });
   });
 });

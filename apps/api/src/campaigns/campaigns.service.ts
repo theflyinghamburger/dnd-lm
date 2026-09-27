@@ -231,6 +231,10 @@ export class CampaignsService {
       style: pick(DmStyle, stored.dm_style),
       tone: pick(DmTone, stored.dm_tone),
       difficulty: pick(DmDifficulty, stored.dm_difficulty),
+      progressionChapter: pick(
+        z.number().int().min(0),
+        (stored.progression as { chapter?: unknown } | undefined)?.chapter,
+      ),
     };
   }
 
@@ -249,13 +253,27 @@ export class CampaignsService {
     if (input.tone !== undefined) columns.dm_tone = input.tone;
     if (input.difficulty !== undefined) columns.dm_difficulty = input.difficulty;
 
+    let settings = sql`${campaigns.settings} || ${JSON.stringify(columns)}::jsonb`;
+    // M8.5: `progression.chapter` is the exact key retrieval gates on (M8.3).
+    // Merged into `progression` so any sibling key there survives; `null`
+    // removes it, which retrieval reads as "no chapter reached" (0).
+    const chapter = input.progressionChapter;
+    if (chapter === null) settings = sql`(${settings}) #- '{progression,chapter}'`;
+    if (typeof chapter === 'number') {
+      settings = sql`(${settings}) || jsonb_build_object('progression',
+        coalesce(${campaigns.settings}->'progression', '{}'::jsonb)
+          || jsonb_build_object('chapter', ${chapter}::int))`;
+    }
+
     const [updated] = await this.db
       .update(campaigns)
-      .set({ settings: sql`${campaigns.settings} || ${JSON.stringify(columns)}::jsonb` })
+      .set({ settings })
       .where(eq(campaigns.id, campaignId))
       .returning({ id: campaigns.id });
     if (!updated) throw new NotFoundException({ code: 'CAMPAIGN_NOT_FOUND' });
 
+    // The chapter gates the NPC roster too (M8.4), which is cached here.
+    if (chapter !== undefined) this.context.invalidate(campaignId);
     return this.getDmSettings(campaignId);
   }
 

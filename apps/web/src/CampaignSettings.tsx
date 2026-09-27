@@ -7,7 +7,7 @@ import { api, describeApiError } from './api';
  * Campaign → Settings (M7.6, FR-506). A host picks a provider from the
  * *redacted* enabled list — identity and model, never a URL or a key, because
  * the shape `GET /api/providers` returns has no field for either (M7.4) — and
- * sets the DM knobs.
+ * sets the DM knobs and the party's current chapter (M8.5).
  *
  * The knobs are stored and shown; they do not reach the DM's prompt yet. That
  * wiring is its own change, with its own untrusted-input treatment.
@@ -44,6 +44,7 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
         style: knobs.style ?? null,
         tone: knobs.tone ?? null,
         difficulty: knobs.difficulty ?? null,
+        progressionChapter: knobs.progressionChapter ?? null,
       }),
     onSuccess: done,
   });
@@ -98,6 +99,7 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
             style: value<DmStyle>('style'),
             tone: value<DmTone>('tone'),
             difficulty: value<DmDifficulty>('difficulty'),
+            progressionChapter: form.get('chapter') ? Number(form.get('chapter')) : null,
           });
         }}
       >
@@ -121,6 +123,18 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
           label="Difficulty"
           options={DIFFICULTIES}
           value={current.difficulty}
+        />
+        {/* M8.5: the party's progression. Notes above it stay out of the DM's
+            reach (FR-608); without this the chapter gate is decoration. */}
+        <label htmlFor={`chapter-${campaignId}`}>Party's current chapter</label>
+        <input
+          id={`chapter-${campaignId}`}
+          name="chapter"
+          type="number"
+          min={0}
+          step={1}
+          placeholder="Not started"
+          defaultValue={current.progressionChapter ?? ''}
         />
         <button type="submit" disabled={saveKnobs.isPending}>
           Save DM settings
