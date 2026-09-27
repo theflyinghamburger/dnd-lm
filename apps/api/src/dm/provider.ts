@@ -28,6 +28,7 @@ export type DmRequest = {
   system: string;
   /** The per-turn prompt: structured state, untrusted layers, transcript. */
   prompt: string;
+  /** Output ceiling. 0 inherits the connection row's `max_tokens` (P4.1.0). */
   maxTokens: number;
 };
 
