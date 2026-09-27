@@ -4,6 +4,7 @@ import {
   type SessionSnapshot,
   SessionState,
   acceptsMutations,
+  canTransition,
   isTerminal,
 } from '@dnd-lm/contracts';
 
@@ -59,4 +60,24 @@ export function canSend(status: SessionState, draft: RoutingDecision | null): bo
   if (draft?.kind !== 'route' || isTerminal(status)) return false;
   const mutating = Boolean(draft.dmTrigger) || draft.recipientType === 'dice';
   return !mutating || acceptsMutations(status);
+}
+
+/**
+ * Which host controls are legal from here (U1.2, FR-801). The transition table
+ * decides, never a local list: PAUSE and END are the edges to PAUSED and
+ * SESSION_ENDED, and asking for a check is the edge to WAITING_FOR_ROLL.
+ * RESUME's target is the server's `pausedFrom`, so it is "only from PAUSED".
+ * FORCE_DM_TURN moves nothing; it is a trigger, and the server runs it as an
+ * ordinary mutation — refused while paused (summary.md §4) and once ended.
+ */
+export function hostActions(status: SessionState) {
+  return {
+    PAUSE: canTransition(status, 'PAUSED'),
+    RESUME: status === 'PAUSED',
+    END: canTransition(status, 'SESSION_ENDED'),
+    FORCE_DM_TURN: acceptsMutations(status),
+    // PAUSED -> WAITING_FOR_ROLL is RESUME's edge; the request itself is a
+    // mutation, so a pause refuses it.
+    REQUEST_ROLL: acceptsMutations(status) && canTransition(status, 'WAITING_FOR_ROLL'),
+  };
 }

@@ -1,6 +1,8 @@
 import type {
+  ClientCommand,
   CommandAck,
   EventEnvelope,
+  HostControlAction,
   ServerError,
   SessionSnapshot,
   SessionState,
@@ -254,23 +256,61 @@ export function useSession(sessionId: string, characterId: string | null) {
     [sessionId, absorb],
   );
 
+  /**
+   * Sends one mutating command with a fresh `command_id` and the current
+   * version, and hands back the ack or the rejection for the caller to show.
+   */
+  const command = useCallback(
+    async (type: ClientCommand['type'], payload: Record<string, unknown>) => {
+      const socket = socketRef.current;
+      if (!socket) return null;
+      const result = (await socket.emitWithAck('command', {
+        command_id: crypto.randomUUID(),
+        type,
+        session_id: sessionId,
+        expected_state_version: stateVersion.current,
+        payload,
+      })) as CommandAck | ServerError;
+      absorb(result);
+      return result;
+    },
+    [sessionId, absorb],
+  );
+
   /** Click-to-roll from the sheet. The dice themselves are rolled server-side. */
   const roll = useCallback(
     async (expression: string) => {
-      const socket = socketRef.current;
-      if (!socket) return;
-      absorb(
-        (await socket.emitWithAck('command', {
-          command_id: crypto.randomUUID(),
-          type: 'ROLL_DICE',
-          session_id: sessionId,
-          expected_state_version: stateVersion.current,
-          payload: { expression, ...(characterId ? { character_id: characterId } : {}) },
-        })) as CommandAck | ServerError,
-      );
+      await command('ROLL_DICE', {
+        expression,
+        ...(characterId ? { character_id: characterId } : {}),
+      });
     },
-    [sessionId, characterId, absorb],
+    [characterId, command],
   );
 
-  return { snapshot, lines, rolls, pending, connected, dmNarration, send, roll };
+  /** U1.2 (FR-801). The server refuses a non-host with NOT_THE_HOST regardless. */
+  const hostControl = useCallback(
+    (action: HostControlAction) => command('HOST_CONTROL', { action }),
+    [command],
+  );
+
+  /** U1.2 (M5.5). The ROLL_REQUESTED it produces renders as U1.1's card. */
+  const requestRoll = useCallback(
+    (prompt: string, expression: string, characterIds: string[]) =>
+      command('REQUEST_ROLL', { prompt, expression, character_ids: characterIds }),
+    [command],
+  );
+
+  return {
+    snapshot,
+    lines,
+    rolls,
+    pending,
+    connected,
+    dmNarration,
+    send,
+    roll,
+    hostControl,
+    requestRoll,
+  };
 }
