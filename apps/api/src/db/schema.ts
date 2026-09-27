@@ -70,6 +70,11 @@ export const campaigns = pgTable('campaigns', {
    * Carries the enabled trigger set (M3.2) and the provider connection and DM
    * style knobs (M7.1). One JSONB column rather than a settings table: it is
    * read whole, per campaign, and never queried by field.
+   *
+   * `progression.chapter` (integer, M8) is the party's current progression
+   * marker, host-set. `campaign_notes.chapter` is gated against it: a note
+   * whose chapter is above it is not retrievable (FR-608). Absent means no
+   * chapter has been reached yet.
    */
   settings: jsonb('settings')
     .notNull()
@@ -439,4 +444,90 @@ export const providerConnectionAudit = pgTable(
     at: timestamp('at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index('provider_connection_audit_connection_idx').on(t.connectionId, t.at)],
+);
+
+/* -------------------------------------------------------------------------- */
+/* M8 — campaign notes                                                        */
+/* -------------------------------------------------------------------------- */
+
+export const noteType = pgEnum('note_type', [
+  'location',
+  'npc',
+  'quest',
+  'item',
+  'lore',
+  'handout',
+]);
+
+/**
+ * DECLARATION ORDER IS THE ORDERING. Postgres compares enum values by the
+ * order they are declared, so `player < dm` is what makes M8.2's
+ * `spoiler_level <= $scope` the whole spoiler filter (FR-608). Reversing or
+ * reordering this list silently inverts the guarantee. A new level goes at
+ * its place in the order (`ALTER TYPE ... ADD VALUE ... BEFORE/AFTER`).
+ */
+export const noteSpoilerLevel = pgEnum('note_spoiler_level', ['player', 'dm']);
+
+/** Phase 4 ingestion writes `draft`; retrieval only ever reads `published` (FR-607). */
+export const noteStatus = pgEnum('note_status', ['draft', 'published']);
+
+// Generated, never written, never selected — no driver mapping needed.
+const tsvector = customType<{ data: string }>({
+  dataType() {
+    return 'tsvector';
+  },
+});
+
+/**
+ * A campaign note (M8.1, FR-609). The columns are architecture.md §9's
+ * frontmatter keys that retrieval filters on (`slug` = frontmatter `id`,
+ * `type`, `chapter`, `spoiler_level`); everything else in §9 (`source`,
+ * `unlock_condition`, `entities`, `connections`, `aliases`) lives in
+ * `frontmatter`. `status` and `source_id` exist for Phase 4 ingestion
+ * (docs/campaign-pdf-ingestion.md §3.1) so it writes this table without
+ * adding a column.
+ *
+ * `tsv`'s expression must use raw column names (no `${}`) and the two-arg
+ * `to_tsvector` (the one-arg form is not IMMUTABLE). Changing it later makes
+ * drizzle-kit drop and re-add the column, which silently drops the GIN index
+ * with it — see docs/changes/M8.1.migration-plan.md.
+ *
+ * Never `select()` the whole table: that drags `tsv` back as a string.
+ */
+export const campaignNotes = pgTable(
+  'campaign_notes',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    campaignId: uuid('campaign_id')
+      .notNull()
+      .references(() => campaigns.id, { onDelete: 'cascade' }),
+    slug: text('slug').notNull(),
+    type: noteType('type').notNull(),
+    title: text('title').notNull(),
+    bodyMd: text('body_md').notNull().default(''),
+    frontmatter: jsonb('frontmatter')
+      .notNull()
+      .default(sql`'{}'::jsonb`),
+    /** Defaults to `dm`: an unlabelled note fails toward "hidden", never "spoiled". */
+    spoilerLevel: noteSpoilerLevel('spoiler_level').notNull().default('dm'),
+    /** Null = ungated. Compared against `campaigns.settings.progression.chapter`. */
+    chapter: integer('chapter'),
+    status: noteStatus('status').notNull().default('published'),
+    /**
+     * The upload this note was extracted from; null = hand-authored. The
+     * foreign key to `campaign_sources(id) ON DELETE SET NULL` is added by
+     * P4.1.1, which creates that table.
+     */
+    sourceId: uuid('source_id'),
+    tsv: tsvector('tsv').generatedAlwaysAs(
+      sql`setweight(to_tsvector('english', coalesce(title, '')), 'A') || setweight(to_tsvector('english', coalesce(body_md, '')), 'B')`,
+    ),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex('campaign_notes_campaign_slug_key').on(t.campaignId, t.slug),
+    index('campaign_notes_campaign_type_idx').on(t.campaignId, t.type),
+    index('campaign_notes_tsv_idx').using('gin', t.tsv),
+  ],
 );

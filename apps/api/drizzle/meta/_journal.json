@@ -71,6 +71,13 @@
       "when": 1788747973747,
       "tag": "0009_chief_norrin_radd",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1790493375420,
+      "tag": "0010_dry_marrow",
+      "breakpoints": true
     }
   ]
 }
