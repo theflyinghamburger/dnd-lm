@@ -172,25 +172,25 @@ export class SessionGateway implements OnGatewayInit, OnGatewayConnection {
     };
   }
 
-  handleConnection(socket: SessionSocket): void {
+  async handleConnection(socket: SessionSocket): Promise<void> {
     const { sessionId, userId, campaignId } = socket.data;
-    void socket.join([
-      room(sessionId),
-      userRoom(sessionId, userId),
-      memberRoom(campaignId, userId),
-    ]);
     // Closes the handshake race with `evict` (#79): a removal that commits
-    // after `authenticate` read the membership but before the join above
-    // would evict an empty room and leave this socket live. Re-reading it
-    // *after* the join means one of the two always sees the other. Fails
-    // closed.
-    void this.memberships
-      .roleFor(campaignId, userId)
-      .then((role) => role !== null)
-      .catch(() => false)
-      .then((member) => {
-        if (!member) socket.disconnect(true);
-      });
+    // after `authenticate` read the membership but before the join would
+    // evict an empty room and leave this socket live. The join is awaited
+    // (it is async under some adapters) and only then is membership re-read,
+    // so one of the two always sees the other. Fails closed.
+    let member: boolean;
+    try {
+      await socket.join([
+        room(sessionId),
+        userRoom(sessionId, userId),
+        memberRoom(campaignId, userId),
+      ]);
+      member = (await this.memberships.roleFor(campaignId, userId)) !== null;
+    } catch {
+      member = false;
+    }
+    if (!member) socket.disconnect(true);
   }
 
   /**

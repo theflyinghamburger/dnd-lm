@@ -67,7 +67,8 @@ commits.
   addressed by `server.in(...).disconnectSockets(true)` also stays correct under
   the Phase 3 Redis adapter.
 - **The handshake race is closed by a re-check after join.** `handleConnection`
-  re-reads the membership after joining the rooms and disconnects on
+  awaits the room join (async under some adapters), then re-reads the
+  membership and disconnects on
   none (fails closed on a DB error). Either the removal commits before the
   re-check (re-check sees it) or after the join (`evict` finds the socket).
 - **Refusals are 409 with `code` + `message`**, the same shape as
@@ -116,7 +117,7 @@ commits.
 | AC-5 | early return on no membership; `ParseUUIDPipe` | "is idempotent: removing a non-member is 204" |
 | AC-6 | `@CampaignRoles('host', 'admin')` | "is refused to a player, whatever the UI shows" |
 | AC-7 | no character/event writes in `removeMember` | "leaves their characters and their history in place" |
-| AC-8 | `Members` in `apps/web/src/Lobby.tsx` | typecheck/lint only; no web component test harness exists |
+| AC-8 | `Members` in `apps/web/src/Lobby.tsx` | typecheck/lint only; `apps/web` has no DOM/component test harness (its tests are pure-function). Accepted gap: the control is courtesy, the authorization is AC-6 |
 
 **Requirements:** FR-102 (remove members), FR-105 (control only your own
 characters — a removed owner's character is controllable by no one), NFR-302
