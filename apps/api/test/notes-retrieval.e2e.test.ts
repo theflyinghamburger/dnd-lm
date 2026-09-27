@@ -152,7 +152,10 @@ describe.skipIf(!DATABASE_URL)('notes retrieval (M8.2)', () => {
     expect(total).toBeGreaterThan(tokenCap);
 
     const got = await ask({ tokenCap });
-    expect(got.map((n) => n.slug)).toEqual(['n0', 'n1']);
+    // Whole notes, bodies untouched: the cap drops notes, never truncates one.
+    expect(got).toEqual(
+      rows.slice(0, 2).map((r) => ({ slug: r.slug, title: r.title, body: r.bodyMd })),
+    );
     expect(got.reduce((s, n) => s + estimateTokens(n.title + n.body), 0)).toBeLessThanOrEqual(
       tokenCap,
     );
