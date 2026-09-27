@@ -20,8 +20,8 @@ import { looksLikePdf } from '../characters/pdf-form';
 import { SourcesService } from './sources.service';
 
 /**
- * A campaign book is tens of MB. Multer enforces this before the body is
- * buffered, so an oversized upload is a 413 that never allocates.
+ * A campaign book is tens of MB. Multer enforces this while streaming, so an
+ * oversized upload is a 413 with memory bounded at the cap, never the full body.
  */
 const MAX_SOURCE_BYTES = 32 * 1024 * 1024;
 

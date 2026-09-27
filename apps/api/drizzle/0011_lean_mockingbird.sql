@@ -20,4 +20,5 @@ ALTER TABLE "campaign_sources" ADD CONSTRAINT "campaign_sources_campaign_id_camp
 ALTER TABLE "campaign_sources" ADD CONSTRAINT "campaign_sources_uploaded_by_users_id_fk" FOREIGN KEY ("uploaded_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 CREATE UNIQUE INDEX "campaign_sources_one_in_flight_key" ON "campaign_sources" USING btree ("campaign_id") WHERE status in ('pending', 'extracting');--> statement-breakpoint
 CREATE INDEX "campaign_sources_campaign_idx" ON "campaign_sources" USING btree ("campaign_id","created_at");--> statement-breakpoint
-ALTER TABLE "campaign_notes" ADD CONSTRAINT "campaign_notes_source_id_campaign_sources_id_fk" FOREIGN KEY ("source_id") REFERENCES "public"."campaign_sources"("id") ON DELETE set null ON UPDATE no action;
+ALTER TABLE "campaign_notes" ADD CONSTRAINT "campaign_notes_source_id_campaign_sources_id_fk" FOREIGN KEY ("source_id") REFERENCES "public"."campaign_sources"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "campaign_notes_source_id_idx" ON "campaign_notes" USING btree ("source_id");

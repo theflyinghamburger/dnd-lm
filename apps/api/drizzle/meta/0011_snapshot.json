@@ -1,5 +1,5 @@
 {
-  "id": "4782c838-7cd5-4cb3-9bd9-748face6374e",
+  "id": "49837f69-c936-4ba8-9a69-e674ff5ee7c0",
   "prevId": "9e25dff1-4fa3-4f9f-a615-f98f159304be",
   "version": "7",
   "dialect": "postgresql",
@@ -231,6 +231,21 @@
           "isUnique": false,
           "concurrently": false,
           "method": "gin",
+          "with": {}
+        },
+        "campaign_notes_source_id_idx": {
+          "name": "campaign_notes_source_id_idx",
+          "columns": [
+            {
+              "expression": "source_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
           "with": {}
         }
       },

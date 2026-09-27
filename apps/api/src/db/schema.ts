@@ -532,6 +532,8 @@ export const campaignNotes = pgTable(
     uniqueIndex('campaign_notes_campaign_slug_key').on(t.campaignId, t.slug),
     index('campaign_notes_campaign_type_idx').on(t.campaignId, t.type),
     index('campaign_notes_tsv_idx').using('gin', t.tsv),
+    // Deleting a source nulls its notes through the FK; without this, that scans the table.
+    index('campaign_notes_source_id_idx').on(t.sourceId),
   ],
 );
 
