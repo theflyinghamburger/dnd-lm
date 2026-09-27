@@ -1,8 +1,8 @@
 # Build summary — DnD LM
 
 **Repo:** [theflyinghamburger/dnd-lm](https://github.com/theflyinghamburger/dnd-lm) (private)
-**As of:** 2026-09-05
-**Progress:** M0–M7.9. M5–M7.7 merged (#17, #18, #28–#32). The rest of M7 is open as one stack: #35 (gate fix) → #34 (M7.5) → #36 (M7.8) → #37 (M7.9) → #38 (M7.6), all tests passing on live Postgres. M8 and M9 not started.
+**As of:** 2026-09-27
+**Progress:** M0–M7 merged, M7 review follow-ups (#42–#45) closed, plus the admin bootstrap (#60) and the lobby pregen picker (#61). PR [#81](https://github.com/theflyinghamburger/dnd-lm/pull/81) (M4.7, character import from a sheet PDF) is open. M8 and M9 not started. Next open work: M8 (#48–#52), U1 (#72–#78), P4.1 (#64–#70), #79, M9 (#53–#57).
 
 ---
 
@@ -22,15 +22,23 @@
 | M7.3 — Base URL validation (SSRF) | [#21](https://github.com/theflyinghamburger/dnd-lm/issues/21) | **merged** | [#30](https://github.com/theflyinghamburger/dnd-lm/pull/30) |
 | M7.4 — Authorization: admin-managed connections | [#22](https://github.com/theflyinghamburger/dnd-lm/issues/22) | **merged** | [#31](https://github.com/theflyinghamburger/dnd-lm/pull/31) |
 | M7.7 — Adapter wiring from connections | [#25](https://github.com/theflyinghamburger/dnd-lm/issues/25) | **merged** | [#32](https://github.com/theflyinghamburger/dnd-lm/pull/32) |
-| M7.5 — Test connection | [#23](https://github.com/theflyinghamburger/dnd-lm/issues/23) | PR open, stacked on #35 | [#34](https://github.com/theflyinghamburger/dnd-lm/pull/34) |
-| M7.8 — Audit and attribution | [#26](https://github.com/theflyinghamburger/dnd-lm/issues/26) | PR open, stacked on #34 | [#36](https://github.com/theflyinghamburger/dnd-lm/pull/36) |
-| M7.9 — Provider failure behaviour | [#27](https://github.com/theflyinghamburger/dnd-lm/issues/27) | PR open, stacked on #36 | [#37](https://github.com/theflyinghamburger/dnd-lm/pull/37) |
-| M7.6 — Config UI | [#24](https://github.com/theflyinghamburger/dnd-lm/issues/24) | PR open, stacked on #37 | [#38](https://github.com/theflyinghamburger/dnd-lm/pull/38) |
-| The gate could not find a dotted work-item id (`M7.5.md`) | — | PR open, base of the stack | [#35](https://github.com/theflyinghamburger/dnd-lm/pull/35) |
-| M8 — Manual campaign notes and retrieval | [#9](https://github.com/theflyinghamburger/dnd-lm/issues/9) | not started | |
-| M9 — MVP acceptance | [#10](https://github.com/theflyinghamburger/dnd-lm/issues/10) | not started | |
+| M7.5 — Test connection | [#23](https://github.com/theflyinghamburger/dnd-lm/issues/23) | **merged** | [#40](https://github.com/theflyinghamburger/dnd-lm/pull/40) |
+| M7.6 — Config UI | [#24](https://github.com/theflyinghamburger/dnd-lm/issues/24) | **merged** | [#38](https://github.com/theflyinghamburger/dnd-lm/pull/38) |
+| M7.8 — Audit and attribution | [#26](https://github.com/theflyinghamburger/dnd-lm/issues/26) | **merged** | [#41](https://github.com/theflyinghamburger/dnd-lm/pull/41) |
+| M7.9 — Provider failure behaviour | [#27](https://github.com/theflyinghamburger/dnd-lm/issues/27) | **merged** | [#37](https://github.com/theflyinghamburger/dnd-lm/pull/37) |
+| The gate could not find a dotted work-item id (`M7.5.md`) | — | **merged** | [#35](https://github.com/theflyinghamburger/dnd-lm/pull/35) |
+| M7 review follow-ups (M7-FU2.1–2.3, FU3, FU4) | [#42](https://github.com/theflyinghamburger/dnd-lm/issues/42)–[#45](https://github.com/theflyinghamburger/dnd-lm/issues/45) | **merged** | [#39](https://github.com/theflyinghamburger/dnd-lm/pull/39), [#46](https://github.com/theflyinghamburger/dnd-lm/pull/46), [#47](https://github.com/theflyinghamburger/dnd-lm/pull/47), [#59](https://github.com/theflyinghamburger/dnd-lm/pull/59) |
+| Platform admin bootstrap (`admin:grant`) | [#60](https://github.com/theflyinghamburger/dnd-lm/issues/60) | **merged** | [#62](https://github.com/theflyinghamburger/dnd-lm/pull/62) |
+| Pregen character picker in the lobby | [#61](https://github.com/theflyinghamburger/dnd-lm/issues/61) | **merged** | [#63](https://github.com/theflyinghamburger/dnd-lm/pull/63) |
+| M4.7 — Import a character from a sheet PDF | — (work item `docs/changes/M4.7.md`) | PR open | [#81](https://github.com/theflyinghamburger/dnd-lm/pull/81) |
+| M8 — Manual campaign notes and retrieval (M8.1–M8.5) | [#9](https://github.com/theflyinghamburger/dnd-lm/issues/9), [#48](https://github.com/theflyinghamburger/dnd-lm/issues/48)–[#52](https://github.com/theflyinghamburger/dnd-lm/issues/52) | not started | |
+| U1 — UI coverage: reach every shipped feature (U1.0–U1.5) | [#72](https://github.com/theflyinghamburger/dnd-lm/issues/72)–[#78](https://github.com/theflyinghamburger/dnd-lm/issues/78) | not started | |
+| P4.1 — Campaign PDF ingestion (P4.1.0–P4.1.5) | [#64](https://github.com/theflyinghamburger/dnd-lm/issues/64)–[#70](https://github.com/theflyinghamburger/dnd-lm/issues/70) | not started | |
+| Remove a member from a campaign (FR-102) | [#79](https://github.com/theflyinghamburger/dnd-lm/issues/79) | not started | |
+| README step 5: lobby route for getting a character | [#71](https://github.com/theflyinghamburger/dnd-lm/issues/71) | not started | |
+| M9 — MVP acceptance (M9.1–M9.5) | [#10](https://github.com/theflyinghamburger/dnd-lm/issues/10), [#53](https://github.com/theflyinghamburger/dnd-lm/issues/53)–[#57](https://github.com/theflyinghamburger/dnd-lm/issues/57) | not started | |
 
-285 tests on the M7.7 branch (top of the stack): unit + integration, all of them run, locally and in CI. CI runs build → typecheck → lint → format → migrate → test → migration-drift on every push, against a real Postgres 16 service. The integration suite silently skips without `DATABASE_URL` in the environment — always `set -a; source .env; set +a` first.
+367 tests on `main` (240 unit + 127 integration), all of them run in CI. CI runs build → typecheck → lint → format → migrate → test → migration-drift on every push, against a real Postgres 16 service. The integration suite silently skips without `DATABASE_URL` in the environment — always `set -a; source .env; set +a` first.
 
 ### PR #12 is dead
 
@@ -42,12 +50,12 @@ GitHub auto-closed it when its base branch was deleted on merge of #11. #13 is t
 
 ```
 apps/api            NestJS 12 — auth, campaigns, session, router, dice, characters, dm (LangGraph)
-apps/web            React 19 + Vite + TanStack Query — lobby, chat, character sheet
+apps/web            React 19 + Vite + TanStack Query — lobby, chat, character sheet, admin providers, campaign settings
 packages/contracts  Zod schemas AND the pure logic both sides must agree on
 fixtures/pregens    Six level-3 SRD characters
 ```
 
-**Postgres tables:** `users`, `auth_sessions`, `campaigns`, `memberships`, `invites`, `sessions`, `session_events`, `commands`, `messages`, `characters`, `rolls`, `pending_actions`, `provider_connections` (M7.1; key material is AES-GCM `bytea`, never plaintext). Six migrations, drift-checked.
+**Postgres tables:** `users`, `auth_sessions`, `campaigns`, `memberships`, `invites`, `sessions`, `session_events`, `commands`, `messages`, `characters`, `rolls`, `pending_actions`, `provider_connections` (M7.1; key material is AES-GCM `bytea`, never plaintext), `provider_connection_audit` (M7.8). Nine migrations, drift-checked.
 
 ### Running it
 
@@ -82,7 +90,9 @@ pnpm --filter @dnd-lm/web dev          # :5173, proxies /api and /ws
 
 ---
 
-## 4. Start here: M7.7 lands the adapters on the connections; M7.5, M7.6, M7.8, M7.9 remain
+## 4. Start here: M7 is merged; next is M8, U1, P4.1, #79, then M9
+
+M7 as it stands on `main`:
 
 - **The DM runs on the campaign's selected connection (M7.7).**
   `DmProviderSource.get(campaignId)` re-reads the row on *every* turn — decrypt the key,
@@ -160,27 +170,21 @@ step 2), so the admin surface never claims a `commands` row or touches
 key field to strip — the projection never selects them. A filter that could
 leak is worse than a shape that couldn't.
 
-**The campaign-settings writer takes only `providerConnectionId`.** M7.4's
-endpoint does not also write DM style/tone/difficulty (FR-506's broader
-surface) — that shape is undefined and lands with the M7.6 config UI (#24).
-Said in PR #31, not silently skipped.
+**The FR-506 knobs are three enums, stored but inert.** M7.4's endpoint
+wrote only `providerConnectionId`; M7.6 (#38) added style/tone/difficulty to
+the same writer. Nothing reads them into the prompt yet — see §6.
 
-### The rest of M7, in one stack
+### The rest of M7, merged
 
-Merge in order: **#35 → #34 → #36 → #37 → #38.** Each is based on the one
-before it, so merging out of order rebases the rest.
-
-- **#35 first, and it is not optional.** `find_item` accepted a work item only
-  if its filename had exactly one dot, so `docs/changes/M7.5.md` was invisible
-  and the gate reported "no work-item file" on a change whose work item was in
-  the diff. Every `M7.x` pull request fails the `sdlc` job until this lands.
-  The same bug is in the upstream suite and in every other install of it.
-- **M7.5 (#34)** — `POST /api/admin/providers/:id/test`: one real minimal call
+- **#35** — `find_item` accepted a work item only if its filename had exactly
+  one dot, so `docs/changes/M7.5.md` was invisible to the gate. Fixed here;
+  the same bug is in the upstream suite and in every other install of it.
+- **M7.5 (#40)** — `POST /api/admin/providers/:id/test`: one real minimal call
   through the *same* row→provider path a turn uses, reported as five
   independently falsifiable fields. `DmProviderSource` now builds through
   `ProviderConnectionsService.sourceFromRow`, so the test cannot drift from the
   path a turn takes. `classifyProviderError` lands here and M7.9 reuses it.
-- **M7.8 (#36)** — `provider_connection_audit`, one row per mutation in that
+- **M7.8 (#41)** — `provider_connection_audit`, one row per mutation in that
   mutation's transaction, field *names* only. No foreign key to
   `provider_connections` on purpose: an audit row outlives the row it audits.
   Resolution events carry `provider_connection_id` and `model_id`, and the
@@ -199,7 +203,7 @@ before it, so merging out of order rebases the rest.
 
 ## 5. Environment caveats
 
-**Docker works now** (Docker Desktop WSL integration), so all 64 integration tests run locally: `docker compose up -d`, then `pnpm db:migrate && pnpm test`. Before that, CI was their only execution — and it caught three real bugs unit tests could not.
+**Docker works now** (Docker Desktop WSL integration), so all 127 integration tests run locally: `docker compose up -d`, then `pnpm db:migrate && pnpm test`. Before that, CI was their only execution — and it caught three real bugs unit tests could not.
 
 - The global `AuthGuard` was running on WebSocket message handlers, finding no cookies, and rejecting every frame. Handshake tests passed the whole time because they never reach a handler. Fixed by scoping the guard to HTTP; there is now a unit test with a stubbed ws `ExecutionContext` so it needs no database.
 - The character import schema required a `campaignId` the route already supplied, and the pipe validated the body first — every import was a 400.
@@ -217,10 +221,10 @@ before it, so merging out of order rebases the rest.
 
 | Gap | Lands in |
 |---|---|
-| `@npc <name>` always answers "no NPC here is called that" — the roster's NPC list is empty until campaign notes exist. Alias and ambiguity logic is unit-tested against a populated roster. | M8 (#9) |
+| `@npc <name>` always answers "no NPC here is called that" — the roster's NPC list is empty until campaign notes exist. Alias and ambiguity logic is unit-tested against a populated roster. | M8.4 (#51) |
 | A pending action is closed by character, not by the requested expression. The resumed turn is told the roll result as data; it never re-validates the expression. | product decision (M5 ponytail, kept) |
 | The FR-506 DM knobs (style, tone, difficulty) are stored and displayed but do not reach the DM's prompt. Deliberate: host-chosen values entering the system prompt need invariant-7 treatment, and #24 did not ask for it. | a later change |
-| No host-control UI. Pause/resume/end/force and `REQUEST_ROLL` are server-side only; M5 has no UI subtask. | M9 (#10) |
+| No host-control UI. Pause/resume/end/force and `REQUEST_ROLL` are server-side only; M5 has no UI subtask. | U1.2 (#75) |
 | Whispers are hard-coded never DM-visible — the strictest reading of FR-207, and spec-doc.md §16's open question is untouched. | product decision |
 
 Nothing in `spec-doc.md` §16 has been resolved implicitly in code. D-2 (2014 SRD 5.1) is the only one settled, and MVP.md settles it explicitly.
