@@ -1,5 +1,11 @@
 import { randomBytes } from 'node:crypto';
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   type CampaignDmSettings,
   type CampaignSummary,
@@ -17,7 +23,7 @@ import {
   type UpdateTriggersRequest,
 } from '@dnd-lm/contracts';
 import { z } from 'zod';
-import { and, eq, isNull, sql } from 'drizzle-orm';
+import { and, eq, inArray, isNull, ne, sql } from 'drizzle-orm';
 import { DB, type Db } from '../db/db.module';
 import { campaigns, invites, memberships, providerConnections } from '../db/schema';
 import { SessionContextService } from '../router/session-context.service';
@@ -149,6 +155,77 @@ export class CampaignsService {
     // The roster the router parses against just changed (M3.2).
     this.context.invalidate(summary.id);
     return summary;
+  }
+
+  /**
+   * FR-102's other half (#79). Idempotent: a user who is not a member is
+   * already in the state asked for, so that is success, not a 404.
+   *
+   * The campaign row is locked `FOR UPDATE` so two hosts removing each other
+   * at once cannot both pass the last-host check and leave nobody in charge.
+   * `admin` counts as a host here, because every host-only route admits it.
+   *
+   * Their characters are deliberately **left in place**. A character is
+   * campaign content, not the player's property: deleting it would erase the
+   * party's record of them. `owner_user_id` now names a non-member, so no one
+   * can act as it (`requireOwned`) and it reads as nobody's sheet; a host who
+   * wants it gone deletes it through the character endpoint. Messages, rolls
+   * and events stay too — the log is append-only (invariant 5).
+   *
+   * Dropping their live sockets is the caller's half (`SessionGateway.evict`),
+   * after this commits.
+   */
+  async removeMember(campaignId: string, userId: string): Promise<void> {
+    await this.db.transaction(async (tx) => {
+      const [campaign] = await tx
+        .select({ ownerUserId: campaigns.ownerUserId })
+        .from(campaigns)
+        .where(eq(campaigns.id, campaignId))
+        .limit(1)
+        .for('update');
+      if (!campaign) throw new NotFoundException({ code: 'CAMPAIGN_NOT_FOUND' });
+      if (campaign.ownerUserId === userId) {
+        throw new ConflictException({
+          code: 'OWNER_NOT_REMOVABLE',
+          message: 'The campaign owner cannot be removed.',
+        });
+      }
+
+      const [target] = await tx
+        .select({ role: memberships.role })
+        .from(memberships)
+        .where(and(eq(memberships.campaignId, campaignId), eq(memberships.userId, userId)))
+        .limit(1);
+      if (!target) return;
+
+      if (target.role !== 'player') {
+        const [other] = await tx
+          .select({ id: memberships.id })
+          .from(memberships)
+          .where(
+            and(
+              eq(memberships.campaignId, campaignId),
+              ne(memberships.userId, userId),
+              inArray(memberships.role, ['host', 'admin']),
+            ),
+          )
+          .limit(1);
+        if (!other) {
+          throw new ConflictException({
+            code: 'LAST_HOST',
+            message: 'A campaign needs at least one host. Invite another host first.',
+          });
+        }
+      }
+
+      await tx
+        .delete(memberships)
+        .where(and(eq(memberships.campaignId, campaignId), eq(memberships.userId, userId)));
+    });
+
+    // The roster the router parses against just changed: they can no longer
+    // be @-mentioned or whispered to.
+    this.context.invalidate(campaignId);
   }
 
   async listTriggers(campaignId: string): Promise<CampaignTriggersResponse> {

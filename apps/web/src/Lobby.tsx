@@ -122,6 +122,9 @@ export function Lobby({ user, onEnter }: { user: PublicUser; onEnter: (seat: Sea
               </button>
             )}
             {openSettings === campaign.id && <CampaignSettings campaignId={campaign.id} />}
+            {(campaign.role === 'host' || campaign.role === 'admin') && (
+              <Members campaignId={campaign.id} ownerUserId={campaign.ownerUserId} />
+            )}
           </li>
         ))}
       </ul>
@@ -150,6 +153,51 @@ export function Lobby({ user, onEnter }: { user: PublicUser; onEnter: (seat: Sea
         </p>
       )}
     </main>
+  );
+}
+
+/**
+ * FR-102's remove half (#79). Host/admin only; the server enforces that and
+ * refuses the owner and the last host itself — hiding the owner's button is
+ * courtesy, not the control.
+ */
+function Members({ campaignId, ownerUserId }: { campaignId: string; ownerUserId: string }) {
+  const queryClient = useQueryClient();
+  const roster = useQuery({
+    queryKey: ['roster', campaignId],
+    queryFn: () => api.roster(campaignId),
+  });
+  const remove = useMutation({
+    mutationFn: (userId: string) => api.removeMember(campaignId, userId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['roster', campaignId] }),
+  });
+
+  return (
+    <ul aria-label="Members">
+      {roster.data?.members.map((member) => (
+        <li key={member.userId}>
+          {member.displayName} <span className="role">{member.role}</span>
+          {member.userId !== ownerUserId && (
+            <button
+              type="button"
+              disabled={remove.isPending}
+              onClick={() => {
+                if (confirm(`Remove ${member.displayName} from this campaign?`)) {
+                  remove.mutate(member.userId);
+                }
+              }}
+            >
+              Remove
+            </button>
+          )}
+        </li>
+      ))}
+      {remove.error && (
+        <li role="alert" className="error">
+          {describeApiError(remove.error)}
+        </li>
+      )}
+    </ul>
   );
 }
 
