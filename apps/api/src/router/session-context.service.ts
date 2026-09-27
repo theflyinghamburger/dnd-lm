@@ -8,6 +8,7 @@ import {
 import { eq } from 'drizzle-orm';
 import { DB, type Db } from '../db/db.module';
 import { campaigns, memberships, users } from '../db/schema';
+import { NotesService } from '../notes/notes.service';
 
 type CampaignContext = { registry: TriggerDefinition[]; roster: Roster };
 
@@ -17,7 +18,7 @@ type CampaignContext = { registry: TriggerDefinition[]; roster: Roster };
  * Resolved once per campaign and held in memory. Never re-read per message —
  * routing runs on every line of table talk, and a database round trip there
  * would put the p95 chat budget (NFR-101) at the mercy of the connection pool.
- * Invalidation is explicit: settings changes and membership changes call it.
+ * Invalidation is explicit: settings, membership and note writes call it.
  *
  * ponytail: an in-process Map, so a second API instance would serve a stale
  * registry until its own invalidation. Multi-instance is Phase 3 (D-1), which
@@ -27,7 +28,10 @@ type CampaignContext = { registry: TriggerDefinition[]; roster: Roster };
 export class SessionContextService {
   private readonly cache = new Map<string, CampaignContext>();
 
-  constructor(@Inject(DB) private readonly db: Db) {}
+  constructor(
+    @Inject(DB) private readonly db: Db,
+    private readonly notes: NotesService,
+  ) {}
 
   invalidate(campaignId: string): void {
     this.cache.delete(campaignId);
@@ -53,12 +57,11 @@ export class SessionContextService {
       .innerJoin(users, eq(users.id, memberships.userId))
       .where(eq(memberships.campaignId, campaignId));
 
+    const npcs = await this.notes.npcs(campaignId, resolveChapter(campaign?.settings));
+
     const context: CampaignContext = {
       registry: resolveRegistry(campaign?.settings),
-      // NPCs stay empty until M8 gives campaigns notes to resolve them from;
-      // `@npc Klarg` therefore tells the player the NPC is unknown, which is
-      // rule 4's answer and not a special case.
-      roster: buildRoster(members, []),
+      roster: buildRoster(members, npcs),
     };
     this.cache.set(campaignId, context);
     return context;
@@ -75,4 +78,11 @@ export function resolveRegistry(settings: unknown): TriggerDefinition[] {
   return TRIGGER_REGISTRY.filter(
     (definition) => overrides[definition.id] ?? definition.defaultEnabled,
   );
+}
+
+/** `settings.progression.chapter`; absent or junk reads 0 — the fewest NPCs, never more (FR-608). */
+export function resolveChapter(settings: unknown): number {
+  const chapter = (settings as { progression?: { chapter?: unknown } } | null)?.progression
+    ?.chapter;
+  return Number.isInteger(chapter) && (chapter as number) >= 0 ? (chapter as number) : 0;
 }

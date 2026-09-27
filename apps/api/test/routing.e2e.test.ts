@@ -1,11 +1,18 @@
 import type { INestApplication } from '@nestjs/common';
-import type { EventEnvelope, ResumeResponse, ServerError } from '@dnd-lm/contracts';
+import {
+  type EventEnvelope,
+  type ResumeResponse,
+  type Roster,
+  type ServerError,
+  parseMessage,
+} from '@dnd-lm/contracts';
 import { eq } from 'drizzle-orm';
 import { type Socket, io } from 'socket.io-client';
 import request from 'supertest';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Db } from '../src/db/db.module';
-import { messages, sessionEvents } from '../src/db/schema';
+import { campaignNotes, campaigns, messages, sessionEvents, users } from '../src/db/schema';
+import { SessionContextService } from '../src/router/session-context.service';
 import { DATABASE_URL, createTestApp, truncateAll } from './app.harness';
 
 /**
@@ -263,6 +270,144 @@ describe.skipIf(!DATABASE_URL)('deterministic routing over the gateway', () => {
       const error = (await say(socket, table.sessionId, '/whisper @nobody hi')) as ServerError;
       expect(error.reason).toBe('UNKNOWN_PLAYER');
       expect(await db.select().from(messages)).toHaveLength(0);
+    });
+  });
+
+  describe('NPC roster from notes (M8.4, rule 4)', () => {
+    const npc = (
+      campaignId: string,
+      slug: string,
+      title: string,
+      over: Partial<typeof campaignNotes.$inferInsert> = {},
+    ) =>
+      db.insert(campaignNotes).values({
+        campaignId,
+        slug,
+        type: 'npc',
+        title,
+        spoilerLevel: 'player',
+        ...over,
+      });
+
+    const dmTriggered = async (sessionId: string) =>
+      (await db.select().from(sessionEvents).where(eq(sessionEvents.sessionId, sessionId))).filter(
+        (e) => e.type === 'DM_TRIGGERED',
+      );
+
+    it('resolves an NPC note by exact name and fires npc_mention', async () => {
+      const table = await stage();
+      await npc(table.campaignId, 'location.klarg', 'Klarg');
+      const socket = await connect(table.sessionId, table.aria);
+      await say(socket, table.sessionId, '@npc klarg Where is Gundren?');
+
+      const [triggered] = await dmTriggered(table.sessionId);
+      expect(triggered?.payload).toMatchObject({
+        definition_id: 'npc_mention',
+        entry_profile: 'npc_dialogue',
+        args: { entityId: 'location.klarg', text: 'Where is Gundren?' },
+      });
+    });
+
+    it('resolves a unique frontmatter alias and drops junk alias entries', async () => {
+      const table = await stage();
+      await npc(table.campaignId, 'npc.sildar', 'Sildar', {
+        frontmatter: { aliases: ['Hallwinter', 42, null] },
+      });
+      await npc(table.campaignId, 'npc.junk', 'Junk', { frontmatter: { aliases: 'Hallwinter' } });
+      const socket = await connect(table.sessionId, table.aria);
+      await say(socket, table.sessionId, '@npc hallwinter hello');
+
+      const [triggered] = await dmTriggered(table.sessionId);
+      expect(triggered?.payload).toMatchObject({ args: { entityId: 'npc.sildar' } });
+    });
+
+    it('keeps two NPCs with the same title ambiguous', async () => {
+      const table = await stage();
+      await npc(table.campaignId, 'npc.twin-a', 'Twin');
+      await npc(table.campaignId, 'npc.twin-b', 'Twin');
+      const socket = await connect(table.sessionId, table.aria);
+      const error = (await say(socket, table.sessionId, '@npc Twin hi')) as ServerError;
+
+      expect(error.reason).toBe('AMBIGUOUS_NPC');
+      expect(await db.select().from(messages)).toHaveLength(0);
+      expect(await dmTriggered(table.sessionId)).toHaveLength(0);
+    });
+
+    it('reads every out-of-scope NPC exactly like an unknown one, even by exact name', async () => {
+      const table = await stage();
+      const [host] = await db.select({ id: users.id }).from(users).limit(1);
+      const [other] = await db
+        .insert(campaigns)
+        .values({ ownerUserId: host!.id, name: 'Other' })
+        .returning({ id: campaigns.id });
+      // The party is at chapter 1.
+      await db
+        .update(campaigns)
+        .set({ settings: { progression: { chapter: 1 } } })
+        .where(eq(campaigns.id, table.campaignId));
+
+      await npc(table.campaignId, 'npc.ahead', 'Ahead', { chapter: 2 });
+      await npc(table.campaignId, 'npc.secret', 'Secret', { spoilerLevel: 'dm' });
+      await npc(table.campaignId, 'npc.draft', 'Draft', { status: 'draft' });
+      await npc(other!.id, 'npc.elsewhere', 'Elsewhere');
+      await npc(table.campaignId, 'lore.cave', 'Cave', { type: 'lore' });
+      // Control: in scope at chapter 1, so the roster really was re-read.
+      await npc(table.campaignId, 'npc.met', 'Met', { chapter: 1 });
+      app.get(SessionContextService).invalidate(table.campaignId);
+
+      const socket = await connect(table.sessionId, table.aria);
+      const unknown = (await say(socket, table.sessionId, '@npc Nobody hi')) as ServerError;
+      for (const name of ['Ahead', 'Secret', 'Draft', 'Elsewhere', 'Cave']) {
+        const error = (await say(socket, table.sessionId, `@npc ${name} hi`)) as ServerError;
+        expect(error.reason).toBe('UNKNOWN_NPC');
+        expect(error.message).toBe(unknown.message.replace('Nobody', name));
+      }
+      expect(await dmTriggered(table.sessionId)).toHaveLength(0);
+
+      const roster = await api()
+        .get(`/api/campaigns/${table.campaignId}/roster`)
+        .set('Cookie', table.aria)
+        .expect(200);
+      expect(roster.body.npcs).toEqual([{ id: 'npc.met', name: 'Met', aliases: [] }]);
+
+      await say(socket, table.sessionId, '@npc Met hi');
+      expect(await dmTriggered(table.sessionId)).toHaveLength(1);
+    });
+
+    it('lets the registry win over an NPC named like a reserved handle (rule 3)', async () => {
+      const table = await stage();
+      await npc(table.campaignId, 'npc.dm', 'DM');
+      const socket = await connect(table.sessionId, table.aria);
+      await say(socket, table.sessionId, '@npc DM hello');
+      const [triggered] = await dmTriggered(table.sessionId);
+      expect(triggered?.payload).toMatchObject({
+        definition_id: 'npc_mention',
+        args: { entityId: 'npc.dm' },
+      });
+
+      // `@dm` still reaches the DM against the very roster the server serves.
+      // Parsed, not sent: a second DM trigger would race the first turn.
+      const roster = await api()
+        .get(`/api/campaigns/${table.campaignId}/roster`)
+        .set('Cookie', table.aria)
+        .expect(200);
+      const decision = parseMessage('@dm I look around.', roster.body as Roster);
+      expect(decision).toMatchObject({ dmTrigger: { definitionId: 'dm_mention' } });
+    });
+
+    it('re-reads the roster after a note write invalidates the campaign', async () => {
+      const table = await stage();
+      const socket = await connect(table.sessionId, table.aria);
+      // Warm the cache while the campaign has no NPCs.
+      await say(socket, table.sessionId, '@npc Klarg hi');
+
+      await npc(table.campaignId, 'location.klarg', 'Klarg');
+      // M8.5's note writes call this seam; no restart in between.
+      app.get(SessionContextService).invalidate(table.campaignId);
+      await say(socket, table.sessionId, '@npc Klarg hi');
+
+      const [triggered] = await dmTriggered(table.sessionId);
+      expect(triggered?.payload).toMatchObject({ args: { entityId: 'location.klarg' } });
     });
   });
 
