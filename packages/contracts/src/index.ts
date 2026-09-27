@@ -549,6 +549,12 @@ export const CampaignDmSettings = z.object({
   style: DmStyle.nullable(),
   tone: DmTone.nullable(),
   difficulty: DmDifficulty.nullable(),
+  /**
+   * `campaigns.settings.progression.chapter` (M8.5): the party's current
+   * progression, host-set. A note whose `chapter` is above it is not
+   * retrievable (FR-608). `null` means no chapter reached yet.
+   */
+  progressionChapter: z.number().int().min(0).nullable(),
 });
 export type CampaignDmSettings = z.infer<typeof CampaignDmSettings>;
 
@@ -562,6 +568,7 @@ export const UpdateDmSettingsRequest = z
     style: DmStyle.nullable().optional(),
     tone: DmTone.nullable().optional(),
     difficulty: DmDifficulty.nullable().optional(),
+    progressionChapter: z.number().int().min(0).max(10_000).nullable().optional(),
   })
   .refine((v) => Object.values(v).some((value) => value !== undefined), {
     message: 'at least one field must be provided',
@@ -582,3 +589,71 @@ export const ProviderSettingsResponse = z.object({
   providerConnectionId: Id.nullable(),
 });
 export type ProviderSettingsResponse = z.infer<typeof ProviderSettingsResponse>;
+
+/* --- Campaign notes (M8.5, FR-611) ------------------------------------- */
+
+/** Mirrors `note_type` in the database; a test holds the two equal. */
+export const NoteType = z.enum(['location', 'npc', 'quest', 'item', 'lore', 'handout']);
+export type NoteType = z.infer<typeof NoteType>;
+
+/** Ordered `player` < `dm`, as the database enum is (M8.1). */
+export const NoteSpoilerLevel = z.enum(['player', 'dm']);
+export type NoteSpoilerLevel = z.infer<typeof NoteSpoilerLevel>;
+
+/** `draft` is invisible to retrieval; publishing a draft is an update (P4.1.5). */
+export const NoteStatus = z.enum(['draft', 'published']);
+export type NoteStatus = z.infer<typeof NoteStatus>;
+
+/** Kebab-case, unique per campaign. It is the note's URL key and its citation. */
+export const NoteSlug = z
+  .string()
+  .max(100)
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'kebab-case: lowercase letters, digits and single hyphens');
+
+const noteFields = {
+  type: NoteType,
+  title: z.string().trim().min(1).max(200),
+  bodyMd: z.string().max(100_000),
+  /** architecture.md §9's keys that are not filter columns (source, entities, …). */
+  frontmatter: z.record(z.string(), z.unknown()),
+  spoilerLevel: NoteSpoilerLevel,
+  /** Null = ungated; otherwise compared against `progression.chapter`. */
+  chapter: z.number().int().min(0).max(10_000).nullable(),
+  status: NoteStatus,
+};
+
+/**
+ * A campaign note as the host editor reads it. It carries `dm`-level content
+ * by definition, so every route that returns one is host-or-admin (FR-611).
+ * `sourceId` is the upload it was extracted from (null = hand-authored); the
+ * API never lets a client set it.
+ */
+export const CampaignNote = z.object({
+  slug: NoteSlug,
+  ...noteFields,
+  sourceId: Id.nullable(),
+  updatedAt: z.string(),
+});
+export type CampaignNote = z.infer<typeof CampaignNote>;
+
+/** The list shape: everything but the body. */
+export const CampaignNoteSummary = CampaignNote.omit({ bodyMd: true });
+export type CampaignNoteSummary = z.infer<typeof CampaignNoteSummary>;
+
+/** Omitted fields take the column defaults (spoiler `dm`, status `published`, …). */
+export const CreateNoteRequest = z
+  .object(noteFields)
+  .partial()
+  .extend({ slug: NoteSlug, type: noteFields.type, title: noteFields.title })
+  .strict();
+export type CreateNoteRequest = z.infer<typeof CreateNoteRequest>;
+
+/** The slug is the key, so it is not editable; delete and recreate to rename. */
+export const UpdateNoteRequest = z
+  .object(noteFields)
+  .partial()
+  .strict()
+  .refine((v) => Object.values(v).some((value) => value !== undefined), {
+    message: 'at least one field must be provided',
+  });
+export type UpdateNoteRequest = z.infer<typeof UpdateNoteRequest>;

@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { type FormEvent, useState } from 'react';
 import type { Seat } from './App';
 import { AdminProviders } from './AdminProviders';
+import { CampaignNotes } from './CampaignNotes';
 import { CampaignSettings } from './CampaignSettings';
 import { ApiError, api, describeApiError } from './api';
 import { PREGENS } from './pregens';
@@ -13,6 +14,8 @@ export function Lobby({ user, onEnter }: { user: PublicUser; onEnter: (seat: Sea
   /** Which campaign's DM settings are open, and whether the admin page is. */
   const [openSettings, setOpenSettings] = useState<string | null>(null);
   const [showProviders, setShowProviders] = useState(false);
+  /** Which campaign's notes page is open (M8.5). */
+  const [openNotes, setOpenNotes] = useState<{ id: string; name: string } | null>(null);
   /** M1.4's "pick a character", now that M4 has characters to pick. */
   const [seats, setSeats] = useState<Record<string, string>>({});
 
@@ -68,6 +71,15 @@ export function Lobby({ user, onEnter }: { user: PublicUser; onEnter: (seat: Sea
   ].find(Boolean);
 
   if (showProviders) return <AdminProviders onClose={() => setShowProviders(false)} />;
+  if (openNotes) {
+    return (
+      <CampaignNotes
+        campaignId={openNotes.id}
+        campaignName={openNotes.name}
+        onClose={() => setOpenNotes(null)}
+      />
+    );
+  }
 
   return (
     <main>
@@ -119,6 +131,14 @@ export function Lobby({ user, onEnter }: { user: PublicUser; onEnter: (seat: Sea
                 onClick={() => setOpenSettings(openSettings === campaign.id ? null : campaign.id)}
               >
                 {openSettings === campaign.id ? 'Close settings' : 'DM settings'}
+              </button>
+            )}
+            {(campaign.role === 'host' || campaign.role === 'admin') && (
+              <button
+                type="button"
+                onClick={() => setOpenNotes({ id: campaign.id, name: campaign.name })}
+              >
+                Notes
               </button>
             )}
             {openSettings === campaign.id && <CampaignSettings campaignId={campaign.id} />}

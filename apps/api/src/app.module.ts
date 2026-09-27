@@ -6,6 +6,7 @@ import { CharactersModule } from './characters/characters.module';
 import { DbModule } from './db/db.module';
 import { DmModule } from './dm/dm.module';
 import { HealthController } from './health.controller';
+import { NotesAdminModule } from './notes/notes-admin.module';
 import { RouterModule } from './router/router.module';
 import { ProvidersModule } from './providers/providers.module';
 import { SessionModule } from './session/session.module';
@@ -21,6 +22,7 @@ import { SessionModule } from './session/session.module';
     SessionModule,
     ProvidersModule,
     DmModule,
+    NotesAdminModule,
   ],
   controllers: [HealthController],
 })

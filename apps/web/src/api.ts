@@ -1,6 +1,9 @@
 import type {
   AdminConnection,
   CampaignDmSettings,
+  CampaignNote,
+  CampaignNoteSummary,
+  CreateNoteRequest,
   CampaignSummary,
   CampaignTriggersResponse,
   CharacterSheet,
@@ -19,6 +22,7 @@ import type {
   UpdateConnectionRequest,
   UpdateDmSettingsRequest,
   UpdateHpRequest,
+  UpdateNoteRequest,
 } from '@dnd-lm/contracts';
 
 /** Thrown for any non-2xx; `code` is the server's typed error code when it sent one. */
@@ -152,6 +156,18 @@ export const api = {
     patch<ProviderSettingsResponse>(`/campaigns/${campaignId}/provider`, { providerConnectionId }),
   /** The redacted list a host picks from: identity and model, no URL, no key. */
   providers: () => call<HostConnection[]>('/providers'),
+
+  /* --- Campaign notes (M8.5): host-or-admin, reads included ---------- */
+
+  notes: (campaignId: string) => call<CampaignNoteSummary[]>(`/campaigns/${campaignId}/notes`),
+  note: (campaignId: string, slug: string) =>
+    call<CampaignNote>(`/campaigns/${campaignId}/notes/${encodeURIComponent(slug)}`),
+  createNote: (campaignId: string, body: CreateNoteRequest) =>
+    post<CampaignNote>(`/campaigns/${campaignId}/notes`, body),
+  updateNote: (campaignId: string, slug: string, body: UpdateNoteRequest) =>
+    patch<CampaignNote>(`/campaigns/${campaignId}/notes/${encodeURIComponent(slug)}`, body),
+  deleteNote: (campaignId: string, slug: string) =>
+    del(`/campaigns/${campaignId}/notes/${encodeURIComponent(slug)}`),
 
   /* --- Admin providers (M7.6) ----------------------------------------- */
 
