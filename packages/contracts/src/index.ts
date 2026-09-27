@@ -582,3 +582,29 @@ export const ProviderSettingsResponse = z.object({
   providerConnectionId: Id.nullable(),
 });
 export type ProviderSettingsResponse = z.infer<typeof ProviderSettingsResponse>;
+
+/** Where an uploaded campaign book is in ingestion (P4.1). */
+export const SourceStatus = z.enum(['pending', 'extracting', 'review', 'failed']);
+export type SourceStatus = z.infer<typeof SourceStatus>;
+
+/**
+ * An uploaded campaign book as the API shows it (P4.1.1, FR-601). There is no
+ * `content` field, the way `HostConnection` has no key field: the bytes never
+ * leave the server.
+ */
+export const CampaignSource = z.object({
+  id: Id,
+  campaignId: Id,
+  filename: z.string(),
+  byteSize: z.int().nonnegative(),
+  sha256: z.string().regex(/^[0-9a-f]{64}$/),
+  status: SourceStatus,
+  error: z.string().nullable(),
+  pagesTotal: z.int().nonnegative().nullable(),
+  pagesDone: z.int().nonnegative(),
+  notesExtracted: z.int().nonnegative(),
+  uploadedBy: Id.nullable(),
+  createdAt: z.iso.datetime(),
+  finishedAt: z.iso.datetime().nullable(),
+});
+export type CampaignSource = z.infer<typeof CampaignSource>;

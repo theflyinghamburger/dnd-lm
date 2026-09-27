@@ -9,6 +9,7 @@ import { HealthController } from './health.controller';
 import { RouterModule } from './router/router.module';
 import { ProvidersModule } from './providers/providers.module';
 import { SessionModule } from './session/session.module';
+import { SourcesModule } from './sources/sources.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { SessionModule } from './session/session.module';
     SessionModule,
     ProvidersModule,
     DmModule,
+    SourcesModule,
   ],
   controllers: [HealthController],
 })

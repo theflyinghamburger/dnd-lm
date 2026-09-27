@@ -514,11 +514,10 @@ export const campaignNotes = pgTable(
     chapter: integer('chapter'),
     status: noteStatus('status').notNull().default('published'),
     /**
-     * The upload this note was extracted from; null = hand-authored. The
-     * foreign key to `campaign_sources(id) ON DELETE SET NULL` is added by
-     * P4.1.1, which creates that table.
+     * The upload this note was extracted from; null = hand-authored. Deleting
+     * the source keeps the note and forgets where it came from.
      */
-    sourceId: uuid('source_id'),
+    sourceId: uuid('source_id').references(() => campaignSources.id, { onDelete: 'set null' }),
     tsv: tsvector('tsv').generatedAlwaysAs(
       sql`setweight(to_tsvector('english', coalesce(title, '')), 'A') || setweight(to_tsvector('english', coalesce(body_md, '')), 'B')`,
     ),
@@ -533,5 +532,56 @@ export const campaignNotes = pgTable(
     uniqueIndex('campaign_notes_campaign_slug_key').on(t.campaignId, t.slug),
     index('campaign_notes_campaign_type_idx').on(t.campaignId, t.type),
     index('campaign_notes_tsv_idx').using('gin', t.tsv),
+    // Deleting a source nulls its notes through the FK; without this, that scans the table.
+    index('campaign_notes_source_id_idx').on(t.sourceId),
+  ],
+);
+
+/* -------------------------------------------------------------------------- */
+/* P4.1 — campaign PDF ingestion                                              */
+/* -------------------------------------------------------------------------- */
+
+export const sourceStatus = pgEnum('source_status', ['pending', 'extracting', 'review', 'failed']);
+
+/**
+ * An uploaded campaign book (P4.1.1, FR-601), the input to ingestion
+ * (docs/campaign-pdf-ingestion.md §4.1). `content` is never in any API
+ * response: the service's projection does not select it.
+ *
+ * The partial unique index is the "one in-flight ingest per campaign" rule, so
+ * two concurrent uploads cannot both slip past a check-then-insert.
+ */
+export const campaignSources = pgTable(
+  'campaign_sources',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    campaignId: uuid('campaign_id')
+      .notNull()
+      .references(() => campaigns.id, { onDelete: 'cascade' }),
+    /** Client-supplied; display only, never a path. */
+    filename: text('filename').notNull(),
+    byteSize: integer('byte_size').notNull(),
+    /** Lowercase hex. */
+    sha256: text('sha256').notNull(),
+    // ponytail: the original PDF lives in-row, not in object storage — Postgres
+    // is the only store the MVP has (MVP.md D-1). Move to object storage when
+    // books routinely exceed ~50 MB. Keeping it is what lets extraction be re-run
+    // with a better prompt without a re-upload (FR-611).
+    content: bytea('content').notNull(),
+    status: sourceStatus('status').notNull().default('pending'),
+    error: text('error'),
+    pagesTotal: integer('pages_total'),
+    pagesDone: integer('pages_done').notNull().default(0),
+    notesExtracted: integer('notes_extracted').notNull().default(0),
+    /** Null once the uploader's account is gone: the campaign keeps its book. */
+    uploadedBy: uuid('uploaded_by').references(() => users.id, { onDelete: 'set null' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    finishedAt: timestamp('finished_at', { withTimezone: true }),
+  },
+  (t) => [
+    uniqueIndex('campaign_sources_one_in_flight_key')
+      .on(t.campaignId)
+      .where(sql`status in ('pending', 'extracting')`),
+    index('campaign_sources_campaign_idx').on(t.campaignId, t.createdAt),
   ],
 );
